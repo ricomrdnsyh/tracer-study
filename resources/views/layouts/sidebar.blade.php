@@ -193,8 +193,7 @@
                     </div>
 
                     <div class="menu-item">
-                        <a class="menu-link {{ Request::is('admin/dashboard*') ? 'active' : '' }}"
-                            href="#">
+                        <a class="menu-link {{ Request::is('admin/dashboard*') ? 'active' : '' }}" href="#">
                             <span class="menu-icon">
                                 <i class="ki-duotone ki-element-11 fs-2">
                                     <span class="path1"></span><span class="path2"></span>
@@ -202,6 +201,16 @@
                                 </i>
                             </span>
                             <span class="menu-title">Dashboard</span>
+                        </a>
+                    </div>
+
+                    <div class="menu-item">
+                        <a class="menu-link {{ Request::is('admin/users*') ? 'active' : '' }}"
+                            href="{{ route('admin.users.index') }}">
+                            <span class="menu-icon">
+                                <i class="fa-solid fa-user-shield fs-4"></i>
+                            </span>
+                            <span class="menu-title">Pengguna</span>
                         </a>
                     </div>
 
@@ -228,6 +237,16 @@
                                 <i class="fa-solid fa-graduation-cap fs-4"></i>
                             </span>
                             <span class="menu-title">Prodi</span>
+                        </a>
+                    </div>
+
+                    <div class="menu-item">
+                        <a class="menu-link {{ Request::is('admin/mahasiswa*') ? 'active' : '' }}"
+                            href="{{ route('admin.mahasiswa.index') }}">
+                            <span class="menu-icon">
+                                <i class="fa-solid fa-users fs-4"></i>
+                            </span>
+                            <span class="menu-title">Mahasiswa</span>
                         </a>
                     </div>
 
