@@ -53,15 +53,33 @@
                                 <label class="d-flex align-items-center fs-sm-8 fs-lg-6 fw-bolder mb-1 required">
                                     <span>Role</span>
                                 </label>
-                                <select name="role" id="edit_role" class="form-select form-select-sm fs-sm-8 fs-lg-6 @error('role') is-invalid @enderror" required>
-                                    <option value="Admin" selected>Admin</option>
+                                <select name="role" id="edit_role" class="form-select form-select-sm fs-sm-8 fs-lg-6 @error('role') is-invalid @enderror" data-control="select2" data-hide-search="true" data-dropdown-parent="#form_edit" data-placeholder="Pilih Role" required>
+                                    <option value="" disabled selected>Pilih Role</option>
+                                    <option value="Admin">Admin</option>
+                                    <option value="Fakultas">Fakultas</option>
                                 </select>
 
                                 <div class="invalid-feedback">Role wajib dipilih.</div>
                             </div>
                         </div>
 
-                        <div class="col-md-6">
+                        <div class="col-md-6" id="edit_fakultas_container" style="display: none;">
+                            <div class="d-flex flex-column mb-2">
+                                <label class="d-flex align-items-center fs-sm-8 fs-lg-6 fw-bolder mb-1 required">
+                                    <span>Fakultas</span>
+                                </label>
+                                <select name="fakultas_id" id="edit_fakultas_id" class="form-select form-select-sm fs-sm-8 fs-lg-6 @error('fakultas_id') is-invalid @enderror" data-control="select2" data-dropdown-parent="#form_edit" data-placeholder="Pilih Fakultas">
+                                    <option value="" disabled selected>Pilih Fakultas</option>
+                                    @foreach($fakultas as $f)
+                                        <option value="{{ $f->id_fakultas }}">{{ $f->nama_fakultas }}</option>
+                                    @endforeach
+                                </select>
+
+                                <div class="invalid-feedback">Fakultas wajib dipilih.</div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6" id="edit_password_container">
                             <div class="d-flex flex-column mb-2">
                                 <label class="d-flex align-items-center fs-sm-8 fs-lg-6 fw-bolder mb-1">
                                     <span>Password (Kosongkan jika tidak ingin diubah)</span>

@@ -13,12 +13,13 @@ class AdminUserController extends Controller
 {
     public function index()
     {
-        return view('admin.users.index');
+        $fakultas = \App\Models\Fakultas::all();
+        return view('admin.users.index', compact('fakultas'));
     }
 
     public function getUsers()
     {
-        $query = User::select(['id', 'username', 'name', 'email', 'role'])->orderByDesc('created_at');
+        $query = User::with('fakultas')->select(['id', 'username', 'name', 'email', 'role', 'fakultas_id'])->orderByDesc('created_at');
 
         return DataTables::of($query)
             ->addColumn('action', function ($row) {
@@ -52,18 +53,19 @@ class AdminUserController extends Controller
 
     public function edit(string $id)
     {
-        $user = User::findOrFail($id);
+        $user = User::with('fakultas')->findOrFail($id);
         return response()->json($user);
     }
 
     public function store(UserRequest $request)
     {
         User::create([
-            'username' => $request->username,
-            'name'     => $request->name,
-            'email'    => $request->email,
-            'password' => Hash::make($request->password),
-            'role'     => $request->role,
+            'username'    => $request->username,
+            'name'        => $request->name,
+            'email'       => $request->email,
+            'password'    => Hash::make($request->password),
+            'role'        => $request->role,
+            'fakultas_id' => $request->role === 'Fakultas' ? $request->fakultas_id : null,
         ]);
 
         return redirect()->route('admin.users.index')->with('success', 'Data user berhasil ditambahkan.');
@@ -74,10 +76,11 @@ class AdminUserController extends Controller
         $user = User::findOrFail($id);
         
         $data = [
-            'username' => $request->username,
-            'name'     => $request->name,
-            'email'    => $request->email,
-            'role'     => $request->role,
+            'username'    => $request->username,
+            'name'        => $request->name,
+            'email'       => $request->email,
+            'role'        => $request->role,
+            'fakultas_id' => $request->role === 'Fakultas' ? $request->fakultas_id : null,
         ];
 
         if ($request->filled('password')) {

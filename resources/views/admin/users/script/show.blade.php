@@ -12,6 +12,13 @@
                 $('#show_name').val(response.name);
                 $('#show_email').val(response.email);
                 $('#show_role').val(response.role);
+                if (response.role === 'Fakultas') {
+                    $('#show_fakultas_container').show();
+                    $('#show_fakultas').val(response.fakultas ? response.fakultas.nama_fakultas : '-');
+                } else {
+                    $('#show_fakultas_container').hide();
+                    $('#show_fakultas').val('');
+                }
             },
             error: function() {
                 Swal.fire("Error!", "Gagal mengambil data.", "error");
@@ -24,5 +31,7 @@
         $('#show_name').val('');
         $('#show_email').val('');
         $('#show_role').val('');
+        $('#show_fakultas_container').hide();
+        $('#show_fakultas').val('');
     });
 </script>

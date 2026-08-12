@@ -47,6 +47,16 @@
                                 class="form-control form-control-sm fs-sm-8 fs-lg-6 bg-light" readonly>
                         </div>
                     </div>
+
+                    <div class="col-md-6" id="show_fakultas_container" style="display: none;">
+                        <div class="d-flex flex-column mb-2">
+                            <label class="d-flex align-items-center fs-sm-8 fs-lg-6 fw-bolder mb-1">
+                                <span>Fakultas</span>
+                            </label>
+                            <input type="text" id="show_fakultas"
+                                class="form-control form-control-sm fs-sm-8 fs-lg-6 bg-light" readonly>
+                        </div>
+                    </div>
                 </div>
             </div>
 

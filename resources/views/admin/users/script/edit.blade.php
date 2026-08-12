@@ -12,7 +12,16 @@
                 $('#edit_username').val(response.username);
                 $('#edit_name').val(response.name);
                 $('#edit_email').val(response.email);
-                $('#edit_role').val(response.role);
+                $('#edit_role').val(response.role).trigger('change');
+                if (response.role === 'Fakultas') {
+                    $('#edit_fakultas_container').show();
+                    $('#edit_fakultas_id').val(response.fakultas_id).trigger('change');
+                    $('#edit_password_container').removeClass('col-md-6').addClass('col-12');
+                } else {
+                    $('#edit_fakultas_container').hide();
+                    $('#edit_fakultas_id').val('').trigger('change');
+                    $('#edit_password_container').removeClass('col-12').addClass('col-md-6');
+                }
             },
             error: function() {
                 Swal.fire("Error!", "Gagal mengambil data.", "error");
@@ -38,5 +47,19 @@
     $('#form_edit').on('hidden.bs.modal', function() {
         $(this).find('form')[0].reset();
         $(this).find('form').removeClass('was-validated');
+        $('#edit_fakultas_container').hide();
+        $('#edit_fakultas_id').prop('required', false).val('').trigger('change');
+    });
+
+    $('#edit_role').on('change', function() {
+        if ($(this).val() === 'Fakultas') {
+            $('#edit_fakultas_container').show();
+            $('#edit_fakultas_id').prop('required', true);
+            $('#edit_password_container').removeClass('col-md-6').addClass('col-12');
+        } else {
+            $('#edit_fakultas_container').hide();
+            $('#edit_fakultas_id').prop('required', false).val('').trigger('change');
+            $('#edit_password_container').removeClass('col-12').addClass('col-md-6');
+        }
     });
 </script>
