@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\FakultasRequest;
 use App\Models\Fakultas;
 use Illuminate\Http\Request;
 use Yajra\DataTables\Facades\DataTables;
@@ -54,12 +55,8 @@ class AdminFakultasController extends Controller
         return response()->json($fakultas);
     }
 
-    public function store(Request $request)
+    public function store(FakultasRequest $request)
     {
-        $request->validate([
-            'nama_fakultas' => 'required|string|max:50',
-            'singkatan'     => 'required|string|max:10',
-        ]);
 
         Fakultas::create([
             'nama_fakultas' => $request->nama_fakultas,
@@ -69,12 +66,8 @@ class AdminFakultasController extends Controller
         return redirect()->route('admin.fakultas.index')->with('success', 'Data fakultas berhasil ditambahkan.');
     }
 
-    public function update(Request $request, string $id)
+    public function update(FakultasRequest $request, string $id)
     {
-        $request->validate([
-            'nama_fakultas' => 'required|string|max:50',
-            'singkatan'     => 'required|string|max:10',
-        ]);
 
         $fakultas = Fakultas::findOrFail($id);
         $fakultas->update([

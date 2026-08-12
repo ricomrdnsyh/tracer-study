@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\ProdiRequest;
 use App\Models\Fakultas;
 use App\Models\Prodi;
 use Illuminate\Http\Request;
@@ -59,13 +60,8 @@ class AdminProdiController extends Controller
         return response()->json($prodi);
     }
 
-    public function store(Request $request)
+    public function store(ProdiRequest $request)
     {
-        $request->validate([
-            'fakultas_id' => 'required|exists:fakultas,id_fakultas',
-            'nama_prodi'  => 'required|string|max:100',
-            'singkatan'   => 'required|string|max:10',
-        ]);
 
         Prodi::create([
             'fakultas_id' => $request->fakultas_id,
@@ -76,13 +72,8 @@ class AdminProdiController extends Controller
         return redirect()->route('admin.prodi.index')->with('success', 'Data prodi berhasil ditambahkan.');
     }
 
-    public function update(Request $request, string $id)
+    public function update(ProdiRequest $request, string $id)
     {
-        $request->validate([
-            'fakultas_id' => 'required|exists:fakultas,id_fakultas',
-            'nama_prodi'  => 'required|string|max:100',
-            'singkatan'   => 'required|string|max:10',
-        ]);
 
         $prodi = Prodi::findOrFail($id);
         $prodi->update([
