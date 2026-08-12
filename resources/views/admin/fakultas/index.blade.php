@@ -1,6 +1,6 @@
 @extends('layouts.main')
 
-@section('title', 'List Fakultas')
+@section('title', 'Fakultas')
 
 @section('css')
     <link rel="stylesheet" href="{{ asset('assets/plugins/custom/datatables/dataTables.bootstrap5.min.css') }}">
@@ -108,7 +108,8 @@
                                 </div>
                             </div>
                             <div class="card-toolbar">
-                                <a type="button" class="btn btn-sm btn-primary m-0" data-bs-toggle="modal" data-bs-target="#form_create" title="Tambah Fakultas">
+                                <a type="button" class="btn btn-sm btn-primary m-0" data-bs-toggle="modal"
+                                    data-bs-target="#form_create" title="Tambah Fakultas">
                                     <i class="fas fa-plus me-2"></i>Tambah Fakultas
                                 </a>
                             </div>
