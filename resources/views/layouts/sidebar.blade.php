@@ -221,6 +221,16 @@
                         </a>
                     </div>
 
+                    <div class="menu-item">
+                        <a class="menu-link {{ Request::is('admin/prodi*') ? 'active' : '' }}"
+                            href="{{ route('admin.prodi.index') }}">
+                            <span class="menu-icon">
+                                <i class="fa-solid fa-graduation-cap fs-4"></i>
+                            </span>
+                            <span class="menu-title">Prodi</span>
+                        </a>
+                    </div>
+
                 </div>
             </div>
         </div>
