@@ -5,14 +5,22 @@ use App\Http\Controllers\Admin\AdminProdiController;
 use App\Http\Controllers\Admin\AdminUserController;
 use App\Http\Controllers\Admin\AdminMahasiswaController;
 use Illuminate\Support\Facades\Route;
-
-
+use App\Http\Controllers\Auth\AuthController;
+use App\Http\Controllers\Admin\DashboardController as AdminDashboard;
+use App\Http\Controllers\Fakultas\DashboardController as FakultasDashboard;
+use App\Http\Controllers\Mahasiswa\DashboardController as MahasiswaDashboard;
 
 Route::get('/', function () {
-    return view('welcome');
+    return redirect()->route('login');
 });
 
-Route::prefix('admin')->name('admin.')->group(function () {
+Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
+Route::post('/login', [AuthController::class, 'login'])->name('login.post');
+Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+
+Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:Admin'])->group(function () {
+    Route::get('/dashboard', [AdminDashboard::class, 'index'])->name('dashboard');
+
     Route::get('/fakultas/data', [AdminFakultasController::class, 'getFakultas'])->name('fakultas.data');
     Route::resource('fakultas', AdminFakultasController::class);
 
@@ -24,4 +32,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
     Route::get('/mahasiswa/data', [AdminMahasiswaController::class, 'getMahasiswa'])->name('mahasiswa.data');
     Route::resource('mahasiswa', AdminMahasiswaController::class);
+});
+
+Route::prefix('fakultas')->name('fakultas.')->middleware(['auth', 'role:Fakultas'])->group(function () {
+    Route::get('/dashboard', [FakultasDashboard::class, 'index'])->name('dashboard');
+});
+
+Route::prefix('mahasiswa')->name('mahasiswa.')->middleware(['auth:mahasiswa'])->group(function () {
+    Route::get('/dashboard', [MahasiswaDashboard::class, 'index'])->name('dashboard');
 });

@@ -133,7 +133,15 @@
 </style>
 
 @php
-    $currentUser = Auth::user();
+    $isMahasiswa = Auth::guard('mahasiswa')->check();
+    $currentUser = $isMahasiswa ? Auth::guard('mahasiswa')->user() : Auth::user();
+    
+    $roleName = 'Administrator';
+    if ($isMahasiswa) {
+        $roleName = 'Mahasiswa';
+    } elseif ($currentUser && $currentUser->role) {
+        $roleName = $currentUser->role;
+    }
 @endphp
 
 <div id="kt_app_sidebar" class="app-sidebar flex-column" data-kt-drawer="true" data-kt-drawer-name="app-sidebar"
@@ -169,8 +177,8 @@
             </div>
 
             <div class="sidebar-minimize-hide mt-2 w-100">
-                <div class="text-white fw-semibold text-truncate">{{ $currentUser?->name ?? 'User' }}</div>
-                <div class="text-gray-400 fs-8 text-truncate">Administrator</div>
+                <div class="text-white fw-semibold text-truncate">{{ $currentUser?->name ?? ($currentUser?->nama ?? 'User') }}</div>
+                <div class="text-gray-400 fs-8 text-truncate">{{ $roleName }}</div>
             </div>
         </a>
     </div>
@@ -193,7 +201,13 @@
                     </div>
 
                     <div class="menu-item">
-                        <a class="menu-link {{ Request::is('admin/dashboard*') ? 'active' : '' }}" href="#">
+                        @if($isMahasiswa)
+                            <a class="menu-link {{ Request::is('mahasiswa/dashboard*') ? 'active' : '' }}" href="{{ route('mahasiswa.dashboard') }}">
+                        @elseif($roleName === 'Fakultas')
+                            <a class="menu-link {{ Request::is('fakultas/dashboard*') ? 'active' : '' }}" href="{{ route('fakultas.dashboard') }}">
+                        @else
+                            <a class="menu-link {{ Request::is('admin/dashboard*') ? 'active' : '' }}" href="{{ route('admin.dashboard') }}">
+                        @endif
                             <span class="menu-icon">
                                 <i class="ki-duotone ki-element-11 fs-2">
                                     <span class="path1"></span><span class="path2"></span>
@@ -204,6 +218,7 @@
                         </a>
                     </div>
 
+                    @if(!$isMahasiswa && $roleName === 'Admin')
                     <div class="menu-item">
                         <a class="menu-link {{ Request::is('admin/users*') ? 'active' : '' }}"
                             href="{{ route('admin.users.index') }}">
@@ -249,6 +264,7 @@
                             <span class="menu-title">Mahasiswa</span>
                         </a>
                     </div>
+                    @endif
 
                 </div>
             </div>
@@ -256,7 +272,7 @@
     </div>
 
     <div class="app-sidebar-footer px-4 pb-4 mt-auto" id="kt_app_sidebar_footer">
-        <form action="#" method="POST" class="w-100">
+        <form action="{{ route('logout') }}" method="POST" class="w-100">
             @csrf
             <button type="submit"
                 class="btn btn-sm btn-light w-100 d-flex align-items-center justify-content-center gap-2">

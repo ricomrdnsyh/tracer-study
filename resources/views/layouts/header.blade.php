@@ -27,8 +27,15 @@
 </style>
 
 @php
-    $currentUser = auth()->user();
-    $currentUserIdentity = $currentUser?->username ?? '-';
+    $isMahasiswa = Auth::guard('mahasiswa')->check();
+    $currentUser = $isMahasiswa ? Auth::guard('mahasiswa')->user() : Auth::user();
+    
+    $roleName = 'Administrator';
+    if ($isMahasiswa) {
+        $roleName = 'Mahasiswa';
+    } elseif ($currentUser && $currentUser->role) {
+        $roleName = $currentUser->role;
+    }
 @endphp
 
 <div id="kt_app_header" class="app-header" data-kt-sticky="true" data-kt-sticky-activate="{default: true, lg: true}"
@@ -62,7 +69,7 @@
                         <h1 class="d-flex flex-column text-dark fw-bolder fs-3 mb-0">@yield('title')</h1>
                         <ul class="breadcrumb breadcrumb-separatorless fw-bold fs-7 pt-1">
                             <li class="breadcrumb-item text-muted text-hover-primary">
-                                <span>{{ auth()->user()?->role === 'admin' ? 'Administrator' : auth()->user()?->unit?->singkatan ?? 'Unit' }}</span>
+                                <span>{{ $roleName }}</span>
                             </li>
                         </ul>
                     </div>
@@ -154,16 +161,16 @@
                                 </div>
                                 <div class="d-flex flex-column">
                                     <div class="fw-bold d-flex align-items-center fs-5">
-                                        {{ $currentUser?->nama ?? 'User' }}
+                                        {{ $currentUser?->name ?? ($currentUser?->nama ?? 'User') }}
                                     </div>
                                     <span
-                                        class="fw-semibold text-muted text-hover-primary fs-7">{{ auth()->user()?->role === 'admin' ? 'Administrator' : auth()->user()?->unit?->singkatan ?? 'Unit' }}</span>
+                                        class="fw-semibold text-muted text-hover-primary fs-7">{{ $roleName }}</span>
                                 </div>
                             </div>
                         </div>
                         <div class="separator my-2"></div>
                         <div class="menu-item px-5">
-                            <form action="#" method="POST">
+                            <form action="{{ route('logout') }}" method="POST">
                                 @csrf
                                 <button type="submit"
                                     class="menu-link px-5 w-100 text-start border-0 bg-transparent">
