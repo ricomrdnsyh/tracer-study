@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Admin\ProdiRequest;
 use App\Models\Fakultas;
 use App\Models\Prodi;
 use Illuminate\Http\Request;
@@ -14,7 +13,13 @@ class AdminProdiController extends Controller
 {
     public function index()
     {
-        $fakultas = Fakultas::orderBy('nama_fakultas')->get();
+        $fakultas = Fakultas::orderBy('nama_fakultas');
+        
+        if (auth()->user()->role === 'Fakultas') {
+            $fakultas->where('id_fakultas', auth()->user()->fakultas_id);
+        }
+
+        $fakultas = $fakultas->get();
         return view('admin.prodi.index', compact('fakultas'));
     }
 
@@ -22,7 +27,9 @@ class AdminProdiController extends Controller
     {
         $query = Prodi::with('fakultas')->select(['id_prodi', 'fakultas_id', 'nama_prodi', 'singkatan'])->orderByDesc('created_at');
 
-        if ($request->has('id_fakultas') && !empty($request->id_fakultas)) {
+        if (auth()->user()->role === 'Fakultas') {
+            $query->where('fakultas_id', auth()->user()->fakultas_id);
+        } else if ($request->has('id_fakultas') && !empty($request->id_fakultas)) {
             $query->where('fakultas_id', $request->id_fakultas);
         }
 
@@ -52,6 +59,10 @@ class AdminProdiController extends Controller
 
     public function sync(ClientSSO $clientSSO)
     {
+        if (auth()->user()->role !== 'Admin') {
+            return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
+        }
+
         try {
             $fakultasList = Fakultas::all();
 

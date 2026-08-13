@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Admin\FakultasRequest;
 use App\Models\Fakultas;
 use Illuminate\Http\Request;
 use Yajra\DataTables\Facades\DataTables;
@@ -19,6 +18,10 @@ class AdminFakultasController extends Controller
     public function getFakultas()
     {
         $query = Fakultas::select(['id_fakultas', 'nama_fakultas', 'singkatan'])->orderByDesc('id_fakultas');
+
+        if (auth()->user()->role === 'Fakultas') {
+            $query->where('id_fakultas', auth()->user()->fakultas_id);
+        }
 
         return DataTables::of($query)
             ->addColumn('action', function ($row) {
@@ -43,6 +46,10 @@ class AdminFakultasController extends Controller
 
     public function sync(ClientSSO $clientSSO)
     {
+        if (auth()->user()->role !== 'Admin') {
+            return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
+        }
+
         try {
             $data = $clientSSO->getFakultasFromApi();
 

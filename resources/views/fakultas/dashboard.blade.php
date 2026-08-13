@@ -15,6 +15,36 @@
                 <div class="card-body">
                     <h2>Selamat Datang di Dashboard Fakultas</h2>
                     <p>Anda login sebagai Fakultas. Anda memiliki akses untuk memonitoring alumni di Fakultas Anda.</p>
+                    
+                    <div class="row g-5 g-xl-8 mt-5">
+                        <div class="col-xl-4">
+                            <div class="card bg-primary hoverable card-xl-stretch mb-xl-8">
+                                <div class="card-body">
+                                    <i class="fas fa-users text-white fs-3x ms-n1"></i>
+                                    <div class="text-white fw-bold fs-2 mb-2 mt-5">{{ $stats['total_mahasiswa'] }}</div>
+                                    <div class="fw-semibold text-white">Total Mahasiswa Fakultas</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-xl-4">
+                            <div class="card bg-info hoverable card-xl-stretch mb-xl-8">
+                                <div class="card-body">
+                                    <i class="fas fa-graduation-cap text-white fs-3x ms-n1"></i>
+                                    <div class="text-white fw-bold fs-2 mb-2 mt-5">{{ $stats['total_prodi'] }}</div>
+                                    <div class="fw-semibold text-white">Total Prodi Fakultas</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-xl-4">
+                            <div class="card bg-warning hoverable card-xl-stretch mb-xl-8">
+                                <div class="card-body">
+                                    <i class="fas fa-clipboard-check text-white fs-3x ms-n1"></i>
+                                    <div class="text-white fw-bold fs-2 mb-2 mt-5">{{ $stats['total_responden'] }}</div>
+                                    <div class="fw-semibold text-white">Total Responden Tracer</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

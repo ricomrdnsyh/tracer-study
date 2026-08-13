@@ -108,9 +108,11 @@
                                 </div>
                             </div>
                             <div class="card-toolbar">
-                                <button type="button" class="btn btn-sm btn-primary m-0" id="btn_sync_prodi" title="Sinkronisasi Data Prodi">
-                                    <i class="fas fa-sync me-2"></i>Sinkronisasi Prodi
-                                </button>
+                                @if(auth()->user()->role === 'Admin')
+                                    <button type="button" class="btn btn-sm btn-primary m-0" id="btn_sync_prodi" title="Sinkronisasi Data Prodi">
+                                        <i class="fas fa-sync me-2"></i>Sinkronisasi Prodi
+                                    </button>
+                                @endif
                             </div>
                         </div>
                         <div class="card-body py-4 px-8 filter-container mt-4">
@@ -134,7 +136,7 @@
                         </div>
                         <div class="card-body pt-0">
                             <div class="table-responsive">
-                                <table class="table align-middle table-row-dashed fs-6 gy-5" id="example">
+                                <table class="table align-middle table-row-dashed fs-6 gy-5 w-100" id="example">
                                     <thead class="">
                                         <tr class="text-start text-gray-400 fw-bolder fs-7 text-uppercase gs-0">
                                             <th class="text-center p-0" style="width:28px; min-width:28px;"></th>

@@ -218,7 +218,19 @@
                         </a>
                     </div>
 
-                    @if(!$isMahasiswa && $roleName === 'Admin')
+                    @if($isMahasiswa)
+                    <div class="menu-item">
+                        <a class="menu-link {{ Request::is('mahasiswa/tracer*') ? 'active' : '' }}" href="{{ route('mahasiswa.tracer.index') }}">
+                            <span class="menu-icon">
+                                <i class="fa-solid fa-clipboard-list fs-4"></i>
+                            </span>
+                            <span class="menu-title">Isi Tracer Study</span>
+                        </a>
+                    </div>
+                    @endif
+
+                    @if(!$isMahasiswa && in_array($roleName, ['Admin', 'Fakultas']))
+                    @if($roleName === 'Admin')
                     <div class="menu-item">
                         <a class="menu-link {{ Request::is('admin/users*') ? 'active' : '' }}"
                             href="{{ route('admin.users.index') }}">
@@ -228,6 +240,7 @@
                             <span class="menu-title">Pengguna</span>
                         </a>
                     </div>
+                    @endif
 
                     <div class="menu-item pt-1">
                         <div class="menu-content">
@@ -262,6 +275,32 @@
                                 <i class="fa-solid fa-users fs-4"></i>
                             </span>
                             <span class="menu-title">Mahasiswa</span>
+                        </a>
+                    </div>
+
+                    <div class="menu-item pt-1">
+                        <div class="menu-content">
+                            <span class="menu-heading fw-bold text-uppercase fs-8">Tracer Study</span>
+                        </div>
+                    </div>
+
+                    <div class="menu-item">
+                        <a class="menu-link {{ Request::is('admin/periode*') ? 'active' : '' }}"
+                            href="{{ route('admin.periode.index') }}">
+                            <span class="menu-icon">
+                                <i class="fa-regular fa-calendar-alt fs-4"></i>
+                            </span>
+                            <span class="menu-title">Periode Tracer</span>
+                        </a>
+                    </div>
+
+                    <div class="menu-item">
+                        <a class="menu-link {{ Request::is('admin/kuesioner*') ? 'active' : '' }}"
+                            href="{{ route('admin.kuesioner.index') }}">
+                            <span class="menu-icon">
+                                <i class="fa-solid fa-clipboard-list fs-4"></i>
+                            </span>
+                            <span class="menu-title">Kuesioner</span>
                         </a>
                     </div>
                     @endif

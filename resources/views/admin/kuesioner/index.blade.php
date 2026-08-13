@@ -1,6 +1,6 @@
 @extends('layouts.main')
 
-@section('title', 'Mahasiswa')
+@section('title', 'Kuesioner Tracer Study')
 
 @section('css')
     <link rel="stylesheet" href="{{ asset('assets/plugins/custom/datatables/dataTables.bootstrap5.min.css') }}">
@@ -103,16 +103,16 @@
                             <div class="card-title">
                                 <div class="d-flex align-items-center position-relative my-1">
                                     <h3 class="card-title align-items-start flex-column">
-                                        <span class="card-label fw-bolder fs-3 mb-1">List Mahasiswa</span>
+                                        <span class="card-label fw-bolder fs-3 mb-1">List Kuesioner Tracer Study</span>
                                     </h3>
                                 </div>
                             </div>
                             <div class="card-toolbar">
                                 @if(auth()->user()->role === 'Admin')
-                                    <a type="button" class="btn btn-sm btn-primary m-0" data-bs-toggle="modal"
-                                        data-bs-target="#form_create" title="Tambah Mahasiswa">
-                                        <i class="fas fa-plus me-2"></i>Tambah Mahasiswa
-                                    </a>
+                                <a type="button" class="btn btn-sm btn-primary m-0" data-bs-toggle="modal"
+                                    data-bs-target="#form_create" title="Tambah Kuesioner">
+                                    <i class="fas fa-plus me-2"></i>Tambah Kuesioner
+                                </a>
                                 @endif
                             </div>
                         </div>
@@ -124,9 +124,8 @@
                                         <tr class="text-start text-gray-400 fw-bolder fs-7 text-uppercase gs-0">
                                             <th class="text-center p-0" style="width:28px; min-width:28px;"></th>
                                             <th class="text-center ps-1 min-w-175px">Aksi</th>
-                                            <th class="min-w-100px">NIM</th>
-                                            <th class="min-w-150px">Nama</th>
-                                            <th class="min-w-150px">Prodi</th>
+                                            <th class="min-w-150px">Judul Kuesioner</th>
+                                            <th class="min-w-150px">Periode</th>
                                             <th class="min-w-100px">Status</th>
                                         </tr>
                                     </thead>
@@ -137,9 +136,10 @@
                     </div>
                 </div>
             </div>
-            @include('admin.mahasiswa.create')
-            @include('admin.mahasiswa.edit')
-            @include('admin.mahasiswa.show')
+            @if(auth()->user()->role === 'Admin')
+                @include('admin.kuesioner.create')
+                @include('admin.kuesioner.edit')
+            @endif
 
             @include('layouts.footer')
         </div>
@@ -153,7 +153,7 @@
     <script src="{{ asset('assets/plugins/custom/datatables/dataTables.colReorder.min.js') }}"></script>
     <script src="{{ asset('assets/plugins/custom/datatables/dataTables.responsive.min.js') }}"></script>
     <script src="{{ asset('assets/plugins/custom/datatables/dataTables.buttons.min.js') }}"></script>
-
+    
     <script src="{{ asset('assets/plugins/custom/datatables/vfs_fonts.js') }}"></script>
     <script src="{{ asset('assets/plugins/custom/datatables/buttons.html5.min.js') }}"></script>
     <script src="{{ asset('assets/plugins/custom/datatables/jszip.min.js') }}"></script>
@@ -161,8 +161,9 @@
     <script src="{{ asset('assets/plugins/custom/datatables/print.js') }}"></script>
     <script src="{{ asset('assets/plugins/custom/datatables/responsive.bootstrap.min.js') }}"></script>
 
-    @include('admin.mahasiswa.script.index')
-    @include('admin.mahasiswa.script.create')
-    @include('admin.mahasiswa.script.edit')
-    @include('admin.mahasiswa.script.show')
+    @include('admin.kuesioner.script.index')
+    @if(auth()->user()->role === 'Admin')
+        @include('admin.kuesioner.script.create')
+        @include('admin.kuesioner.script.edit')
+    @endif
 @endsection

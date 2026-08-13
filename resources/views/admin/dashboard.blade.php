@@ -15,6 +15,45 @@
                 <div class="card-body">
                     <h2>Selamat Datang di Dashboard Admin</h2>
                     <p>Anda login sebagai Admin. Anda memiliki akses ke seluruh data Tracer Study.</p>
+                    
+                    <div class="row g-5 g-xl-8 mt-5">
+                        <div class="col-xl-3">
+                            <div class="card bg-primary hoverable card-xl-stretch mb-xl-8">
+                                <div class="card-body">
+                                    <i class="fas fa-users text-white fs-3x ms-n1"></i>
+                                    <div class="text-white fw-bold fs-2 mb-2 mt-5">{{ $stats['total_mahasiswa'] }}</div>
+                                    <div class="fw-semibold text-white">Total Mahasiswa</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-xl-3">
+                            <div class="card bg-success hoverable card-xl-stretch mb-xl-8">
+                                <div class="card-body">
+                                    <i class="fas fa-building text-white fs-3x ms-n1"></i>
+                                    <div class="text-white fw-bold fs-2 mb-2 mt-5">{{ $stats['total_fakultas'] }}</div>
+                                    <div class="fw-semibold text-white">Total Fakultas</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-xl-3">
+                            <div class="card bg-info hoverable card-xl-stretch mb-xl-8">
+                                <div class="card-body">
+                                    <i class="fas fa-graduation-cap text-white fs-3x ms-n1"></i>
+                                    <div class="text-white fw-bold fs-2 mb-2 mt-5">{{ $stats['total_prodi'] }}</div>
+                                    <div class="fw-semibold text-white">Total Prodi</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-xl-3">
+                            <div class="card bg-warning hoverable card-xl-stretch mb-xl-8">
+                                <div class="card-body">
+                                    <i class="fas fa-clipboard-check text-white fs-3x ms-n1"></i>
+                                    <div class="text-white fw-bold fs-2 mb-2 mt-5">{{ $stats['total_responden'] }}</div>
+                                    <div class="fw-semibold text-white">Total Responden Tracer</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

@@ -14,13 +14,25 @@ class AdminMahasiswaController extends Controller
 {
     public function index()
     {
-        $prodi = Prodi::orderBy('nama_prodi')->get();
+        $prodi = Prodi::orderBy('nama_prodi');
+        
+        if (auth()->user()->role === 'Fakultas') {
+            $prodi->where('fakultas_id', auth()->user()->fakultas_id);
+        }
+        
+        $prodi = $prodi->get();
         return view('admin.mahasiswa.index', compact('prodi'));
     }
 
     public function getMahasiswa()
     {
         $query = Mahasiswa::with('prodi.fakultas')->select(['nim', 'prodi_id', 'nama', 'email', 'status', 'no_hp'])->orderByDesc('created_at');
+
+        if (auth()->user()->role === 'Fakultas') {
+            $query->whereHas('prodi', function ($q) {
+                $q->where('fakultas_id', auth()->user()->fakultas_id);
+            });
+        }
 
         return DataTables::of($query)
             ->addColumn('prodi_nama', function ($row) {
@@ -34,14 +46,19 @@ class AdminMahasiswaController extends Controller
                                 <i class="fa fa-file-alt"></i>
                             </a>';
 
-                $editBtn = '<a href="javascript:void(0)"
-                                class="btn btn-sm btn-light btn-active-light-warning text-center btn-edit"
-                                data-id="' . $row->nim . '"
-                                data-bs-toggle="tooltip" title="Edit">
-                                <i class="fas fa-edit"></i>
-                            </a>';
+                $editBtn = '';
+                $deleteBtn = '';
+                
+                if (auth()->user()->role === 'Admin') {
+                    $editBtn = '<a href="javascript:void(0)"
+                                    class="btn btn-sm btn-light btn-active-light-warning text-center btn-edit"
+                                    data-id="' . $row->nim . '"
+                                    data-bs-toggle="tooltip" title="Edit">
+                                    <i class="fas fa-edit"></i>
+                                </a>';
 
-                $deleteBtn = '<a href="javascript:void(0)" onclick="confirmDelete(\'' . $row->nim . '\')" class="btn btn-sm btn-light btn-active-light-danger text-center" data-bs-toggle="tooltip" title="Hapus" data-bs-title="Hapus"><i class="fas fa-trash-alt"></i></a>';
+                    $deleteBtn = '<a href="javascript:void(0)" onclick="confirmDelete(\'' . $row->nim . '\')" class="btn btn-sm btn-light btn-active-light-danger text-center" data-bs-toggle="tooltip" title="Hapus" data-bs-title="Hapus"><i class="fas fa-trash-alt"></i></a>';
+                }
 
                 return '<div class="text-center">' . $showBtn . ' ' . $editBtn . ' ' . $deleteBtn . '</div>';
             })
