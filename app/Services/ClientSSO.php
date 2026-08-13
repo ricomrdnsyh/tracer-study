@@ -21,6 +21,41 @@ class ClientSSO
         return $this->fetchData('program_studi', ['id_fakultas' => $idFakultas]);
     }
 
+    public function getLembagaFromApi(): array
+    {
+        return $this->fetchData('lembaga');
+    }
+
+    public function getKaryawanFromApi(): array
+    {
+        $allKaryawans = [];
+        
+        try {
+            $lembagaList = $this->getLembagaFromApi();
+            
+            foreach ($lembagaList as $lembaga) {
+                if (isset($lembaga['id_lembaga'])) {
+                    try {
+                        $data = $this->fetchData('karyawan', [
+                            'id_lembaga' => $lembaga['id_lembaga'],
+                            'pagination' => 'off'
+                        ]);
+                        if (is_array($data)) {
+                            $allKaryawans = array_merge($allKaryawans, $data);
+                        }
+                    } catch (\Exception $e) {
+                        // Lanjut ke lembaga berikutnya jika error
+                    }
+                }
+            }
+        } catch (\Exception $e) {
+            // Gagal fetch lembaga list
+        }
+
+        return $allKaryawans;
+    }
+
+
     private function fetchData(string $filter, array $additionalPayload = []): array
     {
         $auth = $this->auth->getAuth();

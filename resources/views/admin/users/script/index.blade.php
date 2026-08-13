@@ -74,22 +74,22 @@
                     name: 'name'
                 },
                 {
-                    data: 'email',
-                    name: 'email',
-                    render: function(data) {
-                        return data || '-';
-                    }
-                },
-                {
                     data: 'role',
                     name: 'role',
-                    render: function(data) {
+                    render: function(data, type, row) {
                         let badgeClass = 'badge-primary';
                         if (data === 'Admin') badgeClass = 'badge-success';
                         else if (data === 'Pimpinan') badgeClass = 'badge-info';
                         else if (data === 'Fakultas') badgeClass = 'badge-warning';
                         
                         return '<span class="badge ' + badgeClass + '">' + data + '</span>';
+                    }
+                },
+                {
+                    data: 'fakultas_id',
+                    name: 'fakultas_id',
+                    render: function(data, type, row) {
+                        return row.role === 'Fakultas' && row.fakultas ? row.fakultas.nama_fakultas : '-';
                     }
                 },
             ]

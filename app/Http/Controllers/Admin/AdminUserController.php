@@ -5,16 +5,22 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\UserRequest;
 use App\Models\User;
+use App\Services\ClientSSO;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Yajra\DataTables\Facades\DataTables;
 
 class AdminUserController extends Controller
 {
+    public function __construct(
+        protected ClientSSO $clientSSO
+    ) {}
+
     public function index()
     {
         $fakultas = \App\Models\Fakultas::all();
-        return view('admin.users.index', compact('fakultas'));
+        $karyawans = $this->clientSSO->getKaryawanFromApi();
+        return view('admin.users.index', compact('fakultas', 'karyawans'));
     }
 
     public function getUsers()

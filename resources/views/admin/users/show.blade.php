@@ -8,7 +8,7 @@
 
             <div class="modal-body">
                 <div class="row g-3">
-                    <div class="col-12">
+                    <div class="col-md-6">
                         <div class="d-flex flex-column mb-2">
                             <label class="d-flex align-items-center fs-sm-8 fs-lg-6 fw-bolder mb-1">
                                 <span>Username</span>
@@ -21,7 +21,7 @@
                     <div class="col-md-6">
                         <div class="d-flex flex-column mb-2">
                             <label class="d-flex align-items-center fs-sm-8 fs-lg-6 fw-bolder mb-1">
-                                <span>Name</span>
+                                <span>Nama Lengkap</span>
                             </label>
                             <input type="text" id="show_name"
                                 class="form-control form-control-sm fs-sm-8 fs-lg-6 bg-light" readonly>

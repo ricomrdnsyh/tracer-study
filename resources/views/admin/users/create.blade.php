@@ -14,11 +14,34 @@
                         <div class="col-12">
                             <div class="d-flex flex-column mb-2">
                                 <label class="d-flex align-items-center fs-sm-8 fs-lg-6 fw-bolder mb-1 required">
+                                    <span>Pilih Karyawan</span>
+                                </label>
+                                <select id="karyawan" class="form-select form-select-sm fs-sm-8 fs-lg-6"
+                                    data-control="select2" data-placeholder="Pilih Karyawan" data-allow-clear="true"
+                                    data-dropdown-parent="#form_create" required>
+                                    <option value="">-- Pilih Karyawan --</option>
+                                    @if (isset($karyawans) && is_array($karyawans))
+                                        @foreach ($karyawans as $karyawan)
+                                            <option value="{{ $karyawan['id_penduduk'] ?? '' }}"
+                                                data-nama="{{ $karyawan['nama_penduduk'] ?? '' }}"
+                                                data-email="{{ $karyawan['email'] ?? '' }}">
+                                                {{ $karyawan['nama_penduduk'] ?? '' }} -
+                                                {{ $karyawan['lembaga'] ?? '' }}
+                                            </option>
+                                        @endforeach
+                                    @endif
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="d-flex flex-column mb-2">
+                                <label class="d-flex align-items-center fs-sm-8 fs-lg-6 fw-bolder mb-1 required">
                                     <span>Username</span>
                                 </label>
                                 <input type="text" name="username" id="username"
                                     class="form-control form-control-sm fs-sm-8 fs-lg-6 @error('username') is-invalid @enderror"
-                                    value="{{ old('username') }}" required autofocus maxlength="10">
+                                    value="{{ old('username') }}" required readonly maxlength="20">
 
                                 @error('username')
                                     <div class="small text-danger mt-1">{{ $message }}</div>
@@ -30,11 +53,11 @@
                         <div class="col-md-6">
                             <div class="d-flex flex-column mb-2">
                                 <label class="d-flex align-items-center fs-sm-8 fs-lg-6 fw-bolder mb-1 required">
-                                    <span>Name</span>
+                                    <span>Nama Lengkap</span>
                                 </label>
                                 <input type="text" name="name" id="name"
                                     class="form-control form-control-sm fs-sm-8 fs-lg-6 @error('name') is-invalid @enderror"
-                                    value="{{ old('name') }}" required maxlength="100">
+                                    value="{{ old('name') }}" required readonly maxlength="100">
 
                                 @error('name')
                                     <div class="small text-danger mt-1">{{ $message }}</div>
@@ -64,7 +87,10 @@
                                 <label class="d-flex align-items-center fs-sm-8 fs-lg-6 fw-bolder mb-1 required">
                                     <span>Role</span>
                                 </label>
-                                <select name="role" id="role" class="form-select form-select-sm fs-sm-8 fs-lg-6 @error('role') is-invalid @enderror" data-control="select2" data-hide-search="true" data-dropdown-parent="#form_create" data-placeholder="Pilih Role" required>
+                                <select name="role" id="role"
+                                    class="form-select form-select-sm fs-sm-8 fs-lg-6 @error('role') is-invalid @enderror"
+                                    data-control="select2" data-hide-search="true" data-dropdown-parent="#form_create"
+                                    data-placeholder="Pilih Role" required>
                                     <option value="" disabled selected>Pilih Role</option>
                                     <option value="Admin">Admin</option>
                                     <option value="Fakultas">Fakultas</option>
@@ -77,14 +103,17 @@
                             </div>
                         </div>
 
-                        <div class="col-md-6" id="fakultas_container" style="display: none;">
+                        <div class="col-12" id="fakultas_container" style="display: none;">
                             <div class="d-flex flex-column mb-2">
                                 <label class="d-flex align-items-center fs-sm-8 fs-lg-6 fw-bolder mb-1 required">
                                     <span>Fakultas</span>
                                 </label>
-                                <select name="fakultas_id" id="fakultas_id" class="form-select form-select-sm fs-sm-8 fs-lg-6 @error('fakultas_id') is-invalid @enderror" data-control="select2" data-dropdown-parent="#form_create" data-placeholder="Pilih Fakultas">
+                                <select name="fakultas_id" id="fakultas_id"
+                                    class="form-select form-select-sm fs-sm-8 fs-lg-6 @error('fakultas_id') is-invalid @enderror"
+                                    data-control="select2" data-dropdown-parent="#form_create"
+                                    data-placeholder="Pilih Fakultas">
                                     <option value="" disabled selected>Pilih Fakultas</option>
-                                    @foreach($fakultas as $f)
+                                    @foreach ($fakultas as $f)
                                         <option value="{{ $f->id_fakultas }}">{{ $f->nama_fakultas }}</option>
                                     @endforeach
                                 </select>
@@ -96,13 +125,14 @@
                             </div>
                         </div>
 
-                        <div class="col-md-6" id="password_container">
+                        <div class="col-12" id="password_container">
                             <div class="d-flex flex-column mb-2">
                                 <label class="d-flex align-items-center fs-sm-8 fs-lg-6 fw-bolder mb-1 required">
                                     <span>Password</span>
                                 </label>
                                 <input type="password" name="password" id="password"
-                                    class="form-control form-control-sm fs-sm-8 fs-lg-6 @error('password') is-invalid @enderror" required minlength="6">
+                                    class="form-control form-control-sm fs-sm-8 fs-lg-6 @error('password') is-invalid @enderror"
+                                    required minlength="6">
 
                                 @error('password')
                                     <div class="small text-danger mt-1">{{ $message }}</div>

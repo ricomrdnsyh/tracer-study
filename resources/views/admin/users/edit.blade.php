@@ -15,10 +15,33 @@
                         <div class="col-12">
                             <div class="d-flex flex-column mb-2">
                                 <label class="d-flex align-items-center fs-sm-8 fs-lg-6 fw-bolder mb-1 required">
+                                    <span>Pilih Karyawan</span>
+                                </label>
+                                <select id="edit_karyawan" class="form-select form-select-sm fs-sm-8 fs-lg-6"
+                                    data-control="select2" data-placeholder="Pilih Karyawan" data-allow-clear="true"
+                                    data-dropdown-parent="#form_edit" required>
+                                    <option value="">-- Pilih Karyawan --</option>
+                                    @if (isset($karyawans) && is_array($karyawans))
+                                        @foreach ($karyawans as $karyawan)
+                                            <option value="{{ $karyawan['id_penduduk'] ?? '' }}"
+                                                data-nama="{{ $karyawan['nama_penduduk'] ?? '' }}"
+                                                data-email="{{ $karyawan['email'] ?? '' }}">
+                                                {{ $karyawan['nama_penduduk'] ?? '' }} -
+                                                {{ $karyawan['lembaga'] ?? '' }}
+                                            </option>
+                                        @endforeach
+                                    @endif
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="d-flex flex-column mb-2">
+                                <label class="d-flex align-items-center fs-sm-8 fs-lg-6 fw-bolder mb-1 required">
                                     <span>Username</span>
                                 </label>
                                 <input type="text" name="username" id="edit_username"
-                                    class="form-control form-control-sm fs-sm-8 fs-lg-6 @error('username') is-invalid @enderror" required maxlength="10">
+                                    class="form-control form-control-sm fs-sm-8 fs-lg-6 @error('username') is-invalid @enderror" required readonly maxlength="20">
 
                                 <div class="invalid-feedback">Username wajib diisi (maks 10 karakter).</div>
                             </div>
@@ -27,10 +50,10 @@
                         <div class="col-md-6">
                             <div class="d-flex flex-column mb-2">
                                 <label class="d-flex align-items-center fs-sm-8 fs-lg-6 fw-bolder mb-1 required">
-                                    <span>Name</span>
+                                    <span>Nama Lengkap</span>
                                 </label>
                                 <input type="text" name="name" id="edit_name"
-                                    class="form-control form-control-sm fs-sm-8 fs-lg-6 @error('name') is-invalid @enderror" required maxlength="100">
+                                    class="form-control form-control-sm fs-sm-8 fs-lg-6 @error('name') is-invalid @enderror" required readonly maxlength="100">
 
                                 <div class="invalid-feedback">Name wajib diisi.</div>
                             </div>
@@ -63,7 +86,7 @@
                             </div>
                         </div>
 
-                        <div class="col-md-6" id="edit_fakultas_container" style="display: none;">
+                        <div class="col-12" id="edit_fakultas_container" style="display: none;">
                             <div class="d-flex flex-column mb-2">
                                 <label class="d-flex align-items-center fs-sm-8 fs-lg-6 fw-bolder mb-1 required">
                                     <span>Fakultas</span>
@@ -79,7 +102,7 @@
                             </div>
                         </div>
 
-                        <div class="col-md-6" id="edit_password_container">
+                        <div class="col-12" id="edit_password_container">
                             <div class="d-flex flex-column mb-2">
                                 <label class="d-flex align-items-center fs-sm-8 fs-lg-6 fw-bolder mb-1">
                                     <span>Password (Kosongkan jika tidak ingin diubah)</span>

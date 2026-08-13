@@ -123,9 +123,9 @@
                                             <th class="text-center p-0" style="width:28px; min-width:28px;"></th>
                                             <th class="text-center ps-1 min-w-175px">Aksi</th>
                                             <th class="min-w-150px">Username</th>
-                                            <th class="min-w-150px">Name</th>
-                                            <th class="min-w-150px">Email</th>
+                                            <th class="min-w-150px">Nama Lengkap</th>
                                             <th class="min-w-100px">Role</th>
+                                            <th class="min-w-150px">Fakultas</th>
                                         </tr>
                                     </thead>
                                     <tbody class="fw-bold text-gray-800"></tbody>
