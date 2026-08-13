@@ -7,6 +7,7 @@ use App\Http\Requests\Admin\FakultasRequest;
 use App\Models\Fakultas;
 use Illuminate\Http\Request;
 use Yajra\DataTables\Facades\DataTables;
+use App\Services\ClientSSO;
 
 class AdminFakultasController extends Controller
 {
@@ -28,16 +29,7 @@ class AdminFakultasController extends Controller
                                 <i class="fa fa-file-alt"></i>
                             </a>';
 
-                $editBtn = '<a href="javascript:void(0)"
-                                class="btn btn-sm btn-light btn-active-light-warning text-center btn-edit"
-                                data-id="' . $row->id_fakultas . '"
-                                data-bs-toggle="tooltip" title="Edit">
-                                <i class="fas fa-edit"></i>
-                            </a>';
-
-                $deleteBtn = '<a href="javascript:void(0)" onclick="confirmDelete(' . $row->id_fakultas . ')" class="btn btn-sm btn-light btn-active-light-danger text-center" data-bs-toggle="tooltip" title="Hapus" data-bs-title="Hapus"><i class="fas fa-trash-alt"></i></a>';
-
-                return '<div class="text-center">' . $showBtn . ' ' . $editBtn . ' ' . $deleteBtn . '</div>';
+                return '<div class="text-center">' . $showBtn . '</div>';
             })
             ->rawColumns(['action'])
             ->make(true);
@@ -46,46 +38,45 @@ class AdminFakultasController extends Controller
     public function show(string $id)
     {
         $fakultas = Fakultas::findOrFail($id);
-        return view('admin.fakultas.show', compact('fakultas'));
-    }
-
-    public function edit(string $id)
-    {
-        $fakultas = Fakultas::findOrFail($id);
         return response()->json($fakultas);
     }
 
-    public function store(FakultasRequest $request)
+    public function sync(ClientSSO $clientSSO)
     {
+        try {
+            $data = $clientSSO->getFakultasFromApi();
 
-        Fakultas::create([
-            'nama_fakultas' => $request->nama_fakultas,
-            'singkatan'     => $request->singkatan,
-        ]);
+            if (empty($data)) {
+                return response()->json(['success' => false, 'message' => 'Data dari API kosong.']);
+            }
 
-        return redirect()->route('admin.fakultas.index')->with('success', 'Data fakultas berhasil ditambahkan.');
-    }
+            $newCount = 0;
+            $updatedCount = 0;
+            $unchangedCount = 0;
 
-    public function update(FakultasRequest $request, string $id)
-    {
+            foreach ($data as $item) {
+                $fakultas = Fakultas::updateOrCreate(
+                    ['id_fakultas' => $item['id_fakultas']],
+                    [
+                        'nama_fakultas' => $item['fakultas'] ?? 'Tanpa Nama',
+                        'singkatan'     => $item['singkatan'] ?? null,
+                    ]
+                );
 
-        $fakultas = Fakultas::findOrFail($id);
-        $fakultas->update([
-            'nama_fakultas' => $request->nama_fakultas,
-            'singkatan'     => $request->singkatan,
-        ]);
+                if ($fakultas->wasRecentlyCreated) {
+                    $newCount++;
+                } else if ($fakultas->wasChanged()) {
+                    $updatedCount++;
+                } else {
+                    $unchangedCount++;
+                }
+            }
 
-        return redirect()->route('admin.fakultas.index')->with('success', 'Data fakultas berhasil diperbarui.');
-    }
+            $message = "Sinkronisasi Selesai. Baru: {$newCount}, Diperbarui: {$updatedCount}, Tetap: {$unchangedCount}.";
 
-    public function destroy(string $id)
-    {
-        $fakultas = Fakultas::findOrFail($id);
-        $fakultas->delete();
-
-        return response()->json([
-            'status'  => 'success',
-            'message' => 'Data fakultas berhasil dihapus.',
-        ]);
+            return response()->json(['success' => true, 'message' => $message]);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => 'Gagal sinkronisasi: ' . $e->getMessage()], 500);
+        }
     }
 }

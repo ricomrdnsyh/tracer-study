@@ -26,10 +26,12 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:Admin'])->grou
     Route::get('/dashboard', [AdminDashboard::class, 'index'])->name('dashboard');
 
     Route::get('/fakultas/data', [AdminFakultasController::class, 'getFakultas'])->name('fakultas.data');
-    Route::resource('fakultas', AdminFakultasController::class);
+    Route::match(['get', 'post'], '/fakultas/sync', [AdminFakultasController::class, 'sync'])->name('fakultas.sync');
+    Route::resource('fakultas', AdminFakultasController::class)->only(['index', 'show']);
 
     Route::get('/prodi/data', [AdminProdiController::class, 'getProdi'])->name('prodi.data');
-    Route::resource('prodi', AdminProdiController::class);
+    Route::match(['get', 'post'], '/prodi/sync', [AdminProdiController::class, 'sync'])->name('prodi.sync');
+    Route::resource('prodi', AdminProdiController::class)->only(['index', 'show']);
 
     Route::get('/users/data', [AdminUserController::class, 'getUsers'])->name('users.data');
     Route::resource('users', AdminUserController::class);

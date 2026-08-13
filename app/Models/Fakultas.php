@@ -14,6 +14,7 @@ class Fakultas extends Model
     protected $primaryKey = 'id_fakultas';
 
     protected $fillable = [
+        'id_fakultas',
         'nama_fakultas',
         'singkatan'
     ];

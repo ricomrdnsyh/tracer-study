@@ -108,13 +108,30 @@
                                 </div>
                             </div>
                             <div class="card-toolbar">
-                                <a type="button" class="btn btn-sm btn-primary m-0" data-bs-toggle="modal"
-                                    data-bs-target="#form_create" title="Tambah Prodi">
-                                    <i class="fas fa-plus me-2"></i>Tambah Prodi
-                                </a>
+                                <button type="button" class="btn btn-sm btn-primary m-0" id="btn_sync_prodi" title="Sinkronisasi Data Prodi">
+                                    <i class="fas fa-sync me-2"></i>Sinkronisasi Prodi
+                                </button>
                             </div>
                         </div>
-                        <div class="separator my-5"></div>
+                        <div class="card-body py-4 px-8 filter-container mt-4">
+                            <div class="border border-dashed rounded p-5 mb-5" style="border-color: #b5b5c3 !important;">
+                                <h5 class="text-primary mb-4"><i class="fas fa-filter text-primary me-2"></i>Filter Data
+                                </h5>
+                                <div class="row g-5">
+                                    <div class="col-lg-12 col-md-12 col-sm-12">
+                                        <label class="form-label fw-bold mb-2">Fakultas:</label>
+                                        <select class="form-select form-select-sm" data-control="select2"
+                                            data-placeholder="Semua Fakultas" data-allow-clear="true" data-filter="fakultas"
+                                            id="filter-fakultas">
+                                            <option value="">Semua Fakultas</option>
+                                            @foreach ($fakultas as $fak)
+                                                <option value="{{ $fak->id_fakultas }}">{{ $fak->nama_fakultas }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                         <div class="card-body pt-0">
                             <div class="table-responsive">
                                 <table class="table align-middle table-row-dashed fs-6 gy-5" id="example">
@@ -134,8 +151,6 @@
                     </div>
                 </div>
             </div>
-            @include('admin.prodi.create')
-            @include('admin.prodi.edit')
             @include('admin.prodi.show')
 
             @include('layouts.footer')
@@ -159,7 +174,5 @@
     <script src="{{ asset('assets/plugins/custom/datatables/responsive.bootstrap.min.js') }}"></script>
 
     @include('admin.prodi.script.index')
-    @include('admin.prodi.script.create')
-    @include('admin.prodi.script.edit')
     @include('admin.prodi.script.show')
 @endsection

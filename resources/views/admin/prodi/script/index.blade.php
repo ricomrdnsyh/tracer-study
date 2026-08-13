@@ -52,7 +52,14 @@
                     className: 'btn btn-sm btn-primary mt-2 rounded-2'
                 }
             ],
-            ajax: '{{ route('admin.prodi.data', [], false) }}',
+            ajax: {
+                url: '{{ route('admin.prodi.data', [], false) }}',
+                data: function(d) {
+                    if ($('#filter-fakultas').length) {
+                        d.id_fakultas = $('#filter-fakultas').val();
+                    }
+                }
+            },
             columns: [{
                     data: null,
                     defaultContent: '',
@@ -106,53 +113,68 @@
                 }
             });
         @endif
-    });
 
-    function confirmDelete(id) {
-        Swal.fire({
-            title: "Apakah Anda yakin?",
-            text: "Data akan dihapus permanen.",
-            icon: "warning",
-            showCancelButton: true,
-            confirmButtonText: "Ya, hapus!",
-            cancelButtonText: "Batal",
-            customClass: {
-                confirmButton: "btn btn-danger",
-                cancelButton: 'btn btn-secondary'
-            }
-        }).then((result) => {
-            if (result.isConfirmed) {
-                $.ajax({
-                    url: '/admin/prodi/' + id,
-                    type: 'DELETE',
-                    data: {
-                        _token: '{{ csrf_token() }}'
-                    },
-                    beforeSend: function() {
-                        Swal.fire({
-                            title: "Tunggu Sebentar..",
-                            icon: "info",
-                            text: 'Sedang menghapus Data...',
-                            allowOutsideClick: false,
-                            didOpen: () => {
-                                Swal.showLoading()
+        $('#filter-fakultas').on('change', function() {
+            $('#example').DataTable().ajax.reload(null, false);
+        });
+
+        $('#btn_sync_prodi').on('click', function() {
+            Swal.fire({
+                title: "Sinkronisasi Program Studi?",
+                text: "Proses ini akan mengambil data dari API SSO dan memperbarui database.",
+                icon: "info",
+                showCancelButton: true,
+                confirmButtonText: "Ya, Sinkronkan!",
+                cancelButtonText: "Batal",
+                customClass: {
+                    confirmButton: "btn btn-primary",
+                    cancelButton: 'btn btn-secondary'
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: '{{ route('admin.prodi.sync') }}',
+                        type: 'POST',
+                        data: {
+                            _token: '{{ csrf_token() }}'
+                        },
+                        beforeSend: function() {
+                            Swal.fire({
+                                title: 'Menyinkronkan...',
+                                icon: 'info',
+                                text: 'Mohon tunggu sebentar...',
+                                allowOutsideClick: false,
+                                didOpen: () => {
+                                    Swal.showLoading()
+                                }
+                            });
+                        },
+                        success: function(response) {
+                            if (response.success) {
+                                Swal.fire({
+                                    text: response.message,
+                                    icon: "success",
+                                    buttonsStyling: false,
+                                    confirmButtonText: "Ok",
+                                    customClass: {
+                                        confirmButton: "btn btn-primary"
+                                    }
+                                });
+                                $('#example').DataTable().ajax.reload(null, false);
+                            } else {
+                                Swal.fire("Gagal!", response.message, "error");
                             }
-                        });
-                    },
-                    success: function(response) {
-                        Swal.fire({
-                            text: response.message,
-                            icon: "success",
-                            confirmButtonText: "Ok, got it!",
-                            confirmButtonColor: '#004289',
-                        });
-                        $('#example').DataTable().ajax.reload(null, false);
-                    },
-                    error: function() {
-                        Swal.fire("Error!", "Terjadi kesalahan saat menghapus data.", "error");
-                    }
-                });
-            }
-        })
-    }
+                        },
+                        error: function(xhr) {
+                            let msg = "Terjadi kesalahan saat menyinkronkan data.";
+                            if (xhr.responseJSON && xhr.responseJSON.message) {
+                                msg = xhr.responseJSON.message;
+                            }
+                            Swal.fire("Error!", msg, "error");
+                        }
+                    });
+                }
+            });
+        });
+    });
 </script>

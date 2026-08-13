@@ -8,6 +8,7 @@ use App\Models\Fakultas;
 use App\Models\Prodi;
 use Illuminate\Http\Request;
 use Yajra\DataTables\Facades\DataTables;
+use App\Services\ClientSSO;
 
 class AdminProdiController extends Controller
 {
@@ -17,9 +18,13 @@ class AdminProdiController extends Controller
         return view('admin.prodi.index', compact('fakultas'));
     }
 
-    public function getProdi()
+    public function getProdi(Request $request)
     {
         $query = Prodi::with('fakultas')->select(['id_prodi', 'fakultas_id', 'nama_prodi', 'singkatan'])->orderByDesc('created_at');
+
+        if ($request->has('id_fakultas') && !empty($request->id_fakultas)) {
+            $query->where('fakultas_id', $request->id_fakultas);
+        }
 
         return DataTables::of($query)
             ->addColumn('fakultas_nama', function ($row) {
@@ -33,16 +38,7 @@ class AdminProdiController extends Controller
                                 <i class="fa fa-file-alt"></i>
                             </a>';
 
-                $editBtn = '<a href="javascript:void(0)"
-                                class="btn btn-sm btn-light btn-active-light-warning text-center btn-edit"
-                                data-id="' . $row->id_prodi . '"
-                                data-bs-toggle="tooltip" title="Edit">
-                                <i class="fas fa-edit"></i>
-                            </a>';
-
-                $deleteBtn = '<a href="javascript:void(0)" onclick="confirmDelete(\'' . $row->id_prodi . '\')" class="btn btn-sm btn-light btn-active-light-danger text-center" data-bs-toggle="tooltip" title="Hapus" data-bs-title="Hapus"><i class="fas fa-trash-alt"></i></a>';
-
-                return '<div class="text-center">' . $showBtn . ' ' . $editBtn . ' ' . $deleteBtn . '</div>';
+                return '<div class="text-center">' . $showBtn . '</div>';
             })
             ->rawColumns(['action'])
             ->make(true);
@@ -51,48 +47,54 @@ class AdminProdiController extends Controller
     public function show(string $id)
     {
         $prodi = Prodi::with('fakultas')->findOrFail($id);
-        return view('admin.prodi.show', compact('prodi'));
-    }
-
-    public function edit(string $id)
-    {
-        $prodi = Prodi::with('fakultas')->findOrFail($id);
         return response()->json($prodi);
     }
 
-    public function store(ProdiRequest $request)
+    public function sync(ClientSSO $clientSSO)
     {
+        try {
+            $fakultasList = Fakultas::all();
 
-        Prodi::create([
-            'fakultas_id' => $request->fakultas_id,
-            'nama_prodi'  => $request->nama_prodi,
-            'singkatan'   => $request->singkatan,
-        ]);
+            if ($fakultasList->isEmpty()) {
+                return response()->json(['success' => false, 'message' => 'Data Fakultas kosong, silakan sinkronisasi fakultas terlebih dahulu.']);
+            }
 
-        return redirect()->route('admin.prodi.index')->with('success', 'Data prodi berhasil ditambahkan.');
-    }
+            $newCount = 0;
+            $updatedCount = 0;
+            $unchangedCount = 0;
 
-    public function update(ProdiRequest $request, string $id)
-    {
+            foreach ($fakultasList as $fakultas) {
+                $data = $clientSSO->getProdiByFakultas($fakultas->id_fakultas);
 
-        $prodi = Prodi::findOrFail($id);
-        $prodi->update([
-            'fakultas_id' => $request->fakultas_id,
-            'nama_prodi'  => $request->nama_prodi,
-            'singkatan'   => $request->singkatan,
-        ]);
+                if (empty($data)) {
+                    continue;
+                }
 
-        return redirect()->route('admin.prodi.index')->with('success', 'Data prodi berhasil diperbarui.');
-    }
+                foreach ($data as $item) {
+                    $prodi = Prodi::updateOrCreate(
+                        ['id_prodi' => $item['id_sms']],
+                        [
+                            'fakultas_id' => $item['id_fakultas'] ?? $fakultas->id_fakultas,
+                            'nama_prodi'  => $item['prodi'] ?? 'Tanpa Nama',
+                            'singkatan'   => $item['singkatan'] ?? null,
+                        ]
+                    );
 
-    public function destroy(string $id)
-    {
-        $prodi = Prodi::findOrFail($id);
-        $prodi->delete();
+                    if ($prodi->wasRecentlyCreated) {
+                        $newCount++;
+                    } else if ($prodi->wasChanged()) {
+                        $updatedCount++;
+                    } else {
+                        $unchangedCount++;
+                    }
+                }
+            }
 
-        return response()->json([
-            'status'  => 'success',
-            'message' => 'Data prodi berhasil dihapus.',
-        ]);
+            $message = "Sinkronisasi selesai. Baru: {$newCount}, Diperbarui: {$updatedCount}, Tetap: {$unchangedCount}.";
+
+            return response()->json(['success' => true, 'message' => $message]);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => 'Gagal sinkronisasi: ' . $e->getMessage()], 500);
+        }
     }
 }

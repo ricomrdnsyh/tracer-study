@@ -99,53 +99,64 @@
                 }
             });
         @endif
-    });
 
-    function confirmDelete(id) {
-        Swal.fire({
-            title: "Apakah Anda yakin?",
-            text: "Data akan dihapus permanen.",
-            icon: "warning",
-            showCancelButton: true,
-            confirmButtonText: "Ya, hapus!",
-            cancelButtonText: "Batal",
-            customClass: {
-                confirmButton: "btn btn-danger",
-                cancelButton: 'btn btn-secondary'
-            }
-        }).then((result) => {
-            if (result.isConfirmed) {
-                $.ajax({
-                    url: '/admin/fakultas/' + id,
-                    type: 'DELETE',
-                    data: {
-                        _token: '{{ csrf_token() }}'
-                    },
-                    beforeSend: function() {
-                        Swal.fire({
-                            title: "Tunggu Sebentar..",
-                            icon: "info",
-                            text: 'Sedang menghapus Data...',
-                            allowOutsideClick: false,
-                            didOpen: () => {
-                                Swal.showLoading()
+        $('#btn_sync_fakultas').on('click', function() {
+            Swal.fire({
+                title: "Sinkronisasi Fakultas?",
+                text: "Proses ini akan mengambil data dari API SSO dan memperbarui database.",
+                icon: "info",
+                showCancelButton: true,
+                confirmButtonText: "Ya, Sinkronkan!",
+                cancelButtonText: "Batal",
+                customClass: {
+                    confirmButton: "btn btn-primary",
+                    cancelButton: 'btn btn-secondary'
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: '{{ route('admin.fakultas.sync') }}',
+                        type: 'POST',
+                        data: {
+                            _token: '{{ csrf_token() }}'
+                        },
+                        beforeSend: function() {
+                            Swal.fire({
+                                title: 'Menyinkronkan...',
+                                icon: 'info',
+                                text: 'Mohon tunggu sebentar...',
+                                allowOutsideClick: false,
+                                didOpen: () => {
+                                    Swal.showLoading()
+                                }
+                            });
+                        },
+                        success: function(response) {
+                            if (response.success) {
+                                Swal.fire({
+                                    text: response.message,
+                                    icon: "success",
+                                    buttonsStyling: false,
+                                    confirmButtonText: "Ok",
+                                    customClass: {
+                                        confirmButton: "btn btn-primary"
+                                    }
+                                });
+                                $('#example').DataTable().ajax.reload(null, false);
+                            } else {
+                                Swal.fire("Gagal!", response.message, "error");
                             }
-                        });
-                    },
-                    success: function(response) {
-                        Swal.fire({
-                            text: response.message,
-                            icon: "success",
-                            confirmButtonText: "Ok, got it!",
-                            confirmButtonColor: '#004289',
-                        });
-                        $('#example').DataTable().ajax.reload(null, false);
-                    },
-                    error: function() {
-                        Swal.fire("Error!", "Terjadi kesalahan saat menghapus data.", "error");
-                    }
-                });
-            }
-        })
-    }
+                        },
+                        error: function(xhr) {
+                            let msg = "Terjadi kesalahan saat menyinkronkan data.";
+                            if (xhr.responseJSON && xhr.responseJSON.message) {
+                                msg = xhr.responseJSON.message;
+                            }
+                            Swal.fire("Error!", msg, "error");
+                        }
+                    });
+                }
+            });
+        });
+    });
 </script>

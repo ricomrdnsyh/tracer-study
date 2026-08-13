@@ -108,10 +108,9 @@
                                 </div>
                             </div>
                             <div class="card-toolbar">
-                                <a type="button" class="btn btn-sm btn-primary m-0" data-bs-toggle="modal"
-                                    data-bs-target="#form_create" title="Tambah Fakultas">
-                                    <i class="fas fa-plus me-2"></i>Tambah Fakultas
-                                </a>
+                                <button type="button" class="btn btn-sm btn-primary m-0" id="btn_sync_fakultas" title="Sinkronisasi Data Fakultas">
+                                    <i class="fas fa-sync me-2"></i>Sinkronisasi Fakultas
+                                </button>
                             </div>
                         </div>
                         <div class="separator my-5"></div>
@@ -133,8 +132,6 @@
                     </div>
                 </div>
             </div>
-            @include('admin.fakultas.create')
-            @include('admin.fakultas.edit')
             @include('admin.fakultas.show')
 
             @include('layouts.footer')
@@ -158,7 +155,5 @@
     <script src="{{ asset('assets/plugins/custom/datatables/responsive.bootstrap.min.js') }}"></script>
 
     @include('admin.fakultas.script.index')
-    @include('admin.fakultas.script.create')
-    @include('admin.fakultas.script.edit')
     @include('admin.fakultas.script.show')
 @endsection
