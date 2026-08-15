@@ -9,6 +9,16 @@
                 <div id="kt_app_content_container" class="app-container container-fluid">
                     <div class="card shadow-sm border border-dashed border-dark rounded mb-5">
                         <div class="card-header border-0 pt-6">
+                            @php
+                                $allPertanyaan = collect();
+                                foreach($kuesioner->kategoriPertanyaans as $kat) {
+                                    foreach($kat->pertanyaans as $p) {
+                                        if (in_array($p->tipe_jawaban, ['radio', 'select', 'checkbox'])) {
+                                            $allPertanyaan->push($p);
+                                        }
+                                    }
+                                }
+                            @endphp
                             <div class="card-title">
                                 <h3 class="card-title align-items-start flex-column">
                                     <div class="d-flex align-items-center mb-1">
@@ -75,7 +85,9 @@
                                                             <button class="btn btn-sm btn-light-warning btn-edit-kategori"
                                                                 data-id="{{ $kategori->id_kategori }}"
                                                                 data-nama="{{ $kategori->nama_kategori }}"
-                                                                data-urutan="{{ $kategori->urutan }}">
+                                                                data-urutan="{{ $kategori->urutan }}"
+                                                                data-syarat-pertanyaan="{{ $kategori->syarat_pertanyaan_id }}"
+                                                                data-syarat-jawaban="{{ json_encode($kategori->syarat_jawaban) }}">
                                                                 <i class="fas fa-edit"></i> Edit Kategori
                                                             </button>
                                                             <form
@@ -145,7 +157,9 @@
                                                                                 data-teks="{{ $pertanyaan->teks_pertanyaan }}"
                                                                                 data-tipe="{{ $pertanyaan->tipe_jawaban }}"
                                                                                 data-wajib="{{ $pertanyaan->wajib }}"
-                                                                                data-opsi="{{ $pertanyaan->opsi_jawaban ? implode('\n', $pertanyaan->opsi_jawaban) : '' }}">
+                                                                                data-opsi="{{ $pertanyaan->opsi_jawaban ? implode('\n', $pertanyaan->opsi_jawaban) : '' }}"
+                                                                                data-syarat-pertanyaan="{{ $pertanyaan->syarat_pertanyaan_id }}"
+                                                                                data-syarat-jawaban="{{ json_encode($pertanyaan->syarat_jawaban) }}">
                                                                                 <i class="fas fa-edit"></i>
                                                                             </button>
                                                                             <form
@@ -188,7 +202,7 @@
                 <!-- Modal Kategori -->
                 <div class="modal fade" id="modal_add_kategori" data-bs-backdrop="static" data-bs-keyboard="false"
                     tabindex="-1" aria-hidden="true">
-                    <div class="modal-dialog" role="document">
+                    <div class="modal-dialog modal-xl" role="document">
                         <form id="form_add_kategori" action="{{ route('admin.kategori.store') }}" method="POST">
                             @csrf
                             <input type="hidden" name="kuesioner_id" value="{{ $kuesioner->id_kuesioner }}">
@@ -221,6 +235,22 @@
                                                     value="{{ $kuesioner->kategoriPertanyaans->count() + 1 }}" required>
                                             </div>
                                         </div>
+                                        <div class="col-12 border-top pt-3 mt-3">
+                                            <div class="d-flex flex-column mb-2">
+                                                <label class="d-flex align-items-center fs-sm-8 fs-lg-6 fw-bolder mb-1">
+                                                    <span>Tampilkan Jika... (Logika Kondisional)</span>
+                                                </label>
+                                                <select class="form-select form-select-sm fs-sm-8 fs-lg-6 mb-2" data-control="select2" data-dropdown-parent="#modal_add_kategori" name="syarat_pertanyaan_id" data-placeholder="Pilih Pertanyaan Syarat" data-allow-clear="true">
+                                                    <option></option>
+                                                    @foreach($allPertanyaan as $p)
+                                                        <option value="{{ $p->id_pertanyaan }}" data-opsi="{{ json_encode($p->opsi_jawaban ?? []) }}">{{ $p->teks_pertanyaan }}</option>
+                                                    @endforeach
+                                                </select>
+                                                <select class="form-select form-select-sm fs-sm-8 fs-lg-6" data-control="select2" data-dropdown-parent="#modal_add_kategori" name="syarat_jawaban[]" multiple="multiple" data-placeholder="Nilai/Jawaban Syarat (Ketik lalu Enter)" data-tags="true">
+                                                </select>
+                                                <small class="text-muted mt-1">Kosongkan jika kategori ini tidak memiliki syarat tampil.</small>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                                 <div class="modal-footer">
@@ -243,7 +273,7 @@
         <!-- Modal Edit Kategori -->
         <div class="modal fade" id="modal_edit_kategori" data-bs-backdrop="static" data-bs-keyboard="false"
             tabindex="-1" aria-hidden="true">
-            <div class="modal-dialog" role="document">
+            <div class="modal-dialog modal-xl" role="document">
                 <form id="form_edit_kategori" method="POST">
                     @csrf @method('PUT')
                     <div class="modal-content">
@@ -272,6 +302,21 @@
                                             id="edit_urutan" name="urutan" required>
                                     </div>
                                 </div>
+                                <div class="col-12 border-top pt-3 mt-3">
+                                    <div class="d-flex flex-column mb-2">
+                                        <label class="d-flex align-items-center fs-sm-8 fs-lg-6 fw-bolder mb-1">
+                                            <span>Tampilkan Jika... (Logika Kondisional)</span>
+                                        </label>
+                                        <select class="form-select form-select-sm fs-sm-8 fs-lg-6 mb-2" data-control="select2" data-dropdown-parent="#modal_edit_kategori" id="edit_syarat_pertanyaan_id" name="syarat_pertanyaan_id" data-placeholder="Pilih Pertanyaan Syarat" data-allow-clear="true">
+                                            <option></option>
+                                            @foreach($allPertanyaan as $p)
+                                                <option value="{{ $p->id_pertanyaan }}" data-opsi="{{ json_encode($p->opsi_jawaban ?? []) }}">{{ $p->teks_pertanyaan }}</option>
+                                            @endforeach
+                                        </select>
+                                        <select class="form-select form-select-sm fs-sm-8 fs-lg-6" data-control="select2" data-dropdown-parent="#modal_edit_kategori" id="edit_syarat_jawaban_kategori" name="syarat_jawaban[]" multiple="multiple" data-placeholder="Nilai/Jawaban Syarat (Ketik lalu Enter)" data-tags="true">
+                                        </select>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                         <div class="modal-footer">
@@ -294,7 +339,7 @@
     <!-- Modal Pertanyaan -->
     <div class="modal fade" id="modal_pertanyaan" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
         aria-hidden="true">
-        <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-dialog modal-xl" role="document">
             <form id="form_pertanyaan" method="POST">
                 @csrf
                 <input type="hidden" name="_method" id="method_pertanyaan" value="POST">
@@ -355,6 +400,21 @@
                                     </select>
                                 </div>
                             </div>
+                            <div class="col-12 border-top pt-3 mt-3">
+                                <div class="d-flex flex-column mb-2">
+                                    <label class="d-flex align-items-center fs-sm-8 fs-lg-6 fw-bolder mb-1">
+                                        <span>Tampilkan Jika... (Logika Kondisional)</span>
+                                    </label>
+                                    <select class="form-select form-select-sm fs-sm-8 fs-lg-6 mb-2" data-control="select2" data-dropdown-parent="#modal_pertanyaan" id="pert_syarat_pertanyaan_id" name="syarat_pertanyaan_id" data-placeholder="Pilih Pertanyaan Syarat" data-allow-clear="true">
+                                        <option></option>
+                                        @foreach($allPertanyaan as $p)
+                                            <option value="{{ $p->id_pertanyaan }}" data-opsi="{{ json_encode($p->opsi_jawaban ?? []) }}">{{ $p->teks_pertanyaan }}</option>
+                                        @endforeach
+                                    </select>
+                                    <select class="form-select form-select-sm fs-sm-8 fs-lg-6" data-control="select2" data-dropdown-parent="#modal_pertanyaan" id="pert_syarat_jawaban" name="syarat_jawaban[]" multiple="multiple" data-placeholder="Nilai/Jawaban Syarat (Ketik lalu Enter)" data-tags="true">
+                                    </select>
+                                </div>
+                            </div>
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -384,14 +444,59 @@
     @if (auth()->user()->role === 'Admin')
         <script>
             $(document).ready(function() {
+                // Auto-populate opsi jawaban based on selected syarat_pertanyaan_id
+                $('select[name="syarat_pertanyaan_id"]').on('change', function() {
+                    var $selectedOption = $(this).find(':selected');
+                    var targetSelect = $(this).closest('form').find('select[name="syarat_jawaban[]"]');
+                    
+                    var currentValues = targetSelect.data('saved-values');
+                    if (!currentValues) {
+                        currentValues = targetSelect.val() || [];
+                    }
+                    
+                    targetSelect.removeData('saved-values');
+                    targetSelect.find('option').remove();
+
+                    var opsiStr = $selectedOption.attr('data-opsi');
+                    if (opsiStr) {
+                        try {
+                            var opsi = JSON.parse(opsiStr);
+                            if (Array.isArray(opsi)) {
+                                opsi.forEach(function(o) {
+                                    var isSelected = currentValues.includes(o);
+                                    var newOption = new Option(o, o, false, isSelected);
+                                    targetSelect.append(newOption);
+                                });
+                            }
+                        } catch(e) {}
+                    }
+                    
+                    if (Array.isArray(currentValues)) {
+                        currentValues.forEach(function(val) {
+                            if (targetSelect.find("option[value='" + val + "']").length === 0) {
+                                var customOption = new Option(val, val, true, true);
+                                targetSelect.append(customOption);
+                            }
+                        });
+                    }
+
+                    targetSelect.trigger('change.select2');
+                });
+
                 $('.btn-edit-kategori').click(function() {
                     var id = $(this).data('id');
                     var nama = $(this).data('nama');
                     var urutan = $(this).data('urutan');
+                    var syaratPert = $(this).data('syarat-pertanyaan');
+                    var syaratJawaban = $(this).data('syarat-jawaban');
 
                     $('#form_edit_kategori').attr('action', '/admin/kategori/' + id);
                     $('#edit_nama_kategori').val(nama);
                     $('#edit_urutan').val(urutan);
+                    
+                    $('#edit_syarat_jawaban_kategori').data('saved-values', syaratJawaban);
+                    $('#edit_syarat_pertanyaan_id').val(syaratPert).trigger('change');
+
                     $('#modal_edit_kategori').modal('show');
                 });
 
@@ -403,7 +508,11 @@
                     $('#teks_pertanyaan').val('');
                     $('#tipe_jawaban').val('text').trigger('change');
                     $('#opsi_jawaban').val('');
-                    $('#wajib').val('1');
+                    $('#wajib').val('1').trigger('change');
+                    
+                    $('#pert_syarat_jawaban').data('saved-values', []);
+                    $('#pert_syarat_pertanyaan_id').val('').trigger('change');
+
                     $('#modal_pertanyaan').modal('show');
                 });
 
@@ -421,7 +530,14 @@
                     if (opsi) opsi = opsi.replace(/\\n/g, '\n');
                     $('#opsi_jawaban').val(opsi);
 
-                    $('#wajib').val($(this).data('wajib') ? '1' : '0');
+                    $('#wajib').val($(this).data('wajib') ? '1' : '0').trigger('change');
+                    
+                    var syaratPert = $(this).data('syarat-pertanyaan');
+                    var syaratJawaban = $(this).data('syarat-jawaban');
+                    
+                    $('#pert_syarat_jawaban').data('saved-values', syaratJawaban);
+                    $('#pert_syarat_pertanyaan_id').val(syaratPert).trigger('change');
+
                     $('#modal_pertanyaan').modal('show');
                 });
 

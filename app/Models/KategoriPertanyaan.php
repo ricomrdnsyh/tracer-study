@@ -16,6 +16,12 @@ class KategoriPertanyaan extends Model
         'kuesioner_id',
         'nama_kategori',
         'urutan',
+        'syarat_pertanyaan_id',
+        'syarat_jawaban',
+    ];
+
+    protected $casts = [
+        'syarat_jawaban' => 'array',
     ];
 
     public function kuesioner()

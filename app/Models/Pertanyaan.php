@@ -18,10 +18,13 @@ class Pertanyaan extends Model
         'tipe_jawaban',
         'opsi_jawaban',
         'wajib',
+        'syarat_pertanyaan_id',
+        'syarat_jawaban',
     ];
 
     protected $casts = [
         'opsi_jawaban' => 'array',
+        'syarat_jawaban' => 'array',
         'wajib' => 'boolean',
     ];
 

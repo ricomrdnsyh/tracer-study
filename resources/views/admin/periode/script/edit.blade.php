@@ -7,9 +7,20 @@
             success: function(response) {
                 $('#form_edit_action').attr('action', '/admin/periode/' + id);
                 $('#edit_nama_periode').val(response.nama_periode);
-                $('#edit_tgl_mulai').val(response.tgl_mulai);
-                $('#edit_tgl_selesai').val(response.tgl_selesai);
-                $('#edit_status').val(response.status);
+                
+                if (response.tgl_mulai) {
+                    document.getElementById('edit_tgl_mulai')._flatpickr.setDate(response.tgl_mulai.substring(0, 10));
+                }
+                
+                if (response.tgl_selesai) {
+                    document.getElementById('edit_tgl_selesai')._flatpickr.setDate(response.tgl_selesai.substring(0, 10));
+                }
+                
+                if (response.status) {
+                    let status = response.status.charAt(0).toUpperCase() + response.status.slice(1);
+                    $('#edit_status').val(status).trigger('change');
+                }
+                
                 $('#form_edit').modal('show');
             }
         });

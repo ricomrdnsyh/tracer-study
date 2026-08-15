@@ -43,7 +43,7 @@
                                 <input type="hidden" name="kuesioner_id" value="{{ $kuesioner->id_kuesioner }}">
 
                                 @foreach ($kuesioner->kategoriPertanyaans as $kategori)
-                                    <div class="mb-10 p-5 rounded border border-dashed border-gray-300">
+                                    <div class="mb-10 p-5 rounded border border-dashed border-gray-300 kategori-container" data-syarat-pertanyaan="{{ $kategori->syarat_pertanyaan_id }}" data-syarat-jawaban="{{ json_encode($kategori->syarat_jawaban) }}">
                                         <h4
                                             class="mb-7 text-dark fw-bolder bg-light-primary px-4 py-3 rounded d-flex align-items-center">
                                             <i
@@ -51,7 +51,7 @@
                                         </h4>
 
                                         @foreach ($kategori->pertanyaans as $pertanyaan)
-                                            <div class="mb-8 px-4">
+                                            <div class="mb-8 px-4 pertanyaan-container" data-syarat-pertanyaan="{{ $pertanyaan->syarat_pertanyaan_id }}" data-syarat-jawaban="{{ json_encode($pertanyaan->syarat_jawaban) }}">
                                                 @php
                                                     $answer = $jawabanUser[$pertanyaan->id_pertanyaan] ?? null;
                                                 @endphp
@@ -140,6 +140,95 @@
 @section('js')
     <script>
         $(document).ready(function() {
+            function getQuestionValue(id) {
+                let $inputs = $('[name="jawaban[' + id + ']"], [name="jawaban[' + id + '][]"]');
+                if ($inputs.length === 0) return null;
+                if ($inputs.first().is(':disabled')) return null;
+
+                let tagName = $inputs.first().prop('tagName');
+                let type = $inputs.first().attr('type');
+
+                if (tagName === 'SELECT') {
+                    return $inputs.val();
+                } else if (tagName === 'TEXTAREA') {
+                    return $inputs.val();
+                } else if (type === 'radio') {
+                    return $('[name="jawaban[' + id + ']"]:checked').val() || null;
+                } else if (type === 'checkbox') {
+                    let vals = [];
+                    $('[name="jawaban[' + id + '][]"]:checked').each(function() {
+                        vals.push($(this).val());
+                    });
+                    return vals.length > 0 ? vals : null; 
+                } else {
+                    return $inputs.val();
+                }
+            }
+
+            function checkCondition(syaratId, syaratJawabanJson) {
+                if (!syaratId) return true;
+                
+                let userVal = getQuestionValue(syaratId);
+                if (userVal === undefined || userVal === null || userVal === "") return false;
+
+                let syaratJawaban = [];
+                try {
+                    syaratJawaban = JSON.parse(syaratJawabanJson) || [];
+                } catch(e) {}
+
+                if (Array.isArray(userVal)) {
+                    let match = false;
+                    for (let i = 0; i < userVal.length; i++) {
+                        if (syaratJawaban.includes(userVal[i])) {
+                            match = true;
+                            break;
+                        }
+                    }
+                    return match;
+                } else {
+                    return syaratJawaban.includes(userVal);
+                }
+            }
+
+            function evaluateSkipLogic() {
+                // Reset state
+                $('.kategori-container').show();
+                $('.pertanyaan-container').show();
+                $('form input:not([type="hidden"]), form select, form textarea').prop('disabled', false);
+
+                $('.kategori-container').each(function() {
+                    let syaratId = $(this).attr('data-syarat-pertanyaan');
+                    let syaratJawabanJson = $(this).attr('data-syarat-jawaban');
+                    if (syaratId) {
+                        let show = checkCondition(syaratId, syaratJawabanJson);
+                        if (!show) {
+                            $(this).hide();
+                            $(this).find('input, select, textarea').prop('disabled', true);
+                        }
+                    }
+                });
+
+                $('.pertanyaan-container').each(function() {
+                    let syaratId = $(this).attr('data-syarat-pertanyaan');
+                    let syaratJawabanJson = $(this).attr('data-syarat-jawaban');
+                    if (syaratId) {
+                        let show = checkCondition(syaratId, syaratJawabanJson);
+                        if (!show) {
+                            $(this).hide();
+                            $(this).find('input, select, textarea').prop('disabled', true);
+                        }
+                    }
+                });
+            }
+
+            // Init skip logic
+            evaluateSkipLogic();
+
+            // Run on change
+            $('form').on('change input', 'input, select, textarea', function() {
+                evaluateSkipLogic();
+            });
+
             $('#btn_submit_tracer').click(function(e) {
                 e.preventDefault();
 

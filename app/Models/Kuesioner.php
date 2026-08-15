@@ -25,7 +25,7 @@ class Kuesioner extends Model
 
     public function kategoriPertanyaans()
     {
-        return $this->hasMany(KategoriPertanyaan::class, 'kuesioner_id', 'id_kuesioner');
+        return $this->hasMany(KategoriPertanyaan::class, 'kuesioner_id', 'id_kuesioner')->orderBy('urutan');
     }
 
     public function responTracers()

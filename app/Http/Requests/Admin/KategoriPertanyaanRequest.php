@@ -25,6 +25,8 @@ class KategoriPertanyaanRequest extends FormRequest
         $rules = [
             'nama_kategori' => 'required|string|max:255',
             'urutan' => 'required|integer',
+            'syarat_pertanyaan_id' => 'nullable|exists:pertanyaan,id_pertanyaan',
+            'syarat_jawaban' => 'nullable|array',
         ];
 
         if ($this->isMethod('post')) {

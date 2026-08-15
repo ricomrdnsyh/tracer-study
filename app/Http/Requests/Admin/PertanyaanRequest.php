@@ -27,6 +27,8 @@ class PertanyaanRequest extends FormRequest
             'tipe_jawaban' => 'required|string',
             'wajib' => 'required|boolean',
             'opsi_jawaban' => 'nullable|string',
+            'syarat_pertanyaan_id' => 'nullable|exists:pertanyaan,id_pertanyaan',
+            'syarat_jawaban' => 'nullable|array',
         ];
 
         if ($this->isMethod('post')) {
