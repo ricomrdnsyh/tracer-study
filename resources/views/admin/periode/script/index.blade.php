@@ -100,7 +100,7 @@
                     data: 'status',
                     name: 'status',
                     render: function(data, type, row) {
-                        if (data === 'Aktif') {
+                        if (data && data.toLowerCase() === 'aktif') {
                             return '<span class="badge badge-success fs-7 fw-bold">Aktif</span>';
                         } else {
                             return '<span class="badge badge-danger fs-7 fw-bold">Nonaktif</span>';

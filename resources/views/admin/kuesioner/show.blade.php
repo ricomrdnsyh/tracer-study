@@ -108,7 +108,8 @@
                                                         <thead>
                                                             <tr
                                                                 class="fw-bolder fs-6 text-gray-800 text-uppercase bg-light-primary">
-                                                                <th class="ps-3 rounded-start min-w-200px">Pertanyaan</th>
+                                                                <th class="ps-3 rounded-start min-w-100px">Kode</th>
+                                                                <th class="min-w-200px">Pertanyaan</th>
                                                                 <th class="min-w-100px">Tipe</th>
                                                                 <th class="min-w-200px">Opsi</th>
                                                                 <th class="min-w-100px text-center">Wajib</th>
@@ -122,6 +123,8 @@
                                                             @forelse($kategori->pertanyaans as $pertanyaan)
                                                                 <tr>
                                                                     <td class="ps-3 text-dark fw-bold">
+                                                                        {{ $pertanyaan->kode_pertanyaan ?? '-' }}</td>
+                                                                    <td class="text-dark fw-bold">
                                                                         {{ $pertanyaan->teks_pertanyaan }}</td>
                                                                     <td><span
                                                                             class="badge badge-light-primary fw-bolder">{{ ucfirst($pertanyaan->tipe_jawaban) }}</span>
@@ -155,6 +158,7 @@
                                                                                 data-id="{{ $pertanyaan->id_pertanyaan }}"
                                                                                 data-kategori="{{ $pertanyaan->kategori_id }}"
                                                                                 data-teks="{{ $pertanyaan->teks_pertanyaan }}"
+                                                                                data-kode="{{ $pertanyaan->kode_pertanyaan }}"
                                                                                 data-tipe="{{ $pertanyaan->tipe_jawaban }}"
                                                                                 data-wajib="{{ $pertanyaan->wajib }}"
                                                                                 data-opsi="{{ $pertanyaan->opsi_jawaban ? implode('\n', $pertanyaan->opsi_jawaban) : '' }}"
@@ -353,6 +357,15 @@
                         <div class="row g-3">
                             <div class="col-12">
                                 <div class="d-flex flex-column mb-2">
+                                    <label class="d-flex align-items-center fs-sm-8 fs-lg-6 fw-bolder mb-1">
+                                        <span>Kode Pertanyaan (Kemdikbud)</span>
+                                    </label>
+                                    <input type="text" class="form-control form-control-sm fs-sm-8 fs-lg-6" name="kode_pertanyaan" id="kode_pertanyaan" placeholder="Contoh: f6, f505">
+                                    <small class="text-muted mt-1">Opsional. Digunakan untuk format export JSON.</small>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="d-flex flex-column mb-2">
                                     <label class="d-flex align-items-center fs-sm-8 fs-lg-6 fw-bolder mb-1 required">
                                         <span>Teks Pertanyaan</span>
                                     </label>
@@ -505,6 +518,7 @@
                     $('#method_pertanyaan').val('POST');
                     $('#title_pertanyaan').text('Tambah Pertanyaan');
                     $('#pertanyaan_kategori_id').val($(this).data('kategori-id'));
+                    $('#kode_pertanyaan').val('');
                     $('#teks_pertanyaan').val('');
                     $('#tipe_jawaban').val('text').trigger('change');
                     $('#opsi_jawaban').val('');
@@ -522,6 +536,7 @@
                     $('#method_pertanyaan').val('PUT');
                     $('#title_pertanyaan').text('Edit Pertanyaan');
                     $('#pertanyaan_kategori_id').val($(this).data('kategori'));
+                    $('#kode_pertanyaan').val($(this).data('kode'));
                     $('#teks_pertanyaan').val($(this).data('teks'));
                     $('#tipe_jawaban').val($(this).data('tipe')).trigger('change');
 

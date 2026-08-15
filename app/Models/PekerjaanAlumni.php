@@ -14,11 +14,14 @@ class PekerjaanAlumni extends Model
 
     protected $fillable = [
         'respon_id',
-        'nama_perusahaan',
-        'bidang_usaha',
-        'posisi_jabatan',
-        'skala_perusahaan',
-        'tgl_mulai_kerja',
+        'nama',
+        'nama_normalized',
+        'jenis_instansi',
+        'kode_provinsi',
+        'provinsi',
+        'kode_kabupaten',
+        'kabupaten',
+        'metadata',
     ];
 
     public function responTracer()

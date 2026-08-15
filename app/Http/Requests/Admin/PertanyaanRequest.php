@@ -23,6 +23,7 @@ class PertanyaanRequest extends FormRequest
     public function rules(): array
     {
         $rules = [
+            'kode_pertanyaan' => 'nullable|string|max:50',
             'teks_pertanyaan' => 'required|string',
             'tipe_jawaban' => 'required|string',
             'wajib' => 'required|boolean',

@@ -104,16 +104,36 @@ class TracerController extends Controller
                 JawabanDetail::insert($jawabanData);
             }
             
-            // 3. Simpan PekerjaanAlumni (opsional, tergantung form yang dikirim)
-            // Misalnya form menyediakan form khusus pekerjaan
-            if ($request->has('nama_perusahaan')) {
-                PekerjaanAlumni::create([
-                    'respon_id' => $respon->id_respon,
-                    'nama_perusahaan' => $request->nama_perusahaan,
-                    'jabatan' => $request->jabatan,
-                    'tanggal_mulai' => $request->tanggal_mulai,
-                    'gaji' => $request->gaji,
-                ]);
+            // 3. Simpan PekerjaanAlumni berdasarkan jawaban form
+            $pertanyaans = \App\Models\Pertanyaan::whereIn('kode_pertanyaan', ['f5b', 'f1101', 'f5a1', 'f5a2'])->get()->keyBy('kode_pertanyaan');
+            
+            $id_nama = isset($pertanyaans['f5b']) ? $pertanyaans['f5b']->id_pertanyaan : null;
+            $id_jenis = isset($pertanyaans['f1101']) ? $pertanyaans['f1101']->id_pertanyaan : null;
+            $id_provinsi = isset($pertanyaans['f5a1']) ? $pertanyaans['f5a1']->id_pertanyaan : null;
+            $id_kabupaten = isset($pertanyaans['f5a2']) ? $pertanyaans['f5a2']->id_pertanyaan : null;
+            
+            $nama = $id_nama && isset($request->jawaban[$id_nama]) ? $request->jawaban[$id_nama] : null;
+            
+            if ($nama) {
+                // Parse dropdown value if needed, or save directly if it's text.
+                $jenis_instansi = $id_jenis && isset($request->jawaban[$id_jenis]) ? $request->jawaban[$id_jenis] : null;
+                $kode_provinsi = $id_provinsi && isset($request->jawaban[$id_provinsi]) ? $request->jawaban[$id_provinsi] : null;
+                $kode_kabupaten = $id_kabupaten && isset($request->jawaban[$id_kabupaten]) ? $request->jawaban[$id_kabupaten] : null;
+                
+                PekerjaanAlumni::updateOrCreate(
+                    ['respon_id' => $respon->id_respon],
+                    [
+                        'nama' => $nama,
+                        'jenis_instansi' => is_array($jenis_instansi) ? implode(', ', $jenis_instansi) : $jenis_instansi,
+                        'kode_provinsi' => is_array($kode_provinsi) ? implode(', ', $kode_provinsi) : $kode_provinsi,
+                        'kode_kabupaten' => is_array($kode_kabupaten) ? implode(', ', $kode_kabupaten) : $kode_kabupaten,
+                        'nama_normalized' => strtolower($nama),
+                        // provinsi dan kabupaten string label bisa dibiarkan kosong sementara, 
+                        // kecuali ada lookup logic dari provinsi db.
+                    ]
+                );
+            } else {
+                PekerjaanAlumni::where('respon_id', $respon->id_respon)->delete();
             }
             
             DB::commit();

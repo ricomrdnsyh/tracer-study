@@ -77,9 +77,9 @@
                     data: 'status',
                     name: 'status',
                     render: function(data, type, row) {
-                        if (data === 'Published') {
+                        if (data && data.toLowerCase() === 'published') {
                             return '<span class="badge badge-success fs-7 fw-bold">Published</span>';
-                        } else if (data === 'Draft') {
+                        } else if (data && data.toLowerCase() === 'draft') {
                             return '<span class="badge badge-warning fs-7 fw-bold">Draft</span>';
                         } else {
                             return '<span class="badge badge-danger fs-7 fw-bold">Closed</span>';

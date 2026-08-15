@@ -15,11 +15,14 @@ return new class extends Migration
             $table->id('id_pekerjaan');
             $table->unsignedBigInteger('respon_id');
             $table->foreign('respon_id')->references('id_respon')->on('respon_tracer')->restrictOnDelete()->cascadeOnUpdate();
-            $table->string('nama_perusahaan')->nullable();
-            $table->string('bidang_usaha')->nullable();
-            $table->string('posisi_jabatan')->nullable();
-            $table->string('skala_perusahaan')->nullable();
-            $table->date('tgl_mulai_kerja')->nullable();
+            $table->string('nama')->nullable();
+            $table->string('nama_normalized')->nullable();
+            $table->string('jenis_instansi')->nullable();
+            $table->string('kode_provinsi')->nullable();
+            $table->string('provinsi')->nullable();
+            $table->string('kode_kabupaten')->nullable();
+            $table->string('kabupaten')->nullable();
+            $table->json('metadata')->nullable();
             $table->timestamps();
         });
     }

@@ -7,7 +7,9 @@ use App\Http\Controllers\Admin\AdminMahasiswaController;
 use App\Http\Controllers\Admin\AdminPeriodeController;
 use App\Http\Controllers\Admin\AdminPertanyaanController;
 use App\Http\Controllers\Admin\AdminProdiController;
+use App\Http\Controllers\Admin\AdminResponController;
 use App\Http\Controllers\Admin\AdminUserController;
+use App\Http\Controllers\Admin\AdminPerusahaanController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboard;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Fakultas\DashboardController as FakultasDashboard;
@@ -54,8 +56,14 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:Admin,Fakultas
     Route::get('/periode/data', [AdminPeriodeController::class, 'getPeriode'])->name('periode.data');
     Route::resource('periode', AdminPeriodeController::class);
 
+    Route::get('/perusahaan/data', [AdminPerusahaanController::class, 'getPerusahaan'])->name('perusahaan.data');
+    Route::resource('perusahaan', AdminPerusahaanController::class)->only(['index', 'show']);
+
     Route::get('/kuesioner/data', [AdminKuesionerController::class, 'getKuesioner'])->name('kuesioner.data');
     Route::resource('kuesioner', AdminKuesionerController::class);
+
+    Route::get('/respon/data', [AdminResponController::class, 'getRespon'])->name('respon.data');
+    Route::resource('respon', AdminResponController::class)->only(['index', 'show']);
 
     Route::resource('kategori', AdminKategoriPertanyaanController::class)->except(['index', 'show']);
     Route::resource('pertanyaan', AdminPertanyaanController::class)->except(['index', 'show']);

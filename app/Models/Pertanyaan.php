@@ -14,6 +14,7 @@ class Pertanyaan extends Model
 
     protected $fillable = [
         'kategori_id',
+        'kode_pertanyaan',
         'teks_pertanyaan',
         'tipe_jawaban',
         'opsi_jawaban',
