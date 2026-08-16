@@ -20,7 +20,7 @@ class AdminResponController extends Controller
     {
         $query = ResponTracer::with(['mahasiswa', 'kuesioner'])->select(['id_respon', 'mahasiswa_id', 'kuesioner_id', 'status', 'tgl_isi'])->orderByDesc('tgl_isi');
 
-        if ($request->has('kuesioner_id') && !empty($request->kuesioner_id)) {
+        if ($request->has('kuesioner_id') && !empty($request->kuesioner_id) && $request->kuesioner_id !== 'all') {
             $query->where('kuesioner_id', $request->kuesioner_id);
         }
 

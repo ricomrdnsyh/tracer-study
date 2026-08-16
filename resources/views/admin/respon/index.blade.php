@@ -21,6 +21,49 @@
             vertical-align: middle !important;
         }
 
+        #example td.dt-control:before,
+        #example th.dt-control:before {
+            display: none !important;
+            content: "" !important;
+        }
+
+        #example.dataTable td.dt-control,
+        #example.dataTable th.dt-control {
+            position: relative !important;
+            width: 28px !important;
+            min-width: 28px !important;
+            padding: 0 !important;
+            text-align: center !important;
+            vertical-align: middle !important;
+        }
+
+        #example.dataTable.collapsed tbody tr:not(.child) td.dt-control:before,
+        #example.dataTable.collapsed tbody tr:not(.child) th.dt-control:before {
+            display: inline-flex !important;
+            content: "+" !important;
+            position: absolute !important;
+            left: 50% !important;
+            top: 50% !important;
+            transform: translate(-50%, calc(-50% + 7px)) !important;
+            width: 18px !important;
+            height: 18px !important;
+            align-items: center !important;
+            justify-content: center !important;
+            border-radius: 999px !important;
+            color: #fff !important;
+            font-weight: 900 !important;
+            font-size: 13px !important;
+            line-height: 1 !important;
+            background: #0d6efd !important;
+            box-shadow: 0 0 0 2px #ffffff, 0 2px 6px rgba(0, 0, 0, .18) !important;
+        }
+
+        #example.dataTable.collapsed tbody tr.parent td.dt-control:before,
+        #example.dataTable.collapsed tbody tr.parent th.dt-control:before {
+            content: "–" !important;
+            background: #dc3545 !important;
+        }
+
         #example td:nth-child(2),
         #example th:nth-child(2) {
             padding-left: .25rem !important;
@@ -65,11 +108,18 @@
                                 </div>
                             </div>
                             <div class="card-toolbar">
-                                <div class="d-flex align-items-center gap-2 gap-lg-3">
-                                    <div class="m-0">
-                                        <select id="filter_kuesioner" class="form-select form-select-sm form-select-solid" data-control="select2" data-hide-search="true" data-placeholder="Filter Kuesioner">
-                                            <option></option>
-                                            <option value="all">Semua Kuesioner</option>
+                                <!-- Tombol toolbar jika ada nantinya -->
+                            </div>
+                        </div>
+                        
+                        <div class="card-body py-4 px-8 filter-container mt-4">
+                            <div class="border border-dashed rounded p-5 mb-5" style="border-color: #b5b5c3 !important;">
+                                <h5 class="text-primary mb-4"><i class="fas fa-filter text-primary me-2"></i>Filter Data</h5>
+                                <div class="row g-5">
+                                    <div class="col-lg-12 col-md-12 col-sm-12">
+                                        <label class="form-label fw-bold mb-2">Kuesioner:</label>
+                                        <select id="filter_kuesioner" class="form-select form-select-sm" data-control="select2" data-placeholder="Semua Kuesioner" data-allow-clear="true">
+                                            <option value="">Semua Kuesioner</option>
                                             @foreach($kuesioner as $k)
                                                 <option value="{{ $k->id_kuesioner }}">{{ $k->judul }}</option>
                                             @endforeach
@@ -78,12 +128,12 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="separator my-5"></div>
                         <div class="card-body pt-0">
                             <div class="table-responsive">
                                 <table class="table align-middle table-row-dashed fs-6 gy-5 w-100" id="example">
                                     <thead class="">
                                         <tr class="text-start text-gray-400 fw-bolder fs-7 text-uppercase gs-0">
+                                            <th class="text-center p-0" style="width:28px; min-width:28px;"></th>
                                             <th class="text-center ps-1 min-w-100px">Aksi</th>
                                             <th class="min-w-150px">Nama Mahasiswa</th>
                                             <th class="min-w-150px">NIM</th>
