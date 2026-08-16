@@ -8,7 +8,7 @@
                 $('#form_edit_action').attr('action', '/admin/kuesioner/' + id);
                 $('#edit_judul').val(response.judul);
                 $('#edit_periode_id').val(response.periode_id).trigger('change');
-                $('#edit_status').val(response.status);
+                $('#edit_status').val(response.status).trigger('change');
                 $('#form_edit').modal('show');
             }
         });
