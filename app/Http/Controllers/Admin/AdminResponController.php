@@ -35,7 +35,7 @@ class AdminResponController extends Controller
                 return $row->kuesioner ? $row->kuesioner->judul : '-';
             })
             ->addColumn('tgl_isi_format', function ($row) {
-                return $row->tgl_isi ? date('d-m-Y H:i', strtotime($row->tgl_isi)) : '-';
+                return $row->tgl_isi ? \Carbon\Carbon::parse($row->tgl_isi)->translatedFormat('d F Y, H:i') . ' WIB' : '-';
             })
             ->addColumn('action', function ($row) {
                 $showBtn = '<a href="'.route('admin.respon.show', $row->id_respon).'"

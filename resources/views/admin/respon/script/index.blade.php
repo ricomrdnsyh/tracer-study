@@ -1,7 +1,7 @@
 <script>
     $(document).ready(function() {
         var table = $('#example').DataTable({
-            processing: true,
+            processing: false,
             serverSide: true,
             ajax: {
                 url: "{{ route('admin.respon.data') }}",
@@ -53,30 +53,50 @@
                     className: 'btn btn-sm btn-primary mt-2 rounded-2'
                 }
             ],
-            columns: [
-                {
+            columns: [{
                     data: null,
                     defaultContent: '',
                     orderable: false,
                     searchable: false
                 },
-                { data: 'action', name: 'action', orderable: false, searchable: false, className: 'text-center' },
-                { data: 'mahasiswa_nama', name: 'mahasiswa.nama' },
-                { data: 'mahasiswa_nim', name: 'mahasiswa_id' },
-                { data: 'kuesioner_judul', name: 'kuesioner.judul' },
-                { data: 'tgl_isi_format', name: 'tgl_isi' },
-                { 
-                    data: 'status', 
+                {
+                    data: 'action',
+                    name: 'action',
+                    orderable: false,
+                    searchable: false,
+                    className: 'text-center'
+                },
+                {
+                    data: 'mahasiswa_nama',
+                    name: 'mahasiswa.nama'
+                },
+                {
+                    data: 'mahasiswa_nim',
+                    name: 'mahasiswa_id'
+                },
+                {
+                    data: 'kuesioner_judul',
+                    name: 'kuesioner.judul'
+                },
+                {
+                    data: 'tgl_isi_format',
+                    name: 'tgl_isi'
+                },
+                {
+                    data: 'status',
                     name: 'status',
                     render: function(data, type, row) {
                         if (data === 'Selesai') {
                             return '<span class="badge badge-success fs-7 fw-bold">Selesai</span>';
                         }
-                        return '<span class="badge badge-warning fs-7 fw-bold">' + data + '</span>';
+                        return '<span class="badge badge-warning fs-7 fw-bold">' + data +
+                            '</span>';
                     }
                 }
             ],
-            order: [[5, 'desc']],
+            order: [
+                [5, 'desc']
+            ],
             language: {
                 processing: "Memproses...",
                 search: "Cari:",

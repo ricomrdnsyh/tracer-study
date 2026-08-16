@@ -25,15 +25,16 @@
 
                     <div class="card shadow-sm border border-dashed border-primary rounded mb-5">
                         <div class="card-header pt-6 border-0">
-                            <h3 class="card-title align-items-start flex-column">
-                                <div class="d-flex align-items-center mb-1">
-                                    <i class="fas fa-clipboard-list text-primary fs-2 me-3"></i>
-                                    <span class="card-label fw-bolder fs-2">{{ $kuesioner->judul }}</span>
+                            <h3 class="card-title m-0 d-flex align-items-start">
+                                <div class="me-4 d-flex justify-content-center align-items-center mt-1">
+                                    <i class="fas fa-clipboard-list text-primary fs-1"></i>
                                 </div>
-                                <span class="text-muted mt-2 fw-bold fs-7">
-                                    <i class="fas fa-calendar-alt me-1 text-muted"></i> Periode:
-                                    {{ $periodeAktif->nama_periode }}
-                                </span>
+                                <div class="d-flex flex-column">
+                                    <span class="card-label fw-bolder fs-2 m-0 mb-2">{{ $kuesioner->judul }}</span>
+                                    <span class="text-muted fw-bold fs-7 d-flex align-items-center m-0">
+                                        Periode: {{ $periodeAktif->nama_periode }}
+                                    </span>
+                                </div>
                             </h3>
                         </div>
                         <div class="separator my-2"></div>
@@ -43,81 +44,99 @@
                                 <input type="hidden" name="kuesioner_id" value="{{ $kuesioner->id_kuesioner }}">
 
                                 @foreach ($kuesioner->kategoriPertanyaans as $kategori)
-                                    <div class="mb-10 p-5 rounded border border-dashed border-gray-300 kategori-container" data-syarat-pertanyaan="{{ $kategori->syarat_pertanyaan_id }}" data-syarat-jawaban="{{ json_encode($kategori->syarat_jawaban) }}">
-                                        <h4
-                                            class="mb-7 text-dark fw-bolder bg-light-primary px-4 py-3 rounded d-flex align-items-center">
-                                            <i
-                                                class="fas fa-layer-group text-primary me-3"></i>{{ $kategori->nama_kategori }}
-                                        </h4>
+                                    <div class="mb-10 p-8 rounded shadow-sm border border-dashed border-gray-300 kategori-container" data-syarat-pertanyaan="{{ $kategori->syarat_pertanyaan_id }}" data-syarat-jawaban="{{ json_encode($kategori->syarat_jawaban) }}">
+                                        <div class="mb-8 border-bottom border-primary border-2 pb-4 d-flex align-items-center">
+                                            <span class="symbol symbol-40px bg-light-primary me-4">
+                                                <span class="symbol-label">
+                                                    <i class="fas fa-layer-group text-primary fs-3"></i>
+                                                </span>
+                                            </span>
+                                            <h4 class="text-gray-900 fw-bolder m-0 fs-3">{{ $kategori->nama_kategori }}</h4>
+                                        </div>
 
-                                        @foreach ($kategori->pertanyaans as $pertanyaan)
-                                            <div class="mb-8 px-4 pertanyaan-container" data-syarat-pertanyaan="{{ $pertanyaan->syarat_pertanyaan_id }}" data-syarat-jawaban="{{ json_encode($pertanyaan->syarat_jawaban) }}">
+                                        <div class="row">
+                                            @foreach ($kategori->pertanyaans as $pertanyaan)
                                                 @php
-                                                    $answer = $jawabanUser[$pertanyaan->id_pertanyaan] ?? null;
+                                                    $isKompetensi = str_contains(strtolower($kategori->nama_kategori), 'kompetensi');
+                                                    $colClass = $isKompetensi ? 'col-12 col-md-6' : 'col-12';
                                                 @endphp
-                                                <label
-                                                    class="form-label fs-5 fw-bold text-gray-800 {{ $pertanyaan->wajib ? 'required' : '' }} mb-4">
-                                                    {{ $pertanyaan->teks_pertanyaan }}
-                                                </label>
+                                                <div class="{{ $colClass }} mb-6 pertanyaan-container" data-syarat-pertanyaan="{{ $pertanyaan->syarat_pertanyaan_id }}" data-syarat-jawaban="{{ json_encode($pertanyaan->syarat_jawaban) }}">
+                                                    @php
+                                                        $answer = $jawabanUser[$pertanyaan->id_pertanyaan] ?? null;
+                                                    @endphp
+                                                    <label class="form-label fs-5 fw-bold text-gray-800 {{ $pertanyaan->wajib ? 'required' : '' }} mb-3">
+                                                        {{ $pertanyaan->teks_pertanyaan }}
+                                                    </label>
 
-                                                @if ($pertanyaan->tipe_jawaban == 'text')
-                                                    <input type="text" class="form-control form-control-solid"
-                                                        name="jawaban[{{ $pertanyaan->id_pertanyaan }}]"
-                                                        placeholder="Ketik jawaban Anda di sini..."
-                                                        value="{{ $answer }}"
-                                                        {{ $pertanyaan->wajib ? 'required' : '' }}>
-                                                @elseif($pertanyaan->tipe_jawaban == 'textarea')
-                                                    <textarea class="form-control form-control-solid" name="jawaban[{{ $pertanyaan->id_pertanyaan }}]" rows="4"
-                                                        placeholder="Ketik jawaban Anda di sini..." {{ $pertanyaan->wajib ? 'required' : '' }}>{{ $answer }}</textarea>
-                                                @elseif($pertanyaan->tipe_jawaban == 'radio')
-                                                    @foreach ($pertanyaan->opsi_jawaban as $idx => $opsi)
-                                                        <div class="form-check form-check-custom form-check-solid mb-2">
-                                                            <input class="form-check-input" type="radio"
-                                                                value="{{ $opsi }}"
-                                                                name="jawaban[{{ $pertanyaan->id_pertanyaan }}]"
-                                                                id="opt_{{ $pertanyaan->id_pertanyaan }}_{{ $idx }}"
-                                                                {{ $answer == $opsi ? 'checked' : '' }}
-                                                                {{ $pertanyaan->wajib ? 'required' : '' }}>
-                                                            <label class="form-check-label"
-                                                                for="opt_{{ $pertanyaan->id_pertanyaan }}_{{ $idx }}">
-                                                                {{ $opsi }}
-                                                            </label>
+                                                    @if ($pertanyaan->tipe_jawaban == 'text')
+                                                        <input type="text" class="form-control border-gray-300"
+                                                            name="jawaban[{{ $pertanyaan->id_pertanyaan }}]"
+                                                            placeholder="Ketik jawaban Anda di sini..."
+                                                            value="{{ $answer }}"
+                                                            {{ $pertanyaan->wajib ? 'required' : '' }}>
+                                                    @elseif($pertanyaan->tipe_jawaban == 'textarea')
+                                                        <textarea class="form-control border-gray-300" name="jawaban[{{ $pertanyaan->id_pertanyaan }}]" rows="4"
+                                                            placeholder="Ketik jawaban Anda di sini..." {{ $pertanyaan->wajib ? 'required' : '' }}>{{ $answer }}</textarea>
+                                                    @elseif($pertanyaan->tipe_jawaban == 'radio')
+                                                        <div class="row g-3">
+                                                            @foreach ($pertanyaan->opsi_jawaban as $idx => $opsi)
+                                                                <div class="{{ $isKompetensi ? 'col' : 'col-12 col-md-6' }}">
+                                                                    <label class="d-flex {{ $isKompetensi ? 'flex-column justify-content-center align-items-center' : 'align-items-center' }} border border-dashed border-gray-300 rounded {{ $isKompetensi ? 'p-3' : 'p-4' }} bg-hover-light cursor-pointer transition-base" style="transition: all 0.2s ease; height: 100%;">
+                                                                        <div class="form-check form-check-custom form-check-primary {{ $isKompetensi ? 'mb-2' : 'me-4' }}">
+                                                                            <input class="form-check-input {{ $isKompetensi ? 'mx-auto' : '' }}" type="radio"
+                                                                                value="{{ $opsi }}"
+                                                                                name="jawaban[{{ $pertanyaan->id_pertanyaan }}]"
+                                                                                id="opt_{{ $pertanyaan->id_pertanyaan }}_{{ $idx }}"
+                                                                                {{ $answer == $opsi ? 'checked' : '' }}
+                                                                                {{ $pertanyaan->wajib ? 'required' : '' }}>
+                                                                        </div>
+                                                                        <span class="text-gray-700 fw-semibold fs-6 {{ $isKompetensi ? 'text-center' : 'text-start' }}">
+                                                                            {{ $opsi }}
+                                                                        </span>
+                                                                    </label>
+                                                                </div>
+                                                            @endforeach
                                                         </div>
-                                                    @endforeach
-                                                @elseif($pertanyaan->tipe_jawaban == 'checkbox')
-                                                    @foreach ($pertanyaan->opsi_jawaban as $idx => $opsi)
-                                                        <div class="form-check form-check-custom form-check-solid mb-2">
-                                                            <input
-                                                                class="form-check-input check-group-{{ $pertanyaan->id_pertanyaan }}"
-                                                                type="checkbox" value="{{ $opsi }}"
-                                                                name="jawaban[{{ $pertanyaan->id_pertanyaan }}][]"
-                                                                id="opt_{{ $pertanyaan->id_pertanyaan }}_{{ $idx }}"
-                                                                {{ is_array($answer) && in_array($opsi, $answer) ? 'checked' : '' }}>
-                                                            <label class="form-check-label"
-                                                                for="opt_{{ $pertanyaan->id_pertanyaan }}_{{ $idx }}">
-                                                                {{ $opsi }}
-                                                            </label>
+                                                    @elseif($pertanyaan->tipe_jawaban == 'checkbox')
+                                                        <div class="row g-3">
+                                                            @foreach ($pertanyaan->opsi_jawaban as $idx => $opsi)
+                                                                <div class="{{ $isKompetensi ? 'col' : 'col-12 col-md-6' }}">
+                                                                    <label class="d-flex {{ $isKompetensi ? 'flex-column justify-content-center align-items-center' : 'align-items-center' }} border border-dashed border-gray-300 rounded {{ $isKompetensi ? 'p-3' : 'p-4' }} bg-hover-light cursor-pointer transition-base" style="transition: all 0.2s ease; height: 100%;">
+                                                                        <div class="form-check form-check-custom form-check-primary {{ $isKompetensi ? 'mb-2' : 'me-4' }}">
+                                                                            <input
+                                                                                class="form-check-input check-group-{{ $pertanyaan->id_pertanyaan }} {{ $isKompetensi ? 'mx-auto' : '' }}"
+                                                                                type="checkbox" value="{{ $opsi }}"
+                                                                                name="jawaban[{{ $pertanyaan->id_pertanyaan }}][]"
+                                                                                id="opt_{{ $pertanyaan->id_pertanyaan }}_{{ $idx }}"
+                                                                                {{ is_array($answer) && in_array($opsi, $answer) ? 'checked' : '' }}>
+                                                                        </div>
+                                                                        <span class="text-gray-700 fw-semibold fs-6 {{ $isKompetensi ? 'text-center' : 'text-start' }}">
+                                                                            {{ $opsi }}
+                                                                        </span>
+                                                                    </label>
+                                                                </div>
+                                                            @endforeach
                                                         </div>
-                                                    @endforeach
-                                                @elseif($pertanyaan->tipe_jawaban == 'select')
-                                                    <select class="form-select form-select-solid"
-                                                        name="jawaban[{{ $pertanyaan->id_pertanyaan }}]"
-                                                        data-control="select2" data-placeholder="Pilih Jawaban"
-                                                        {{ $pertanyaan->wajib ? 'required' : '' }}>
-                                                        <option value=""></option>
-                                                        @foreach ($pertanyaan->opsi_jawaban as $opsi)
-                                                            <option value="{{ $opsi }}" {{ $answer == $opsi ? 'selected' : '' }}>{{ $opsi }}
-                                                            </option>
-                                                        @endforeach
-                                                    </select>
-                                                @elseif($pertanyaan->tipe_jawaban == 'date')
-                                                    <input type="date" class="form-control form-control-solid w-250px"
-                                                        name="jawaban[{{ $pertanyaan->id_pertanyaan }}]"
-                                                        value="{{ $answer ? date('Y-m-d', strtotime($answer)) : '' }}"
-                                                        {{ $pertanyaan->wajib ? 'required' : '' }}>
-                                                @endif
-                                            </div>
-                                        @endforeach
+                                                    @elseif($pertanyaan->tipe_jawaban == 'select')
+                                                        <select class="form-select border-gray-300"
+                                                            name="jawaban[{{ $pertanyaan->id_pertanyaan }}]"
+                                                            data-control="select2" data-placeholder="Pilih Jawaban"
+                                                            {{ $pertanyaan->wajib ? 'required' : '' }}>
+                                                            <option value=""></option>
+                                                            @foreach ($pertanyaan->opsi_jawaban as $opsi)
+                                                                <option value="{{ $opsi }}" {{ $answer == $opsi ? 'selected' : '' }}>{{ $opsi }}
+                                                                </option>
+                                                            @endforeach
+                                                        </select>
+                                                    @elseif($pertanyaan->tipe_jawaban == 'date')
+                                                        <input type="date" class="form-control border-gray-300 w-250px"
+                                                            name="jawaban[{{ $pertanyaan->id_pertanyaan }}]"
+                                                            value="{{ $answer ? date('Y-m-d', strtotime($answer)) : '' }}"
+                                                            {{ $pertanyaan->wajib ? 'required' : '' }}>
+                                                    @endif
+                                                </div>
+                                            @endforeach
+                                        </div>
                                     </div>
                                 @endforeach
 

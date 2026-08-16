@@ -29,7 +29,7 @@
 @php
     $isMahasiswa = Auth::guard('mahasiswa')->check();
     $currentUser = $isMahasiswa ? Auth::guard('mahasiswa')->user() : Auth::user();
-    
+
     $roleName = 'Administrator';
     if ($isMahasiswa) {
         $roleName = 'Mahasiswa';
@@ -53,7 +53,7 @@
         </div>
         <div class="d-flex align-items-center flex-grow-1 flex-lg-grow-0">
             <a href="#" class="d-lg-none app-mobile-logo">
-                <img alt="Logo E-Lapor" src="{{ asset('assets/media/logos/logo-elapor-dark.png') }}" />
+                <img alt="Logo E-Lapor" src="{{ asset('assets/media/logos/tracer-dark.png') }}" />
             </a>
         </div>
         <div class="d-flex align-items-stretch justify-content-between flex-lg-grow-1" id="kt_app_header_wrapper">

@@ -135,7 +135,7 @@
 @php
     $isMahasiswa = Auth::guard('mahasiswa')->check();
     $currentUser = $isMahasiswa ? Auth::guard('mahasiswa')->user() : Auth::user();
-    
+
     $roleName = 'Administrator';
     if ($isMahasiswa) {
         $roleName = 'Mahasiswa';
@@ -150,8 +150,7 @@
 
     <div class="app-sidebar-logo px-6" id="kt_app_sidebar_logo">
         <a href="#">
-            <img alt="Logo" src="{{ asset('assets/media/logos/logo-elapor.png') }}"
-                class="app-sidebar-logo-default" />
+            <img alt="Logo" src="{{ asset('assets/media/logos/tracer.png') }}" class="app-sidebar-logo-default" />
             <img alt="Logo" src="{{ asset('assets/media/logos/unuja.png') }}" class="app-sidebar-logo-minimize" />
         </a>
 
@@ -177,7 +176,8 @@
             </div>
 
             <div class="sidebar-minimize-hide mt-2 w-100">
-                <div class="text-white fw-semibold text-truncate">{{ $currentUser?->name ?? ($currentUser?->nama ?? 'User') }}</div>
+                <div class="text-white fw-semibold text-truncate">
+                    {{ $currentUser?->name ?? ($currentUser?->nama ?? 'User') }}</div>
                 <div class="text-gray-400 fs-8 text-truncate">{{ $roleName }}</div>
             </div>
         </a>
@@ -201,128 +201,132 @@
                     </div>
 
                     <div class="menu-item">
-                        @if($isMahasiswa)
-                            <a class="menu-link {{ Request::is('mahasiswa/dashboard*') ? 'active' : '' }}" href="{{ route('mahasiswa.dashboard') }}">
-                        @elseif($roleName === 'Fakultas')
-                            <a class="menu-link {{ Request::is('fakultas/dashboard*') ? 'active' : '' }}" href="{{ route('fakultas.dashboard') }}">
-                        @else
-                            <a class="menu-link {{ Request::is('admin/dashboard*') ? 'active' : '' }}" href="{{ route('admin.dashboard') }}">
+                        @if ($isMahasiswa)
+                            <a class="menu-link {{ Request::is('mahasiswa/dashboard*') ? 'active' : '' }}"
+                                href="{{ route('mahasiswa.dashboard') }}">
+                            @elseif($roleName === 'Fakultas')
+                                <a class="menu-link {{ Request::is('fakultas/dashboard*') ? 'active' : '' }}"
+                                    href="{{ route('fakultas.dashboard') }}">
+                                @else
+                                    <a class="menu-link {{ Request::is('admin/dashboard*') ? 'active' : '' }}"
+                                        href="{{ route('admin.dashboard') }}">
                         @endif
-                            <span class="menu-icon">
-                                <i class="ki-duotone ki-element-11 fs-2">
-                                    <span class="path1"></span><span class="path2"></span>
-                                    <span class="path3"></span><span class="path4"></span>
-                                </i>
-                            </span>
-                            <span class="menu-title">Dashboard</span>
+                        <span class="menu-icon">
+                            <i class="ki-duotone ki-element-11 fs-2">
+                                <span class="path1"></span><span class="path2"></span>
+                                <span class="path3"></span><span class="path4"></span>
+                            </i>
+                        </span>
+                        <span class="menu-title">Dashboard</span>
                         </a>
                     </div>
 
-                    @if($isMahasiswa)
-                    <div class="menu-item">
-                        <a class="menu-link {{ Request::is('mahasiswa/tracer*') ? 'active' : '' }}" href="{{ route('mahasiswa.tracer.index') }}">
-                            <span class="menu-icon">
-                                <i class="fa-solid fa-clipboard-list fs-4"></i>
-                            </span>
-                            <span class="menu-title">Isi Tracer Study</span>
-                        </a>
-                    </div>
+                    @if ($isMahasiswa)
+                        <div class="menu-item">
+                            <a class="menu-link {{ Request::is('mahasiswa/tracer*') ? 'active' : '' }}"
+                                href="{{ route('mahasiswa.tracer.index') }}">
+                                <span class="menu-icon">
+                                    <i class="fa-solid fa-clipboard-list fs-4"></i>
+                                </span>
+                                <span class="menu-title">Isi Tracer Study</span>
+                            </a>
+                        </div>
                     @endif
 
-                    @if(!$isMahasiswa && in_array($roleName, ['Admin', 'Fakultas']))
-                    @if($roleName === 'Admin')
-                    <div class="menu-item">
-                        <a class="menu-link {{ Request::is('admin/users*') ? 'active' : '' }}"
-                            href="{{ route('admin.users.index') }}">
-                            <span class="menu-icon">
-                                <i class="fa-solid fa-user-shield fs-4"></i>
-                            </span>
-                            <span class="menu-title">Pengguna</span>
-                        </a>
-                    </div>
-                    @endif
+                    @if (!$isMahasiswa && in_array($roleName, ['Admin', 'Fakultas']))
+                        @if ($roleName === 'Admin')
+                            <div class="menu-item">
+                                <a class="menu-link {{ Request::is('admin/users*') ? 'active' : '' }}"
+                                    href="{{ route('admin.users.index') }}">
+                                    <span class="menu-icon">
+                                        <i class="fa-solid fa-user-shield fs-4"></i>
+                                    </span>
+                                    <span class="menu-title">Pengguna</span>
+                                </a>
+                            </div>
+                        @endif
 
-                    <div class="menu-item pt-1">
-                        <div class="menu-content">
-                            <span class="menu-heading fw-bold text-uppercase fs-8">Master</span>
+                        <div class="menu-item pt-1">
+                            <div class="menu-content">
+                                <span class="menu-heading fw-bold text-uppercase fs-8">Master</span>
+                            </div>
                         </div>
-                    </div>
 
-                    <div class="menu-item">
-                        <a class="menu-link {{ Request::is('admin/fakultas*') ? 'active' : '' }}"
-                            href="{{ route('admin.fakultas.index') }}">
-                            <span class="menu-icon">
-                                <i class="fa-solid fa-building fs-4"></i>
-                            </span>
-                            <span class="menu-title">Fakultas</span>
-                        </a>
-                    </div>
-
-                    <div class="menu-item">
-                        <a class="menu-link {{ Request::is('admin/prodi*') ? 'active' : '' }}"
-                            href="{{ route('admin.prodi.index') }}">
-                            <span class="menu-icon">
-                                <i class="fa-solid fa-graduation-cap fs-4"></i>
-                            </span>
-                            <span class="menu-title">Prodi</span>
-                        </a>
-                    </div>
-
-                    <div class="menu-item">
-                        <a class="menu-link {{ Request::is('admin/mahasiswa*') ? 'active' : '' }}"
-                            href="{{ route('admin.mahasiswa.index') }}">
-                            <span class="menu-icon">
-                                <i class="fa-solid fa-users fs-4"></i>
-                            </span>
-                            <span class="menu-title">Mahasiswa</span>
-                        </a>
-                    </div>
-
-                    <div class="menu-item">
-                        <a class="menu-link {{ Request::is('admin/perusahaan*') ? 'active' : '' }}"
-                            href="{{ route('admin.perusahaan.index') }}">
-                            <span class="menu-icon">
-                                <i class="fa-solid fa-building-user fs-4"></i>
-                            </span>
-                            <span class="menu-title">PT / Instansi</span>
-                        </a>
-                    </div>
-
-                    <div class="menu-item pt-1">
-                        <div class="menu-content">
-                            <span class="menu-heading fw-bold text-uppercase fs-8">Tracer Study</span>
+                        <div class="menu-item">
+                            <a class="menu-link {{ Request::is('admin/fakultas*') ? 'active' : '' }}"
+                                href="{{ route('admin.fakultas.index') }}">
+                                <span class="menu-icon">
+                                    <i class="fa-solid fa-building fs-4"></i>
+                                </span>
+                                <span class="menu-title">Fakultas</span>
+                            </a>
                         </div>
-                    </div>
 
-                    <div class="menu-item">
-                        <a class="menu-link {{ Request::is('admin/periode*') ? 'active' : '' }}"
-                            href="{{ route('admin.periode.index') }}">
-                            <span class="menu-icon">
-                                <i class="fa-regular fa-calendar-alt fs-4"></i>
-                            </span>
-                            <span class="menu-title">Periode Tracer</span>
-                        </a>
-                    </div>
+                        <div class="menu-item">
+                            <a class="menu-link {{ Request::is('admin/prodi*') ? 'active' : '' }}"
+                                href="{{ route('admin.prodi.index') }}">
+                                <span class="menu-icon">
+                                    <i class="fa-solid fa-graduation-cap fs-4"></i>
+                                </span>
+                                <span class="menu-title">Prodi</span>
+                            </a>
+                        </div>
 
-                    <div class="menu-item">
-                        <a class="menu-link {{ Request::is('admin/kuesioner*') ? 'active' : '' }}"
-                            href="{{ route('admin.kuesioner.index') }}">
-                            <span class="menu-icon">
-                                <i class="fa-solid fa-clipboard-list fs-4"></i>
-                            </span>
-                            <span class="menu-title">Kuesioner</span>
-                        </a>
-                    </div>
+                        <div class="menu-item">
+                            <a class="menu-link {{ Request::is('admin/mahasiswa*') ? 'active' : '' }}"
+                                href="{{ route('admin.mahasiswa.index') }}">
+                                <span class="menu-icon">
+                                    <i class="fa-solid fa-users fs-4"></i>
+                                </span>
+                                <span class="menu-title">Mahasiswa</span>
+                            </a>
+                        </div>
 
-                    <div class="menu-item">
-                        <a class="menu-link {{ Request::is('admin/respon*') ? 'active' : '' }}"
-                            href="{{ route('admin.respon.index') }}">
-                            <span class="menu-icon">
-                                <i class="fa-solid fa-reply-all fs-4"></i>
-                            </span>
-                            <span class="menu-title">Respon Tracer</span>
-                        </a>
-                    </div>
+                        <div class="menu-item">
+                            <a class="menu-link {{ Request::is('admin/perusahaan*') ? 'active' : '' }}"
+                                href="{{ route('admin.perusahaan.index') }}">
+                                <span class="menu-icon">
+                                    <i class="fa-solid fa-building-user fs-4"></i>
+                                </span>
+                                <span class="menu-title">PT / Instansi</span>
+                            </a>
+                        </div>
+
+                        <div class="menu-item pt-1">
+                            <div class="menu-content">
+                                <span class="menu-heading fw-bold text-uppercase fs-8">Tracer Study</span>
+                            </div>
+                        </div>
+
+                        <div class="menu-item">
+                            <a class="menu-link {{ Request::is('admin/periode*') ? 'active' : '' }}"
+                                href="{{ route('admin.periode.index') }}">
+                                <span class="menu-icon">
+                                    <i class="fa-regular fa-calendar-alt fs-4"></i>
+                                </span>
+                                <span class="menu-title">Periode Tracer</span>
+                            </a>
+                        </div>
+
+                        <div class="menu-item">
+                            <a class="menu-link {{ Request::is('admin/kuesioner*') ? 'active' : '' }}"
+                                href="{{ route('admin.kuesioner.index') }}">
+                                <span class="menu-icon">
+                                    <i class="fa-solid fa-clipboard-list fs-4"></i>
+                                </span>
+                                <span class="menu-title">Kuesioner</span>
+                            </a>
+                        </div>
+
+                        <div class="menu-item">
+                            <a class="menu-link {{ Request::is('admin/respon*') ? 'active' : '' }}"
+                                href="{{ route('admin.respon.index') }}">
+                                <span class="menu-icon">
+                                    <i class="fa-solid fa-reply-all fs-4"></i>
+                                </span>
+                                <span class="menu-title">Respon Tracer</span>
+                            </a>
+                        </div>
                     @endif
 
                 </div>
