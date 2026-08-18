@@ -20,6 +20,12 @@ class AdminResponController extends Controller
     {
         $query = ResponTracer::with(['mahasiswa', 'kuesioner'])->select(['id_respon', 'mahasiswa_id', 'kuesioner_id', 'status', 'tgl_isi'])->orderByDesc('tgl_isi');
 
+        if (auth()->user()->role === 'Fakultas') {
+            $query->whereHas('mahasiswa.prodi', function ($q) {
+                $q->where('fakultas_id', auth()->user()->fakultas_id);
+            });
+        }
+
         if ($request->has('kuesioner_id') && !empty($request->kuesioner_id) && $request->kuesioner_id !== 'all') {
             $query->where('kuesioner_id', $request->kuesioner_id);
         }
@@ -52,12 +58,20 @@ class AdminResponController extends Controller
 
     public function show($id)
     {
-        $respon = ResponTracer::with([
+        $query = ResponTracer::with([
             'mahasiswa',
             'kuesioner.kategoriPertanyaans.pertanyaans',
             'jawabanDetails.pertanyaan',
             'pekerjaanAlumni'
-        ])->findOrFail($id);
+        ]);
+
+        if (auth()->user()->role === 'Fakultas') {
+            $query->whereHas('mahasiswa.prodi', function ($q) {
+                $q->where('fakultas_id', auth()->user()->fakultas_id);
+            });
+        }
+
+        $respon = $query->findOrFail($id);
 
         // Map jawaban user for easy access
         $jawabanUser = [];

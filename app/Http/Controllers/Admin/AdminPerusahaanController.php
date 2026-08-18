@@ -12,8 +12,16 @@ class AdminPerusahaanController extends Controller
 {
     public function index()
     {
-        $totalPerusahaan = PekerjaanAlumni::whereNotNull('nama')->distinct('nama')->count('nama');
-        $totalMahasiswa = PekerjaanAlumni::whereNotNull('nama')->count();
+        $query = PekerjaanAlumni::whereNotNull('nama');
+        
+        if (auth()->user()->role === 'Fakultas') {
+            $query->whereHas('responTracer.mahasiswa.prodi', function ($q) {
+                $q->where('fakultas_id', auth()->user()->fakultas_id);
+            });
+        }
+
+        $totalPerusahaan = (clone $query)->distinct('nama')->count('nama');
+        $totalMahasiswa = (clone $query)->count();
 
         return view('admin.perusahaan.index', compact('totalPerusahaan', 'totalMahasiswa'));
     }
@@ -21,15 +29,22 @@ class AdminPerusahaanController extends Controller
     public function getPerusahaan(Request $request)
     {
         if ($request->ajax()) {
-            $data = PekerjaanAlumni::select(
+            $query = PekerjaanAlumni::select(
                 'nama',
                 'jenis_instansi',
                 'provinsi',
                 'kabupaten',
                 DB::raw('COUNT(id_pekerjaan) as jumlah_mahasiswa')
             )
-            ->whereNotNull('nama')
-            ->groupBy('nama', 'jenis_instansi', 'provinsi', 'kabupaten');
+            ->whereNotNull('nama');
+
+            if (auth()->user()->role === 'Fakultas') {
+                $query->whereHas('responTracer.mahasiswa.prodi', function ($q) {
+                    $q->where('fakultas_id', auth()->user()->fakultas_id);
+                });
+            }
+
+            $data = $query->groupBy('nama', 'jenis_instansi', 'provinsi', 'kabupaten');
 
             return DataTables::of($data)
                 ->addIndexColumn()
@@ -58,14 +73,25 @@ class AdminPerusahaanController extends Controller
     {
         $nama = urldecode($nama);
         
-        $perusahaan = PekerjaanAlumni::where('nama', $nama)->first();
+        $perusahaanQuery = PekerjaanAlumni::where('nama', $nama);
+        if (auth()->user()->role === 'Fakultas') {
+            $perusahaanQuery->whereHas('responTracer.mahasiswa.prodi', function ($q) {
+                $q->where('fakultas_id', auth()->user()->fakultas_id);
+            });
+        }
+        $perusahaan = $perusahaanQuery->first();
         if (!$perusahaan) {
             abort(404);
         }
 
-        $pekerjaanList = PekerjaanAlumni::with(['responTracer.mahasiswa.prodi'])
-            ->where('nama', $nama)
-            ->get();
+        $pekerjaanListQuery = PekerjaanAlumni::with(['responTracer.mahasiswa.prodi'])
+            ->where('nama', $nama);
+        if (auth()->user()->role === 'Fakultas') {
+            $pekerjaanListQuery->whereHas('responTracer.mahasiswa.prodi', function ($q) {
+                $q->where('fakultas_id', auth()->user()->fakultas_id);
+            });
+        }
+        $pekerjaanList = $pekerjaanListQuery->get();
 
         return view('admin.perusahaan.show', compact('perusahaan', 'pekerjaanList', 'nama'));
     }
