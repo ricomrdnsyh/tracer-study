@@ -8,7 +8,7 @@
             <div id="kt_app_content" class="app-content flex-column-fluid mt-7">
                 <div id="kt_app_content_container" class="app-container container-fluid">
                     <div class="card shadow-sm border border-dashed border-dark rounded mb-5">
-                        <div class="card-header border-0 pt-6">
+                        <div class="card-header border-0 pt-6 flex-wrap gap-3">
                             @php
                                 $allPertanyaan = collect();
                                 foreach ($kuesioner->kategoriPertanyaans as $kat) {
@@ -19,29 +19,30 @@
                                     }
                                 }
                             @endphp
-                            <div class="card-title">
-                                <h3 class="card-title align-items-start flex-column">
-                                    <div class="d-flex align-items-center mb-1">
-                                        <span class="card-label fw-bolder fs-3 me-3">{{ $kuesioner->judul }}</span>
+                            <div class="card-title m-0">
+                                <h3 class="card-title align-items-start flex-column m-0">
+                                    <div class="d-flex align-items-center mb-1 flex-wrap gap-2">
+                                        <span class="card-label fw-bolder fs-4 fs-md-3">{{ $kuesioner->judul }}</span>
                                         @if ($kuesioner->status === 'Draft')
-                                            <span class="badge badge-warning fs-7 fw-bold">Draft</span>
+                                            <span class="badge badge-warning fs-8 fs-md-7 fw-bold">Draft</span>
                                         @elseif($kuesioner->status === 'Published')
-                                            <span class="badge badge-success fs-7 fw-bold">Published</span>
+                                            <span class="badge badge-success fs-8 fs-md-7 fw-bold">Published</span>
                                         @else
-                                            <span class="badge badge-danger fs-7 fw-bold">Closed</span>
+                                            <span class="badge badge-danger fs-8 fs-md-7 fw-bold">Closed</span>
                                         @endif
                                     </div>
-                                    <span class="text-muted mt-2 fw-bold fs-7">
+                                    <span class="text-muted mt-2 fw-bold fs-8 fs-md-7">
                                         <i class="fas fa-calendar-alt me-1 text-muted"></i> Periode:
                                         {{ $kuesioner->periode->nama_periode }}
                                     </span>
                                 </h3>
                             </div>
-                            <div class="card-toolbar">
-                                <a href="{{ route('admin.kuesioner.index') }}" class="btn btn-sm btn-light me-2"><i
-                                        class="fas fa-arrow-left me-1"></i>Kembali</a>
+                            <div class="card-toolbar m-0 d-flex flex-wrap gap-2 w-100 w-md-auto mt-3 mt-md-0">
+                                <a href="{{ route('admin.kuesioner.index') }}" class="btn btn-sm btn-light flex-grow-1 flex-md-grow-0">
+                                    <i class="fas fa-arrow-left me-1"></i>Kembali
+                                </a>
                                 @if (auth()->user()->role === 'Admin')
-                                    <button type="button" class="btn btn-sm btn-primary m-0" data-bs-toggle="modal"
+                                    <button type="button" class="btn btn-sm btn-primary flex-grow-1 flex-md-grow-0" data-bs-toggle="modal"
                                         data-bs-target="#modal_add_kategori">
                                         <i class="fas fa-plus"></i> Tambah Kategori
                                     </button>
@@ -59,13 +60,13 @@
                                     <div class="accordion-item mb-5 border-0 shadow-sm rounded">
                                         <h2 class="accordion-header" id="heading-{{ $kategori->id_kategori }}">
                                             <button
-                                                class="accordion-button collapsed fw-bolder fs-4 bg-light-primary text-dark rounded d-flex align-items-center"
+                                                class="accordion-button collapsed fw-bolder fs-6 fs-md-4 bg-light-primary text-dark rounded d-flex align-items-center px-4 py-3"
                                                 type="button" data-bs-toggle="collapse"
                                                 data-bs-target="#collapse-{{ $kategori->id_kategori }}"
                                                 aria-expanded="false" aria-controls="collapse-{{ $kategori->id_kategori }}">
-                                                <i class="fas fa-layer-group text-primary me-3 fs-3"></i>
-                                                <span class="flex-grow-1 text-start">{{ $kategori->nama_kategori }}</span>
-                                                <span class="badge badge-primary ms-4 me-3">Urutan:
+                                                <i class="fas fa-layer-group text-primary me-2 me-md-3 fs-5 fs-md-3"></i>
+                                                <span class="flex-grow-1 text-start lh-sm">{{ $kategori->nama_kategori }}</span>
+                                                <span class="badge badge-primary ms-2 ms-md-4 me-1 me-md-3 text-nowrap">Urutan:
                                                     {{ $kategori->urutan }}</span>
                                             </button>
                                         </h2>
@@ -74,15 +75,15 @@
                                             data-bs-parent="#kategoriAccordion">
                                             <div class="accordion-body">
                                                 @if (auth()->user()->role === 'Admin')
-                                                    <div class="mb-4 d-flex justify-content-between">
-                                                        <div>
-                                                            <button class="btn btn-sm btn-light-primary btn-add-pertanyaan"
+                                                    <div class="mb-4 d-flex flex-column flex-md-row justify-content-between gap-3">
+                                                        <div class="w-100 w-md-auto">
+                                                            <button class="btn btn-sm btn-light-primary btn-add-pertanyaan w-100 w-md-auto"
                                                                 data-kategori-id="{{ $kategori->id_kategori }}">
                                                                 <i class="fas fa-plus"></i> Tambah Pertanyaan
                                                             </button>
                                                         </div>
-                                                        <div>
-                                                            <button class="btn btn-sm btn-light-warning btn-edit-kategori"
+                                                        <div class="d-flex flex-wrap flex-md-nowrap gap-2 w-100 w-md-auto">
+                                                            <button class="btn btn-sm btn-light-warning btn-edit-kategori flex-grow-1"
                                                                 data-id="{{ $kategori->id_kategori }}"
                                                                 data-nama="{{ $kategori->nama_kategori }}"
                                                                 data-urutan="{{ $kategori->urutan }}"
@@ -92,10 +93,10 @@
                                                             </button>
                                                             <form
                                                                 action="{{ route('admin.kategori.destroy', $kategori->id_kategori) }}"
-                                                                method="POST" class="d-inline form-delete">
+                                                                method="POST" class="form-delete flex-grow-1">
                                                                 @csrf @method('DELETE')
                                                                 <button type="submit"
-                                                                    class="btn btn-sm btn-light-danger"><i
+                                                                    class="btn btn-sm btn-light-danger w-100"><i
                                                                         class="fas fa-trash"></i> Hapus Kategori</button>
                                                             </form>
                                                         </div>
