@@ -35,10 +35,13 @@ class AdminPerusahaanController extends Controller
                 ->addIndexColumn()
                 ->addColumn('action', function ($row) {
                     $detailUrl = route('admin.perusahaan.show', urlencode($row->nama));
-                    $btn = '<div class="action-wrap">';
-                    $btn .= '<a href="' . $detailUrl . '" class="btn btn-icon btn-sm btn-light-primary" title="Detail"><i class="fas fa-eye"></i></a>';
-                    $btn .= '</div>';
-                    return $btn;
+                    $showBtn = '<a href="'.$detailUrl.'"
+                                class="btn btn-sm btn-light btn-active-light-info text-center"
+                                data-bs-toggle="tooltip" title="Lihat Detail PT / Instansi">
+                                <i class="fa fa-eye"></i> Detail
+                            </a>';
+
+                    return '<div class="text-center">' . $showBtn . '</div>';
                 })
                 ->addColumn('lokasi', function ($row) {
                     $loc = [];

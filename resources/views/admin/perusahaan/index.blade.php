@@ -21,6 +21,54 @@
             vertical-align: middle !important;
         }
 
+        #example td.dt-control:before,
+        #example th.dt-control:before {
+            display: none !important;
+            content: "" !important;
+        }
+
+        #example.dataTable td.dt-control,
+        #example.dataTable th.dt-control {
+            position: relative !important;
+            width: 28px !important;
+            min-width: 28px !important;
+            padding: 0 !important;
+            text-align: center !important;
+            vertical-align: middle !important;
+        }
+
+        #example.dataTable.collapsed tbody tr:not(.child) td.dt-control:before,
+        #example.dataTable.collapsed tbody tr:not(.child) th.dt-control:before {
+            display: inline-flex !important;
+            content: "+" !important;
+            position: absolute !important;
+            left: 50% !important;
+            top: 50% !important;
+            transform: translate(-50%, calc(-50% + 7px)) !important;
+            width: 18px !important;
+            height: 18px !important;
+            align-items: center !important;
+            justify-content: center !important;
+            border-radius: 999px !important;
+            color: #fff !important;
+            font-weight: 900 !important;
+            font-size: 13px !important;
+            line-height: 1 !important;
+            background: #0d6efd !important;
+            box-shadow: 0 0 0 2px #ffffff, 0 2px 6px rgba(0, 0, 0, .18) !important;
+        }
+
+        #example.dataTable.collapsed tbody tr.parent td.dt-control:before,
+        #example.dataTable.collapsed tbody tr.parent th.dt-control:before {
+            content: "–" !important;
+            background: #dc3545 !important;
+        }
+
+        #example td:nth-child(2),
+        #example th:nth-child(2) {
+            padding-left: .25rem !important;
+        }
+
         #example .action-wrap {
             display: inline-flex;
             align-items: center;
@@ -50,52 +98,30 @@
 
             <div id="kt_app_content" class="app-content flex-column-fluid mt-7">
                 <div id="kt_app_content_container" class="app-container container-fluid">
-                    
-                    <div class="mb-5">
-                        <span class="text-gray-600 fw-semibold">Rekap perusahaan atau instansi tempat alumni bekerja berdasarkan data tracer study.</span>
-                    </div>
-
-                    <div class="row g-5 g-xl-8 mb-8">
-                        <div class="col-xl-6">
-                            <div class="card shadow-sm border border-dashed border-dark rounded bg-light-primary">
-                                <div class="card-body py-5">
-                                    <div class="text-gray-500 fw-bold fs-6 mb-2">TOTAL PT / INSTANSI</div>
-                                    <div class="text-dark fw-bolder fs-1">{{ $totalPerusahaan }}</div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-xl-6">
-                            <div class="card shadow-sm border border-dashed border-dark rounded bg-light-success">
-                                <div class="card-body py-5">
-                                    <div class="text-gray-500 fw-bold fs-6 mb-2">MAHASISWA TERHUBUNG</div>
-                                    <div class="text-dark fw-bolder fs-1">{{ $totalMahasiswa }}</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
 
                     <div class="card shadow-sm border border-dashed border-dark rounded">
                         <div class="card-header border-0 pt-6">
-                            <div class="card-title w-100">
-                                <div class="d-flex align-items-center position-relative my-1 w-100">
-                                    <input type="text" id="search_box" class="form-control form-control-solid w-100" placeholder="Cari nama PT, instansi, atau lokasi..." />
+                            <div class="card-title">
+                                <div class="d-flex align-items-center position-relative my-1">
+                                    <h3 class="card-title align-items-start flex-column">
+                                        <span class="card-label fw-bolder fs-3 mb-1">List PT / Instansi</span>
+                                    </h3>
                                 </div>
                             </div>
-                            <div class="card-toolbar ms-3">
-                                <button type="button" class="btn btn-light" id="reset_search">Reset</button>
+                            <div class="card-toolbar">
                             </div>
                         </div>
-                        <div class="separator my-5"></div>
-                        <div class="card-body pt-0">
+                        <div class="card-body pt-0 mt-4">
                             <div class="table-responsive">
                                 <table class="table align-middle table-row-dashed fs-6 gy-5 w-100" id="example">
                                     <thead class="">
                                         <tr class="text-start text-gray-400 fw-bolder fs-7 text-uppercase gs-0">
+                                            <th class="text-center p-0" style="width:28px; min-width:28px;"></th>
+                                            <th class="text-center ps-1 min-w-100px">Aksi</th>
                                             <th class="min-w-150px">PT / Instansi</th>
                                             <th class="min-w-100px">Jenis</th>
                                             <th class="min-w-150px">Lokasi</th>
-                                            <th class="min-w-50px text-center">Mahasiswa</th>
-                                            <th class="text-center min-w-100px">Aksi</th>
+                                            <th class="min-w-50px text-center">Jumlah Mahasiswa</th>
                                         </tr>
                                     </thead>
                                     <tbody class="fw-bold text-gray-800"></tbody>
@@ -118,7 +144,7 @@
     <script src="{{ asset('assets/plugins/custom/datatables/dataTables.colReorder.min.js') }}"></script>
     <script src="{{ asset('assets/plugins/custom/datatables/dataTables.responsive.min.js') }}"></script>
     <script src="{{ asset('assets/plugins/custom/datatables/dataTables.buttons.min.js') }}"></script>
-    
+
     <script src="{{ asset('assets/plugins/custom/datatables/vfs_fonts.js') }}"></script>
     <script src="{{ asset('assets/plugins/custom/datatables/buttons.html5.min.js') }}"></script>
     <script src="{{ asset('assets/plugins/custom/datatables/jszip.min.js') }}"></script>

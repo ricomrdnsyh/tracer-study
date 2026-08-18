@@ -282,16 +282,6 @@
                             </a>
                         </div>
 
-                        <div class="menu-item">
-                            <a class="menu-link {{ Request::is('admin/perusahaan*') ? 'active' : '' }}"
-                                href="{{ route('admin.perusahaan.index') }}">
-                                <span class="menu-icon">
-                                    <i class="fa-solid fa-building-user fs-4"></i>
-                                </span>
-                                <span class="menu-title">PT / Instansi</span>
-                            </a>
-                        </div>
-
                         <div class="menu-item pt-1">
                             <div class="menu-content">
                                 <span class="menu-heading fw-bold text-uppercase fs-8">Tracer Study</span>
@@ -325,6 +315,16 @@
                                     <i class="fa-solid fa-reply-all fs-4"></i>
                                 </span>
                                 <span class="menu-title">Respon Tracer</span>
+                            </a>
+                        </div>
+
+                        <div class="menu-item">
+                            <a class="menu-link {{ Request::is('admin/perusahaan*') ? 'active' : '' }}"
+                                href="{{ route('admin.perusahaan.index') }}">
+                                <span class="menu-icon">
+                                    <i class="fa-solid fa-building-user fs-4"></i>
+                                </span>
+                                <span class="menu-title">PT / Instansi Alumni</span>
                             </a>
                         </div>
                     @endif
