@@ -18,8 +18,39 @@
             --text-muted: #667085;
         }
 
-        body {
-            background-color: #fcfcfd;
+        [data-bs-theme="dark"] {
+            --primary-soft: rgba(0, 106, 230, 0.15);
+            --success-soft: rgba(18, 183, 106, 0.15);
+            --warning-soft: rgba(247, 144, 9, 0.15);
+            --info-soft: rgba(14, 165, 233, 0.15);
+            --border-color: var(--bs-border-color);
+            --text-main: var(--bs-text-primary);
+            --text-muted: var(--bs-text-muted);
+        }
+
+        [data-bs-theme="dark"] .glass-card {
+            background: var(--bs-card-bg);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        [data-bs-theme="dark"] .status-done {
+            background: linear-gradient(145deg, var(--bs-card-bg), rgba(18, 183, 106, 0.05));
+            border-color: rgba(18, 183, 106, 0.2);
+        }
+
+        [data-bs-theme="dark"] .status-pending {
+            background: linear-gradient(145deg, var(--bs-card-bg), rgba(247, 144, 9, 0.05));
+            border-color: rgba(247, 144, 9, 0.2);
+        }
+
+        [data-bs-theme="dark"] .step-icon-container {
+            background: var(--bs-app-bg-color);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+        }
+
+        [data-bs-theme="dark"] .step-num-badge {
+            border-color: var(--bs-card-bg);
+            color: #ffffff;
         }
 
         /* HERO SECTION */
@@ -464,7 +495,7 @@
                 </div>
 
                 <!-- OVERLAPPING INFO CHIPS -->
-                <div class="glass-card position-relative z-index-2 mx-auto mb-10"
+                <div class="card glass-card position-relative z-index-2 mx-auto mb-10"
                     style="width: 96%; max-width: 1200px; padding: 0.5rem; box-shadow: 0 16px 32px rgba(0, 106, 230, 0.08);">
                     <div class="row g-0">
                         <div class="col-md-4 border-md-end">
@@ -514,7 +545,7 @@
                 </div>
 
                 <!-- STATUS BANNER -->
-                <div class="glass-card status-banner mb-10 {{ $sudahMengisi ? 'status-done' : 'status-pending' }}">
+                <div class="card glass-card status-banner mb-10 {{ $sudahMengisi ? 'status-done' : 'status-pending' }}">
                     <div
                         class="p-5 p-md-6 d-flex flex-column flex-md-row align-items-start align-items-md-center gap-4 gap-md-6 w-100">
 
@@ -635,8 +666,8 @@
 
                     @foreach ($langkah as $i => $step)
                         <div class="col-lg-4 position-relative">
-                            <div class="glass-card h-100 p-6 p-md-8 position-relative overflow-hidden hover-elevate-up d-flex flex-column"
-                                style="z-index: 1;">
+                            <div class="card shadow-sm border border-dashed border-{{ $step['color'] }} bg-light-{{ $step['color'] }} h-100 p-6 p-md-8 position-relative overflow-hidden hover-elevate-up d-flex flex-column"
+                                style="z-index: 1; border-radius: 24px;">
 
                                 <!-- Giant Watermark Number -->
                                 <div class="position-absolute"
