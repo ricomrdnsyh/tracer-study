@@ -5,6 +5,7 @@
 @section('css')
     <link rel="stylesheet" href="{{ asset('assets/plugins/custom/datatables/dataTables.bootstrap5.min.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/plugins/custom/datatables/responsive.bootstrap.min.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/plugins/custom/datatables/buttons.dataTables.min.css') }}">
     <style>
         .table-row-dashed tr {
             border-bottom: 1px dashed #cccccc !important;
@@ -255,10 +256,37 @@
     <script src="{{ asset('assets/plugins/custom/datatables/dataTables.bootstrap5.min.js') }}"></script>
     <script src="{{ asset('assets/plugins/custom/datatables/dataTables.responsive.min.js') }}"></script>
     <script src="{{ asset('assets/plugins/custom/datatables/responsive.bootstrap.min.js') }}"></script>
+    <script src="{{ asset('assets/plugins/custom/datatables/dataTables.buttons.min.js') }}"></script>
+    <script src="{{ asset('assets/plugins/custom/datatables/vfs_fonts.js') }}"></script>
+    <script src="{{ asset('assets/plugins/custom/datatables/buttons.html5.min.js') }}"></script>
+    <script src="{{ asset('assets/plugins/custom/datatables/jszip.min.js') }}"></script>
+    <script src="{{ asset('assets/plugins/custom/datatables/buttons.colVis.min.js') }}"></script>
     <script>
         $(document).ready(function() {
             $('#example').DataTable({
-                dom: 'lfrtip',
+                dom: 'lBfrtip',
+                buttons: [{
+                        extend: 'colvis',
+                        collectionLayout: 'fixed columns',
+                        collectionTitle: 'Pengaturan Kolom',
+                        className: 'btn btn-sm btn-primary mt-2 rounded-2',
+                        columns: ':not(.noVis)'
+                    },
+                    {
+                        extend: 'csv',
+                        action: newexportaction,
+                        titleAttr: 'Csv',
+                        title: 'Data Mahasiswa Alumni',
+                        className: 'btn btn-sm btn-primary mt-2 rounded-2'
+                    },
+                    {
+                        extend: 'excel',
+                        action: newexportaction,
+                        titleAttr: 'Excel',
+                        title: 'Data Mahasiswa Alumni',
+                        className: 'btn btn-sm btn-primary mt-2 rounded-2'
+                    }
+                ],
                 responsive: {
                     details: {
                         type: 'column',
