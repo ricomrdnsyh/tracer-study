@@ -75,6 +75,7 @@ Route::prefix('fakultas')->name('fakultas.')->middleware(['auth', 'role:Fakultas
 
 Route::prefix('mahasiswa')->name('mahasiswa.')->middleware(['auth:mahasiswa'])->group(function () {
     Route::get('/dashboard', [MahasiswaDashboard::class, 'index'])->name('dashboard');
+    Route::get('/tracer/lookup', [TracerController::class, 'lookup'])->name('tracer.lookup');
     Route::get('/tracer', [TracerController::class, 'index'])->name('tracer.index');
     Route::post('/tracer', [TracerController::class, 'store'])->name('tracer.store');
 });

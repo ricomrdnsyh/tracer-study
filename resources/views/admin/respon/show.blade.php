@@ -84,7 +84,7 @@
                                                     @if ($pertanyaan->tipe_jawaban == 'text')
                                                         <input type="text" class="form-control border-gray-300"
                                                             name="jawaban[{{ $pertanyaan->id_pertanyaan }}]"
-                                                            value="{{ $answer }}" disabled>
+                                                            value="{{ is_array($answer) ? implode(', ', $answer) : $answer }}" disabled>
                                                     @elseif($pertanyaan->tipe_jawaban == 'textarea')
                                                         <textarea class="form-control border-gray-300" name="jawaban[{{ $pertanyaan->id_pertanyaan }}]" rows="4" disabled>{{ $answer }}</textarea>
                                                     @elseif($pertanyaan->tipe_jawaban == 'radio')

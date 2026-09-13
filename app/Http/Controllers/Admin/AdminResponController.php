@@ -77,9 +77,26 @@ class AdminResponController extends Controller
         $jawabanUser = [];
         foreach ($respon->jawabanDetails as $detail) {
             if ($detail->jawaban_json) {
-                $jawabanUser[$detail->pertanyaan_id] = is_string($detail->jawaban_json) ? json_decode($detail->jawaban_json, true) : $detail->jawaban_json;
+                $decoded = is_string($detail->jawaban_json) ? json_decode($detail->jawaban_json, true) : $detail->jawaban_json;
+                if (is_array($decoded) && isset($decoded['label'])) {
+                    $jawabanUser[$detail->pertanyaan_id] = $decoded['label'];
+                } else {
+                    $jawabanUser[$detail->pertanyaan_id] = $decoded;
+                }
             } else {
                 $jawabanUser[$detail->pertanyaan_id] = $detail->jawaban_text;
+            }
+        }
+
+        $pekerjaan = $respon->pekerjaanAlumni;
+        if ($pekerjaan) {
+            $pertanyaans = \App\Models\Pertanyaan::whereIn('kode_pertanyaan', ['f5a1', 'f5a2'])->get()->keyBy('kode_pertanyaan');
+            
+            if (isset($pertanyaans['f5a1']) && empty($jawabanUser[$pertanyaans['f5a1']->id_pertanyaan])) {
+                $jawabanUser[$pertanyaans['f5a1']->id_pertanyaan] = $pekerjaan->provinsi ?? $pekerjaan->kode_provinsi;
+            }
+            if (isset($pertanyaans['f5a2']) && empty($jawabanUser[$pertanyaans['f5a2']->id_pertanyaan])) {
+                $jawabanUser[$pertanyaans['f5a2']->id_pertanyaan] = $pekerjaan->kabupaten ?? $pekerjaan->kode_kabupaten;
             }
         }
 

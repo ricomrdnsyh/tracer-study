@@ -69,11 +69,27 @@
                                                     </label>
 
                                                     @if ($pertanyaan->tipe_jawaban == 'text')
-                                                        <input type="text" class="form-control border-gray-300"
-                                                            name="jawaban[{{ $pertanyaan->id_pertanyaan }}]"
-                                                            placeholder="Ketik jawaban Anda di sini..."
-                                                            value="{{ $answer }}"
-                                                            {{ $pertanyaan->wajib ? 'required' : '' }}>
+                                                        @if (in_array($pertanyaan->kode_pertanyaan, ['f5a1', 'f5a2', 'f18b', 'f18c']))
+                                                            <div class="position-relative" data-remote-select="{{ $pertanyaan->kode_pertanyaan }}" data-disabled="{{ in_array($pertanyaan->kode_pertanyaan, ['f5a2', 'f18c']) ? 'true' : 'false' }}">
+                                                                <input type="hidden" name="jawaban[{{ $pertanyaan->id_pertanyaan }}]" value="{{ $answer }}" {{ $pertanyaan->wajib ? 'required' : '' }}>
+                                                                <input type="search" data-remote-select-search
+                                                                       name="jawaban_label[{{ $pertanyaan->id_pertanyaan }}]"
+                                                                       class="form-control border-gray-300"
+                                                                       placeholder="Ketik untuk mencari..."
+                                                                       autocomplete="off"
+                                                                       value="{{ $jawabanLabel[$pertanyaan->id_pertanyaan] ?? '' }}"
+                                                                       {{ in_array($pertanyaan->kode_pertanyaan, ['f5a2', 'f18c']) ? 'readonly' : '' }}>
+                                                                <div class="position-absolute w-100 mt-1 d-none overflow-hidden rounded border border-gray-300 bg-white shadow-sm"
+                                                                     data-remote-select-results style="max-height: 200px; overflow-y: auto; z-index: 1000;"></div>
+                                                                <div class="form-text mt-2 text-muted" data-remote-select-status>Mulai ketik untuk mencari...</div>
+                                                            </div>
+                                                        @else
+                                                            <input type="text" class="form-control border-gray-300"
+                                                                name="jawaban[{{ $pertanyaan->id_pertanyaan }}]"
+                                                                placeholder="Ketik jawaban Anda di sini..."
+                                                                value="{{ $answer }}"
+                                                                {{ $pertanyaan->wajib ? 'required' : '' }}>
+                                                        @endif
                                                     @elseif($pertanyaan->tipe_jawaban == 'textarea')
                                                         <textarea class="form-control border-gray-300" name="jawaban[{{ $pertanyaan->id_pertanyaan }}]" rows="4"
                                                             placeholder="Ketik jawaban Anda di sini..." {{ $pertanyaan->wajib ? 'required' : '' }}>{{ $answer }}</textarea>
@@ -157,6 +173,7 @@
 @endsection
 
 @section('js')
+    <script src="{{ asset('assets/js/tracer-lookup.js') }}"></script>
     <script>
         $(document).ready(function() {
             function getQuestionValue(id) {
