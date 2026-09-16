@@ -78,6 +78,13 @@ $(document).ready(function() {
 
             searchInput.on('input', function() {
                 const keyword = $(this).val();
+                
+                // Allow manual entry: update hidden input with the typed text
+                // This satisfies 'required' validation and triggers 'change' for dependent fields
+                if (hiddenInput.val() !== keyword) {
+                    hiddenInput.val(keyword).trigger('change');
+                }
+
                 if (keyword.length < config.minChars) {
                     resultsContainer.addClass('d-none');
                     statusText.text(config.helperText);
