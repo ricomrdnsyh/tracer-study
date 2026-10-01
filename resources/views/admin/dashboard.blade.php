@@ -554,18 +554,7 @@
                                                 </div>
                                             </a>
                                         </div>
-                                        <div class="col-md-6 col-lg-4">
-                                            <a href="{{ route('admin.periode.index') }}"
-                                                class="btn btn-outline btn-outline-dashed pintasan-btn pintasan-success p-7 d-flex align-items-center mb-0 w-100"
-                                                style="border-radius: 1rem;">
-                                                <i class="fa-solid fa-calendar-check fs-2x me-4 text-success"></i>
-                                                <div class="text-start">
-                                                    <span class="d-block fw-bold fs-5 text-gray-800 pintasan-title" style="transition: color 0.3s ease;">Kelola Periode</span>
-                                                    <span class="d-block fw-semibold fs-7 text-gray-600 mt-1">Atur jadwal
-                                                        pengisian alumni</span>
-                                                </div>
-                                            </a>
-                                        </div>
+
                                     </div>
                                 </div>
                             </div>
