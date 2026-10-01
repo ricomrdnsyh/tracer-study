@@ -4,7 +4,7 @@ use App\Http\Controllers\Admin\AdminFakultasController;
 use App\Http\Controllers\Admin\AdminKategoriPertanyaanController;
 use App\Http\Controllers\Admin\AdminKuesionerController;
 use App\Http\Controllers\Admin\AdminMahasiswaController;
-use App\Http\Controllers\Admin\AdminPeriodeController;
+
 use App\Http\Controllers\Admin\AdminPertanyaanController;
 use App\Http\Controllers\Admin\AdminProdiController;
 use App\Http\Controllers\Admin\AdminResponController;
@@ -53,8 +53,6 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:Admin,Fakultas
     Route::get('/mahasiswa/data', [AdminMahasiswaController::class, 'getMahasiswa'])->name('mahasiswa.data');
     Route::resource('mahasiswa', AdminMahasiswaController::class);
 
-    Route::get('/periode/data', [AdminPeriodeController::class, 'getPeriode'])->name('periode.data');
-    Route::resource('periode', AdminPeriodeController::class);
 
     Route::get('/perusahaan/data', [AdminPerusahaanController::class, 'getPerusahaan'])->name('perusahaan.data');
     Route::resource('perusahaan', AdminPerusahaanController::class)->only(['index', 'show']);

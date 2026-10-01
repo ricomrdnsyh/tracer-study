@@ -23,7 +23,8 @@ class KuesionerRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'periode_id' => 'required|exists:periode_tracer,id_periode',
+            'tgl_mulai' => 'required|date',
+            'tgl_selesai' => 'required|date|after_or_equal:tgl_mulai',
             'judul' => 'required|string|max:255',
             'status' => 'required|in:Draft,Published,Closed',
         ];

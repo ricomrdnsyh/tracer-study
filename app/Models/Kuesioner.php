@@ -13,15 +13,11 @@ class Kuesioner extends Model
     protected $primaryKey = 'id_kuesioner';
 
     protected $fillable = [
-        'periode_id',
+        'tgl_mulai',
+        'tgl_selesai',
         'judul',
         'status',
     ];
-
-    public function periode()
-    {
-        return $this->belongsTo(PeriodeTracer::class, 'periode_id', 'id_periode');
-    }
 
     public function kategoriPertanyaans()
     {

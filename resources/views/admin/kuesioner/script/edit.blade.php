@@ -7,7 +7,8 @@
             success: function(response) {
                 $('#form_edit_action').attr('action', '/admin/kuesioner/' + id);
                 $('#edit_judul').val(response.judul);
-                $('#edit_periode_id').val(response.periode_id).trigger('change');
+                $('#edit_tgl_mulai').val(response.tgl_mulai);
+                $('#edit_tgl_selesai').val(response.tgl_selesai);
                 $('#edit_status').val(response.status).trigger('change');
                 $('#form_edit').modal('show');
             }

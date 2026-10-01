@@ -25,8 +25,7 @@
                         
                         <div class="text-muted fs-4 fw-semibold mb-10 mx-auto" style="max-width: 650px; line-height: 1.8;">
                             Anda telah berhasil berpartisipasi dalam mengisi kuesioner <br/>
-                            <span class="text-gray-800 fw-bold">{{ $kuesioner->judul }}</span><br/>
-                            pada periode <span class="text-gray-800 fw-bold">{{ $periodeAktif->nama_periode }}</span>.
+                            <span class="text-gray-800 fw-bold">{{ $kuesioner->judul }}</span>.
                         </div>
 
                         <!-- Buttons -->

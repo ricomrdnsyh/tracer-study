@@ -18,17 +18,21 @@
                             </div>
                         </div>
 
-                        <div class="col-12">
+                        <div class="col-md-6">
                             <div class="d-flex flex-column mb-2">
                                 <label class="d-flex align-items-center fs-sm-8 fs-lg-6 fw-bolder mb-1 required">
-                                    <span>Periode</span>
+                                    <span>Tanggal Mulai</span>
                                 </label>
-                                <select name="periode_id" class="form-select form-select-sm fs-sm-8 fs-lg-6" data-control="select2" data-dropdown-parent="#form_create" data-placeholder="Pilih Periode" required>
-                                    <option value="" disabled selected>Pilih Periode</option>
-                                    @foreach ($periode as $p)
-                                        <option value="{{ $p->id_periode }}">{{ $p->nama_periode }}</option>
-                                    @endforeach
-                                </select>
+                                <input type="date" name="tgl_mulai" class="form-control form-control-sm fs-sm-8 fs-lg-6" required>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="d-flex flex-column mb-2">
+                                <label class="d-flex align-items-center fs-sm-8 fs-lg-6 fw-bolder mb-1 required">
+                                    <span>Tanggal Selesai</span>
+                                </label>
+                                <input type="date" name="tgl_selesai" class="form-control form-control-sm fs-sm-8 fs-lg-6" required>
                             </div>
                         </div>
 

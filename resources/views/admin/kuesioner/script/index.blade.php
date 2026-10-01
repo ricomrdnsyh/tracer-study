@@ -73,7 +73,7 @@
                 },
                 {
                     data: 'periode_nama',
-                    name: 'periode.nama_periode'
+                    name: 'tgl_mulai'
                 },
                 {
                     data: 'status',

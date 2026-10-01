@@ -288,15 +288,7 @@
                             </div>
                         </div>
 
-                        <div class="menu-item">
-                            <a class="menu-link {{ Request::is('admin/periode*') ? 'active' : '' }}"
-                                href="{{ route('admin.periode.index') }}">
-                                <span class="menu-icon">
-                                    <i class="fa-regular fa-calendar-alt fs-4"></i>
-                                </span>
-                                <span class="menu-title">Periode Tracer</span>
-                            </a>
-                        </div>
+
 
                         <div class="menu-item">
                             <a class="menu-link {{ Request::is('admin/kuesioner*') ? 'active' : '' }}"

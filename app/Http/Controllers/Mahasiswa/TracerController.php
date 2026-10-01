@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Mahasiswa;
 
 use App\Http\Controllers\Controller;
 use App\Models\Kuesioner;
-use App\Models\PeriodeTracer;
+
 use App\Models\ResponTracer;
 use App\Models\JawabanDetail;
 use App\Models\PekerjaanAlumni;
@@ -21,18 +21,16 @@ class TracerController extends Controller
     {
         $mahasiswa = auth()->guard('mahasiswa')->user();
 
-        $periodeAktif = PeriodeTracer::where('status', 'Aktif')->first();
-
-        if (!$periodeAktif) {
-            return view('mahasiswa.tracer.empty', ['message' => 'Tidak ada periode Tracer Study yang sedang aktif saat ini.']);
-        }
-
         $kuesioner = Kuesioner::with(['kategoriPertanyaans' => function ($q) {
             $q->orderBy('urutan');
-        }, 'kategoriPertanyaans.pertanyaans'])->where('periode_id', $periodeAktif->id_periode)->where('status', 'Published')->first();
+        }, 'kategoriPertanyaans.pertanyaans'])
+        ->where('status', 'Published')
+        ->whereDate('tgl_mulai', '<=', now())
+        ->whereDate('tgl_selesai', '>=', now())
+        ->first();
 
         if (!$kuesioner) {
-            return view('mahasiswa.tracer.empty', ['message' => 'Kuesioner belum tersedia untuk periode saat ini.']);
+            return view('mahasiswa.tracer.empty', ['message' => 'Belum ada Tracer Study yang aktif saat ini.']);
         }
 
         $respon = ResponTracer::with('jawabanDetails')->where('kuesioner_id', $kuesioner->id_kuesioner)
@@ -40,7 +38,7 @@ class TracerController extends Controller
             ->first();
 
         if ($respon && !request()->has('edit')) {
-            return view('mahasiswa.tracer.sudah_isi', compact('kuesioner', 'periodeAktif'));
+            return view('mahasiswa.tracer.sudah_isi', compact('kuesioner'));
         }
 
         $jawabanUser = [];
@@ -82,7 +80,7 @@ class TracerController extends Controller
             }
         }
 
-        return view('mahasiswa.tracer.form', compact('kuesioner', 'periodeAktif', 'respon', 'jawabanUser', 'jawabanLabel'));
+        return view('mahasiswa.tracer.form', compact('kuesioner', 'respon', 'jawabanUser', 'jawabanLabel'));
     }
 
     public function store(Request $request)

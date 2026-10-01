@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Kuesioner;
-use App\Models\PeriodeTracer;
+
 use App\Http\Requests\Admin\KuesionerRequest;
 use Illuminate\Http\Request;
 use Yajra\DataTables\Facades\DataTables;
@@ -13,21 +13,17 @@ class AdminKuesionerController extends Controller
 {
     public function index()
     {
-        $periode = PeriodeTracer::orderByDesc('id_periode')->get();
-        return view('admin.kuesioner.index', compact('periode'));
+        return view('admin.kuesioner.index');
     }
 
     public function getKuesioner(Request $request)
     {
-        $query = Kuesioner::with('periode')->select(['id_kuesioner', 'periode_id', 'judul', 'status'])->orderByDesc('id_kuesioner');
-
-        if ($request->has('periode_id') && !empty($request->periode_id)) {
-            $query->where('periode_id', $request->periode_id);
-        }
+        $query = Kuesioner::select(['id_kuesioner', 'judul', 'tgl_mulai', 'tgl_selesai', 'status'])->orderByDesc('id_kuesioner');
 
         return DataTables::of($query)
             ->addColumn('periode_nama', function ($row) {
-                return $row->periode ? $row->periode->nama_periode : '-';
+                if (!$row->tgl_mulai || !$row->tgl_selesai) return '-';
+                return $row->tgl_mulai . ' s/d ' . $row->tgl_selesai;
             })
             ->addColumn('action', function ($row) {
                 $showBtn = '<a href="'.route('admin.kuesioner.show', $row->id_kuesioner).'"
