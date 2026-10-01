@@ -60,6 +60,8 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:Admin,Fakultas
     Route::resource('perusahaan', AdminPerusahaanController::class)->only(['index', 'show']);
 
     Route::get('/kuesioner/data', [AdminKuesionerController::class, 'getKuesioner'])->name('kuesioner.data');
+    Route::get('/kuesioner/{kuesioner}/export-json', [AdminKuesionerController::class, 'exportJson'])->name('kuesioner.export-json');
+    Route::post('/kuesioner/{kuesioner}/import-json', [AdminKuesionerController::class, 'importJson'])->name('kuesioner.import-json');
     Route::resource('kuesioner', AdminKuesionerController::class);
 
     Route::get('/respon/data', [AdminResponController::class, 'getRespon'])->name('respon.data');

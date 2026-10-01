@@ -42,6 +42,12 @@
                                     <i class="fas fa-arrow-left me-1"></i>Kembali
                                 </a>
                                 @if (auth()->user()->role === 'Admin')
+                                    <a href="{{ route('admin.kuesioner.export-json', $kuesioner->id_kuesioner) }}" class="btn btn-sm btn-light-primary flex-grow-1 flex-md-grow-0">
+                                        <i class="fas fa-file-export"></i> Export JSON
+                                    </a>
+                                    <button type="button" class="btn btn-sm btn-light-success flex-grow-1 flex-md-grow-0" data-bs-toggle="modal" data-bs-target="#modal_import_json">
+                                        <i class="fas fa-file-import"></i> Import JSON
+                                    </button>
                                     <button type="button" class="btn btn-sm btn-primary flex-grow-1 flex-md-grow-0" data-bs-toggle="modal"
                                         data-bs-target="#modal_add_kategori">
                                         <i class="fas fa-plus"></i> Tambah Kategori
@@ -662,7 +668,65 @@
                         }
                     });
                 @endif
+
+                @if ($errors->any())
+                    Swal.fire({
+                        text: "{{ $errors->first() }}",
+                        icon: "error",
+                        buttonsStyling: false,
+                        confirmButtonText: "Ok, got it!",
+                        customClass: {
+                            confirmButton: "btn btn-sm btn-danger"
+                        }
+                    });
+                @endif
             });
         </script>
+    @endif
+
+    @if (auth()->user()->role === 'Admin')
+        <!-- Modal Import JSON -->
+        <div class="modal fade" id="modal_import_json" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered mw-500px">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2 class="fw-bolder">Import Kuesioner (JSON)</h2>
+                        <div class="btn btn-icon btn-sm btn-active-icon-primary" data-bs-dismiss="modal">
+                            <i class="fas fa-times fs-1"></i>
+                        </div>
+                    </div>
+                    <form action="{{ route('admin.kuesioner.import-json', $kuesioner->id_kuesioner) }}" method="POST" enctype="multipart/form-data">
+                        @csrf
+                        <div class="modal-body py-10 px-lg-17">
+                            <div class="mb-5 text-center">
+                                <i class="fas fa-file-import text-success fs-3x mb-3"></i>
+                                <div class="text-muted fw-bold fs-5">
+                                    Pilih file .json hasil Export Kuesioner
+                                </div>
+                            </div>
+                            <div class="fv-row mb-7">
+                                <label class="required fs-6 fw-bold mb-2">File JSON</label>
+                                <input type="file" class="form-control form-control-solid" name="json_file" accept=".json" required />
+                            </div>
+                            <div class="notice d-flex bg-light-warning rounded border-warning border border-dashed p-6">
+                                <i class="fas fa-exclamation-triangle fs-2tx text-warning me-4"></i>
+                                <div class="d-flex flex-stack flex-grow-1">
+                                    <div class="fw-bold">
+                                        <h4 class="text-gray-900 fw-bolder">Perhatian!</h4>
+                                        <div class="fs-6 text-gray-700">Pastikan Anda tidak mengimpor file ganda ke dalam kuesioner yang sama.</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer flex-center">
+                            <button type="reset" class="btn btn-light me-3" data-bs-dismiss="modal">Batal</button>
+                            <button type="submit" class="btn btn-primary">
+                                <span class="indicator-label">Mulai Import</span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
     @endif
 @endsection

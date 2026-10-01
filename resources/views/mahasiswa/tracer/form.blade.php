@@ -51,7 +51,7 @@
                                     <div class="mb-10 p-8 rounded shadow-sm border border-dashed border-gray-300 kategori-container"
                                         style="display: none;"
                                         data-syarat-pertanyaan="{{ $kategori->syarat_pertanyaan_id }}"
-                                        data-syarat-jawaban="{{ json_encode($kategori->syarat_jawaban) }}">
+                                        data-syarat-jawaban='@json($kategori->syarat_jawaban)'>
                                         <div
                                             class="mb-8 border-bottom border-primary border-2 pb-4 d-flex align-items-center">
                                             <span class="symbol symbol-40px bg-light-primary me-4">
@@ -73,12 +73,13 @@
                                                 @endphp
                                                 <div class="{{ $colClass }} mb-6 pertanyaan-container"
                                                     data-syarat-pertanyaan="{{ $pertanyaan->syarat_pertanyaan_id }}"
-                                                    data-syarat-jawaban="{{ json_encode($pertanyaan->syarat_jawaban) }}">
+                                                    data-syarat-jawaban='@json($pertanyaan->syarat_jawaban)'>
                                                     @php
                                                         $answer = $jawabanUser[$pertanyaan->id_pertanyaan] ?? null;
                                                     @endphp
                                                     <label
                                                         class="form-label fs-5 fw-bold text-gray-800 {{ $pertanyaan->wajib ? 'required' : '' }} mb-3">
+                                                        [{{ strtoupper($pertanyaan->kode_pertanyaan) }}]
                                                         {{ $pertanyaan->teks_pertanyaan }}
                                                     </label>
 
@@ -284,20 +285,30 @@
 
                 let syaratJawaban = [];
                 try {
-                    syaratJawaban = JSON.parse(syaratJawabanJson) || [];
+                    if (typeof syaratJawabanJson === 'object') {
+                        syaratJawaban = syaratJawabanJson;
+                    } else {
+                        syaratJawaban = JSON.parse(syaratJawabanJson) || [];
+                    }
                 } catch (e) {}
+
+                if (!Array.isArray(syaratJawaban)) {
+                    syaratJawaban = [syaratJawaban];
+                }
 
                 if (Array.isArray(userVal)) {
                     let match = false;
                     for (let i = 0; i < userVal.length; i++) {
-                        if (syaratJawaban.includes(userVal[i])) {
+                        let val = String(userVal[i]).trim().toLowerCase();
+                        if (syaratJawaban.some(sj => String(sj).trim().toLowerCase() === val)) {
                             match = true;
                             break;
                         }
                     }
                     return match;
                 } else {
-                    return syaratJawaban.includes(userVal);
+                    let val = String(userVal).trim().toLowerCase();
+                    return syaratJawaban.some(sj => String(sj).trim().toLowerCase() === val);
                 }
             }
 
