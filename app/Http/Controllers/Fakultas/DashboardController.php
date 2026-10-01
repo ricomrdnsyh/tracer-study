@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Fakultas;
 use App\Http\Controllers\Controller;
 use App\Models\Kuesioner;
 use App\Models\PekerjaanAlumni;
-use App\Models\PeriodeTracer;
+
 use App\Models\ResponTracer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -16,7 +16,7 @@ class DashboardController extends Controller
     {
         $fakultasId = auth()->user()->fakultas_id;
 
-        $kuesionerList = Kuesioner::with('periode')->orderByDesc('id_kuesioner')->get();
+        $kuesionerList = Kuesioner::orderByDesc('id_kuesioner')->get();
 
         $selectedKuesioner = $this->resolveSelectedKuesioner($request, $kuesionerList);
         $kuesionerId = $selectedKuesioner?->id_kuesioner;
@@ -25,7 +25,7 @@ class DashboardController extends Controller
         $totalKuesioner = Kuesioner::count();
         $totalPerusahaan = $this->totalPerusahaan($kuesionerId, $fakultasId);
         $totalPekerjaan = $this->totalPekerjaan($kuesionerId, $fakultasId);
-        $periodeAktif = PeriodeTracer::where('status', 'Aktif')->first();
+
 
         $recentQuery = ResponTracer::with(['mahasiswa.prodi', 'kuesioner'])
             ->whereHas('mahasiswa.prodi', function($q) use ($fakultasId) {
@@ -45,7 +45,6 @@ class DashboardController extends Controller
             'totalKuesioner',
             'totalPerusahaan',
             'totalPekerjaan',
-            'periodeAktif',
             'recentRespon'
         ));
     }

@@ -472,7 +472,7 @@
                                             <i class="fas fa-check-circle text-success fs-4 me-2"></i>
                                             <span class="fw-semibold tracking-wide">Kuesioner Selesai</span>
                                         </div>
-                                    @elseif ($periodeAktif && $kuesionerAktif)
+                                    @elseif ($kuesionerAktif)
                                         <a href="{{ route('mahasiswa.tracer.index') }}"
                                             class="btn btn-light text-primary fw-bolder px-8 py-4 rounded-pill shadow-sm fs-6 hover-elevate-up">
                                             <i class="fas fa-play me-2"></i> Mulai Kuesioner
@@ -533,10 +533,10 @@
                                     <i class="fas fa-calendar-alt"></i>
                                 </div>
                                 <div>
-                                    <div class="text-muted fs-8 fw-bolder text-uppercase tracking-wider mb-1">Periode Aktif
+                                    <div class="text-muted fs-8 fw-bolder text-uppercase tracking-wider mb-1">Masa Berlaku
                                     </div>
                                     <div class="text-main fs-4 fw-bolder">
-                                        {{ $periodeAktif && $kuesionerAktif ? $periodeAktif->nama_periode : 'Belum Tersedia' }}
+                                        {{ $kuesionerAktif && $kuesionerAktif->tgl_mulai ? \Carbon\Carbon::parse($kuesionerAktif->tgl_mulai)->format('d M') . ' - ' . \Carbon\Carbon::parse($kuesionerAktif->tgl_selesai)->format('d M Y') : 'Belum Tersedia' }}
                                     </div>
                                 </div>
                             </div>
@@ -559,7 +559,7 @@
                             <h3 class="fw-bolder text-main m-0 fs-3 d-md-none">
                                 @if ($sudahMengisi)
                                     Data Tersimpan
-                                @elseif ($periodeAktif && $kuesionerAktif)
+                                @elseif ($kuesionerAktif)
                                     Selesaikan Kuesioner
                                 @else
                                     Belum Tersedia
@@ -572,7 +572,7 @@
                             <h3 class="fw-bolder text-main mb-2 fs-2 d-none d-md-block">
                                 @if ($sudahMengisi)
                                     Luar biasa! Data Anda telah tersimpan.
-                                @elseif ($periodeAktif && $kuesionerAktif)
+                                @elseif ($kuesionerAktif)
                                     Selesaikan kuesioner Tracer Study Anda
                                 @else
                                     Belum ada kuesioner aktif
@@ -581,11 +581,10 @@
                             <p class="text-muted fs-6 fs-md-5 mb-4 mt-2 mt-md-0"
                                 style="max-width: 700px; line-height: 1.6;">
                                 @if ($sudahMengisi)
-                                    Terima kasih telah berpartisipasi pada periode <strong
-                                        class="text-main">{{ $periodeAktif?->nama_periode }}</strong>. Anda tetap dapat
-                                    memperbarui jawaban sebelum periode ditutup.
-                                @elseif ($periodeAktif && $kuesionerAktif)
-                                    Periode <strong class="text-main">{{ $periodeAktif->nama_periode }}</strong> sedang
+                                    Terima kasih telah berpartisipasi pada Tracer Study ini. Anda tetap dapat
+                                    memperbarui jawaban sebelum akses ditutup.
+                                @elseif ($kuesionerAktif)
+                                    Pengisian Tracer Study sedang
                                     berlangsung. Pastikan Anda mengisi kuesioner sebelum batas waktu agar data tercatat.
                                 @else
                                     Mohon tunggu informasi lebih lanjut dari pihak kampus atau kembali lagi nanti saat
@@ -593,7 +592,7 @@
                                 @endif
                             </p>
 
-                            @if ($periodeAktif && $kuesionerAktif)
+                            @if ($kuesionerAktif)
                                 <div class="d-flex flex-column align-items-start">
                                     <div class="d-flex justify-content-between w-100 mb-2" style="max-width: 400px;">
                                         <span class="fs-7 fw-bold text-muted">Progres Pengisian</span>
@@ -617,7 +616,7 @@
                                     class="btn btn-success fw-bolder px-8 py-3 rounded-pill shadow-sm fs-6 w-100 w-md-auto">
                                     <i class="fas fa-eye me-2"></i> Lihat Detail
                                 </a>
-                            @elseif ($periodeAktif && $kuesionerAktif)
+                            @elseif ($kuesionerAktif)
                                 <a href="{{ route('mahasiswa.tracer.index') }}"
                                     class="btn btn-warning fw-bolder px-8 py-3 rounded-pill shadow-sm fs-6 text-white w-100 w-md-auto"
                                     style="background: var(--warning-color);">

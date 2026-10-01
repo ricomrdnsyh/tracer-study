@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Kuesioner;
 use App\Models\PekerjaanAlumni;
-use App\Models\PeriodeTracer;
+
 use App\Models\ResponTracer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -14,7 +14,7 @@ class DashboardController extends Controller
 {
     public function index(Request $request)
     {
-        $kuesionerList = Kuesioner::with('periode')->orderByDesc('id_kuesioner')->get();
+        $kuesionerList = Kuesioner::orderByDesc('id_kuesioner')->get();
 
         $selectedKuesioner = $this->resolveSelectedKuesioner($request, $kuesionerList);
         $kuesionerId = $selectedKuesioner?->id_kuesioner;
@@ -23,7 +23,7 @@ class DashboardController extends Controller
         $totalKuesioner = Kuesioner::count();
         $totalPerusahaan = $this->totalPerusahaan($kuesionerId);
         $totalPekerjaan = $this->totalPekerjaan($kuesionerId);
-        $periodeAktif = PeriodeTracer::where('status', 'Aktif')->first();
+
 
         $recentQuery = ResponTracer::with(['mahasiswa.prodi', 'kuesioner'])->orderByDesc('tgl_isi');
         if ($kuesionerId) {
@@ -38,7 +38,6 @@ class DashboardController extends Controller
             'totalKuesioner',
             'totalPerusahaan',
             'totalPekerjaan',
-            'periodeAktif',
             'recentRespon'
         ));
     }

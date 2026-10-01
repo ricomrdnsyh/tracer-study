@@ -493,24 +493,7 @@
                                 </div>
                             </div>
                         </div>
-                        @if ($periodeAktif)
-                            <div class="col-xl-3 col-md-6 animate-fade-in-up delay-400">
-                                <div class="card stat-card shadow-sm h-100 border border-dashed border-success bg-light-success"
-                                    onclick="window.location.href='#'">
-                                    <div class="card-body d-flex align-items-center">
-                                        <div class="stat-icon bg-body shadow-sm me-4 icon-glow-success">
-                                            <i class="fa-solid fa-calendar-check fs-2x text-success"></i>
-                                        </div>
-                                        <div>
-                                            <div class="text-gray-600 fw-semibold fs-7 mb-1">Periode Aktif</div>
-                                            <div class="text-gray-900 fw-bolder fs-3 text-truncate">
-                                                {{ $periodeAktif->nama_periode }}
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        @endif
+
                         <div class="col-xl-3 col-md-6 animate-fade-in-up delay-500">
                             <div class="card stat-card shadow-sm h-100 border border-dashed border-warning bg-light-warning"
                                 onclick="window.location.href='#'">
