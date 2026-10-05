@@ -7,6 +7,8 @@
                 url: "{{ route('admin.respon.data') }}",
                 data: function(d) {
                     d.kuesioner_id = $('#filter_kuesioner').val();
+                    d.fakultas_id = $('#filter_fakultas').length ? $('#filter_fakultas').val() : '';
+                    d.prodi_id = $('#filter_prodi').val();
                 }
             },
             responsive: {
@@ -121,5 +123,45 @@
         $('#filter_kuesioner').on('change', function() {
             table.draw();
         });
+
+        $('#filter_prodi').on('change', function() {
+            table.draw();
+        });
+
+        if ($('#filter_fakultas').length) {
+            // Save original prodi options
+            var originalProdiOptions = $('#filter_prodi option').clone();
+
+            // Initially disable prodi if no fakultas is selected
+            if (!$('#filter_fakultas').val()) {
+                $('#filter_prodi').prop('disabled', true);
+            }
+
+            $('#filter_fakultas').on('change', function() {
+                var selectedFakultas = $(this).val();
+                
+                // Clear current prodi options
+                $('#filter_prodi').empty();
+                
+                if (selectedFakultas) {
+                    // Enable prodi and add back options
+                    $('#filter_prodi').prop('disabled', false);
+                    originalProdiOptions.each(function() {
+                        var fakultasId = $(this).data('fakultas');
+                        if (selectedFakultas == fakultasId || !$(this).val()) {
+                            $('#filter_prodi').append($(this).clone());
+                        }
+                    });
+                } else {
+                    // Disable prodi and only add default option
+                    $('#filter_prodi').prop('disabled', true);
+                    $('#filter_prodi').append('<option value="">Semua Program Studi</option>');
+                }
+                
+                // Reset select2 for prodi and draw table
+                $('#filter_prodi').val('').trigger('change.select2');
+                table.draw();
+            });
+        }
     });
 </script>

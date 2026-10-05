@@ -13,16 +13,34 @@ class AdminResponController extends Controller
     public function index()
     {
         $kuesioner = Kuesioner::orderByDesc('id_kuesioner')->get();
-        return view('admin.respon.index', compact('kuesioner'));
+        $fakultas = \App\Models\Fakultas::orderBy('nama_fakultas')->get();
+        
+        if (auth()->user()->role === 'Fakultas') {
+            $prodi = \App\Models\Prodi::where('fakultas_id', auth()->user()->fakultas_id)->orderBy('nama_prodi')->get();
+        } else {
+            $prodi = \App\Models\Prodi::orderBy('nama_prodi')->get();
+        }
+
+        return view('admin.respon.index', compact('kuesioner', 'fakultas', 'prodi'));
     }
 
     public function getRespon(Request $request)
     {
-        $query = ResponTracer::with(['mahasiswa', 'kuesioner'])->select(['id_respon', 'mahasiswa_id', 'kuesioner_id', 'status', 'tgl_isi'])->orderByDesc('tgl_isi');
+        $query = ResponTracer::with(['mahasiswa.prodi', 'kuesioner'])->select(['id_respon', 'mahasiswa_id', 'kuesioner_id', 'status', 'tgl_isi'])->orderByDesc('tgl_isi');
 
         if (auth()->user()->role === 'Fakultas') {
             $query->whereHas('mahasiswa.prodi', function ($q) {
                 $q->where('fakultas_id', auth()->user()->fakultas_id);
+            });
+        } elseif ($request->has('fakultas_id') && !empty($request->fakultas_id) && $request->fakultas_id !== 'all') {
+            $query->whereHas('mahasiswa.prodi', function ($q) use ($request) {
+                $q->where('fakultas_id', $request->fakultas_id);
+            });
+        }
+
+        if ($request->has('prodi_id') && !empty($request->prodi_id) && $request->prodi_id !== 'all') {
+            $query->whereHas('mahasiswa', function ($q) use ($request) {
+                $q->where('prodi_id', $request->prodi_id);
             });
         }
 

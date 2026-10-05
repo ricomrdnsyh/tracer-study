@@ -23,7 +23,9 @@ class AdminKuesionerController extends Controller
         return DataTables::of($query)
             ->addColumn('periode_nama', function ($row) {
                 if (!$row->tgl_mulai || !$row->tgl_selesai) return '-';
-                return $row->tgl_mulai . ' s/d ' . $row->tgl_selesai;
+                $mulai = \Carbon\Carbon::parse($row->tgl_mulai)->translatedFormat('d F Y');
+                $selesai = \Carbon\Carbon::parse($row->tgl_selesai)->translatedFormat('d F Y');
+                return $mulai . ' s/d ' . $selesai;
             })
             ->addColumn('action', function ($row) {
                 $showBtn = '<a href="'.route('admin.kuesioner.show', $row->id_kuesioner).'"

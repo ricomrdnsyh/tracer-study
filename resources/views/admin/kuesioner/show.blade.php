@@ -414,6 +414,7 @@
                                         <option value="checkbox">Pilihan Ganda (Checkbox)</option>
                                         <option value="select">Dropdown (Select)</option>
                                         <option value="date">Tanggal</option>
+                                        <option value="number">Angka (Number)</option>
                                     </select>
                                 </div>
                             </div>
