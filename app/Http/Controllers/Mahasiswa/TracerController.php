@@ -44,9 +44,6 @@ class TracerController extends Controller
         $jawabanUser = [];
         $jawabanLabel = [];
         if ($respon) {
-            $pekerjaan = $respon->pekerjaanAlumni;
-            $pertanyaans = \App\Models\Pertanyaan::whereIn('kode_pertanyaan', ['f5a1', 'f5a2', 'f18b', 'f18c'])->get()->keyBy('kode_pertanyaan');
-            
             foreach ($respon->jawabanDetails as $detail) {
                 if ($detail->jawaban_json) {
                     $decoded = is_string($detail->jawaban_json) ? json_decode($detail->jawaban_json, true) : $detail->jawaban_json;
@@ -62,19 +59,29 @@ class TracerController extends Controller
                 }
             }
             
-            if ($pekerjaan) {
-                if (isset($pertanyaans['f5a1']) && !isset($jawabanLabel[$pertanyaans['f5a1']->id_pertanyaan])) {
-                    $jawabanLabel[$pertanyaans['f5a1']->id_pertanyaan] = $pekerjaan->provinsi;
-                    // Also fill jawabanUser with kode_provinsi if it exists
-                    if (!isset($jawabanUser[$pertanyaans['f5a1']->id_pertanyaan])) {
-                        $jawabanUser[$pertanyaans['f5a1']->id_pertanyaan] = $pekerjaan->kode_provinsi;
-                    }
-                }
-                if (isset($pertanyaans['f5a2']) && !isset($jawabanLabel[$pertanyaans['f5a2']->id_pertanyaan])) {
-                    $jawabanLabel[$pertanyaans['f5a2']->id_pertanyaan] = $pekerjaan->kabupaten;
-                    // Also fill jawabanUser with kode_kabupaten if it exists
-                    if (!isset($jawabanUser[$pertanyaans['f5a2']->id_pertanyaan])) {
-                        $jawabanUser[$pertanyaans['f5a2']->id_pertanyaan] = $pekerjaan->kode_kabupaten;
+            // Loop through all Wilayah and PT/Prodi questions to ensure labels are filled for editing
+            $pertanyaans = \App\Models\Pertanyaan::whereIn('kode_pertanyaan', ['F5A0', 'F5A1', 'F5A2', 'f5a0', 'f5a1', 'f5a2', 'f18b', 'f18c', 'F18B', 'F18C'])->get();
+            foreach ($pertanyaans as $p) {
+                $id = $p->id_pertanyaan;
+                $kode = strtolower($p->kode_pertanyaan);
+                
+                // If it's a Wilayah field and it has an answer but NO label, fetch it from DB!
+                if (!empty($jawabanUser[$id]) && empty($jawabanLabel[$id])) {
+                    if ($kode === 'f5a0') {
+                        if (strlen($jawabanUser[$id]) == 2) { // Kode Negara ID
+                            $negara = \Illuminate\Support\Facades\DB::table('master_negara')->where('kode_wilayah_negara', $jawabanUser[$id])->first();
+                            if ($negara) $jawabanLabel[$id] = $negara->negara;
+                        }
+                    } elseif ($kode === 'f5a1') {
+                        if (preg_match('/^\d+$/', $jawabanUser[$id])) { // Kode Provinsi
+                            $prov = \Illuminate\Support\Facades\DB::table('master_provinsi')->where('kode_wilayah_provinsi', $jawabanUser[$id])->first();
+                            if ($prov) $jawabanLabel[$id] = $prov->provinsi;
+                        }
+                    } elseif ($kode === 'f5a2') {
+                        if (preg_match('/^\d+$/', $jawabanUser[$id])) { // Kode Kabupaten
+                            $kab = \Illuminate\Support\Facades\DB::table('master_kota_kabupaten')->where('kode_wilayah_kota_kabupaten', $jawabanUser[$id])->first();
+                            if ($kab) $jawabanLabel[$id] = $kab->kota_kabupaten;
+                        }
                     }
                 }
             }
@@ -133,34 +140,51 @@ class TracerController extends Controller
             }
 
             // 3. Simpan PekerjaanAlumni berdasarkan jawaban form
-            $pertanyaans = \App\Models\Pertanyaan::whereIn('kode_pertanyaan', ['f5b', 'f1101', 'f5a1', 'f5a2'])->get()->keyBy('kode_pertanyaan');
+            $pertanyaans = \App\Models\Pertanyaan::whereIn('kode_pertanyaan', ['F5B', 'F1101', 'F5A1', 'F5A2', 'f5b', 'f1101', 'f5a1', 'f5a2'])->get();
 
-            $id_nama = isset($pertanyaans['f5b']) ? $pertanyaans['f5b']->id_pertanyaan : null;
-            $id_jenis = isset($pertanyaans['f1101']) ? $pertanyaans['f1101']->id_pertanyaan : null;
-            $id_provinsi = isset($pertanyaans['f5a1']) ? $pertanyaans['f5a1']->id_pertanyaan : null;
-            $id_kabupaten = isset($pertanyaans['f5a2']) ? $pertanyaans['f5a2']->id_pertanyaan : null;
+            $nama = null;
+            $jenis_instansi = null;
+            $kode_provinsi = null;
+            $kode_kabupaten = null;
+            $provinsi_label = null;
+            $kabupaten_label = null;
 
-            $nama = $id_nama && isset($request->jawaban[$id_nama]) ? $request->jawaban[$id_nama] : null;
+            foreach ($pertanyaans as $p) {
+                $id = $p->id_pertanyaan;
+                $kode = strtolower($p->kode_pertanyaan);
+
+                if ($kode === 'f5b' && isset($request->jawaban[$id]) && !empty($request->jawaban[$id])) {
+                    $nama = $request->jawaban[$id];
+                } elseif ($kode === 'f1101' && isset($request->jawaban[$id]) && !empty($request->jawaban[$id])) {
+                    $jenis_instansi = $request->jawaban[$id];
+                } elseif ($kode === 'f5a1' && isset($request->jawaban[$id]) && !empty($request->jawaban[$id])) {
+                    $kode_provinsi = $request->jawaban[$id];
+                    $provinsi_label = !empty($request->jawaban_label[$id]) ? $request->jawaban_label[$id] : null;
+                    if (empty($provinsi_label)) {
+                        $prov = \Illuminate\Support\Facades\DB::table('master_provinsi')->where('kode_wilayah_provinsi', $kode_provinsi)->first();
+                        if ($prov) $provinsi_label = $prov->provinsi;
+                    }
+                } elseif ($kode === 'f5a2' && isset($request->jawaban[$id]) && !empty($request->jawaban[$id])) {
+                    $kode_kabupaten = $request->jawaban[$id];
+                    $kabupaten_label = !empty($request->jawaban_label[$id]) ? $request->jawaban_label[$id] : null;
+                    if (empty($kabupaten_label)) {
+                        $kab = \Illuminate\Support\Facades\DB::table('master_kota_kabupaten')->where('kode_wilayah_kota_kabupaten', $kode_kabupaten)->first();
+                        if ($kab) $kabupaten_label = $kab->kota_kabupaten;
+                    }
+                }
+            }
 
             if ($nama) {
-                // Parse dropdown value if needed, or save directly if it's text.
-                $jenis_instansi = $id_jenis && isset($request->jawaban[$id_jenis]) ? $request->jawaban[$id_jenis] : null;
-                $kode_provinsi = $id_provinsi && isset($request->jawaban[$id_provinsi]) ? $request->jawaban[$id_provinsi] : null;
-                $kode_kabupaten = $id_kabupaten && isset($request->jawaban[$id_kabupaten]) ? $request->jawaban[$id_kabupaten] : null;
-
-                $provinsi_label = $id_provinsi && isset($request->jawaban_label[$id_provinsi]) ? $request->jawaban_label[$id_provinsi] : null;
-                $kabupaten_label = $id_kabupaten && isset($request->jawaban_label[$id_kabupaten]) ? $request->jawaban_label[$id_kabupaten] : null;
-
                 PekerjaanAlumni::updateOrCreate(
                     ['respon_id' => $respon->id_respon],
                     [
-                        'nama' => $nama,
+                        'nama' => is_array($nama) ? implode(', ', $nama) : $nama,
                         'jenis_instansi' => is_array($jenis_instansi) ? implode(', ', $jenis_instansi) : $jenis_instansi,
                         'kode_provinsi' => is_array($kode_provinsi) ? implode(', ', $kode_provinsi) : $kode_provinsi,
                         'kode_kabupaten' => is_array($kode_kabupaten) ? implode(', ', $kode_kabupaten) : $kode_kabupaten,
                         'provinsi' => $provinsi_label,
                         'kabupaten' => $kabupaten_label,
-                        'nama_normalized' => strtolower($nama),
+                        'nama_normalized' => strtolower(is_array($nama) ? implode(', ', $nama) : $nama),
                     ]
                 );
             } else {
@@ -179,66 +203,99 @@ class TracerController extends Controller
     public function lookup(Request $request): JsonResponse
     {
         $type = trim($request->query('type', ''));
-        $keyword = trim($request->query('q', ''));
-        $allowedTypes = ['provinsi', 'kabupaten', 'pt', 'prodi'];
+        $keyword = trim($request->query('keyword', $request->query('q', '')));
+        
+        $allowedTypes = ['negara', 'provinsi', 'kabupaten', 'pt', 'prodi'];
         if (! in_array($type, $allowedTypes, true)) {
-            return response()->json(['results' => [], 'message' => 'Tipe lookup tidak valid.'], 400);
+            return response()->json([]);
         }
-        if ($keyword === '') {
-            return response()->json(['results' => []]);
+        
+        \Illuminate\Support\Facades\Log::info("Tracer Lookup Hit:", $request->all());
+
+        // Hanya wajibkan keyword jika tipe adalah PT atau Prodi (karena API external berat)
+        if ($keyword === '' && in_array($type, ['pt', 'prodi'])) {
+            return response()->json([]);
         }
-        $cacheKey = "tracer_lookup_{$type}_" . md5($keyword . $request->query('kode_provinsi', '') . $request->query('kode_pt', ''));
+        
+        $cacheKey = "tracer_lookup_{$type}_" . md5($keyword . $request->query('kode_negara', '') . $request->query('kode_provinsi', '') . $request->query('kode_pt', ''));
         if ($request->has('refresh')) {
             Cache::forget($cacheKey);
         }
         $results = Cache::remember($cacheKey, 43200, function () use ($type, $keyword, $request) {
-            $baseApi = 'https://tracerstudy.kemdiktisaintek.go.id/api';
+            $baseApi = 'https://tracerstudy.kemdiktisaintek.go.id/fe-api';
             $results = [];
             try {
                 $response = null;
+                $dataArray = [];
                 switch ($type) {
+                    case 'negara':
+                        $query = DB::table('master_negara');
+                        if (!empty($keyword)) {
+                            $query->where('negara', 'like', "%{$keyword}%");
+                        }
+                        $dataArray = $query->limit(50)->get()->map(fn($x) => (array)$x)->toArray();
+                        break;
                     case 'provinsi':
-                        $response = Http::timeout(10)->withoutVerifying()->get("{$baseApi}/master/provinsi", ['search' => $keyword]);
+                        $query = DB::table('master_provinsi');
+                        $kodeNegara = $request->query('kode_negara', '');
+                        if ($kodeNegara) {
+                            $query->where('kode_wilayah_negara', $kodeNegara);
+                        }
+                        if (!empty($keyword)) {
+                            $query->where('provinsi', 'like', "%{$keyword}%");
+                        }
+                        $dataArray = $query->limit(50)->get()->map(fn($x) => (array)$x)->toArray();
                         break;
                     case 'kabupaten':
                         $kodeProvinsi = $request->query('kode_provinsi', '');
                         if ($kodeProvinsi) {
-                            $response = Http::timeout(10)->withoutVerifying()->get("{$baseApi}/master/kota-kabupaten", [
-                                'kode_provinsi' => $kodeProvinsi,
-                                'search' => $keyword,
-                            ]);
+                            $query = DB::table('master_kota_kabupaten')
+                                ->where('kode_wilayah_provinsi', $kodeProvinsi);
+                            if (!empty($keyword)) {
+                                $query->where('kota_kabupaten', 'like', "%{$keyword}%");
+                            }
+                            $dataArray = $query->limit(100)->get()->map(fn($x) => (array)$x)->toArray();
                         }
                         break;
                     case 'pt':
-                        $response = Http::timeout(10)->withoutVerifying()->get("{$baseApi}/master/list-pt", ['search' => $keyword]);
+                        $response = Http::timeout(10)->withoutVerifying()->get("{$baseApi}/perguruan-tinggi", ['search' => $keyword, 'per_page' => 100]);
+                        if ($response && $response->successful()) {
+                            $dataArray = $response->json('result.data.perguruan_tinggi.data') ?? [];
+                        }
                         break;
                     case 'prodi':
-                        $kodePt = $request->query('kode_pt', '');
+                        $kodePt = $request->query('kode_pt', ''); // This will now receive the UUID of the PT
                         if ($kodePt) {
-                            $response = Http::timeout(10)->withoutVerifying()->get("{$baseApi}/master/list-prodi", [
-                                'kode_pt' => $kodePt,
-                                'search' => $keyword,
-                            ]);
+                            $response = Http::timeout(10)->withoutVerifying()->get("{$baseApi}/perguruan-tinggi/{$kodePt}/program-studi", ['search' => $keyword, 'per_page' => 100]);
+                            if ($response && $response->successful()) {
+                                $dataArray = $response->json('result.data.program_studi.data') ?? [];
+                            }
                         }
                         break;
                 }
-                if ($response && $response->successful()) {
-                    $data = $response->json();
-                    if (isset($data['result']) && is_array($data['result'])) {
-                        foreach ($data['result'] as $item) {
-                            $results[] = match ($type) {
-                                'provinsi' => ['id' => $item['kode_provinsi'], 'text' => $item['provinsi']],
-                                'kabupaten' => ['id' => $item['kode_kab'], 'text' => $item['kota_kabupaten']],
-                                'pt' => ['id' => $item['kode_pt'], 'text' => $item['nama_pt']],
-                                'prodi' => ['id' => $item['kode_prodi'], 'text' => $item['nama_prodi']],
-                                default => null,
-                            };
-                        }
-                        $results = array_filter($results);
-                    }
-                } else {
+                
+                if ($response) {
+                    Log::info("Tracer API Response ({$type}): Status " . $response->status() . " Body: " . substr($response->body(), 0, 1000));
+                }
+
+                if (in_array($type, ['pt', 'prodi']) && (!$response || !$response->successful())) {
                     return null;
                 }
+
+                foreach ($dataArray as $item) {
+                        $results[] = match ($type) {
+                            'negara' => ['id' => $item['kode_wilayah_negara'] ?? $item['id_negara'] ?? $item['id_wil'] ?? '', 'text' => $item['negara'] ?? ''],
+                            'provinsi' => ['id' => $item['kode_wilayah_provinsi'] ?? $item['id_wil'] ?? '', 'text' => $item['provinsi'] ?? $item['nm_wil'] ?? ''],
+                            'kabupaten' => ['id' => $item['kode_wilayah_kota_kabupaten'] ?? $item['id_wil'] ?? $item['kode_kab'] ?? '', 'text' => $item['kota_kabupaten'] ?? $item['nm_wil'] ?? ''],
+                            'pt' => ['id' => $item['id_sp'] ?? '', 'text' => $item['nama_pt'] ?? ''],
+                            'prodi' => [
+                                'id' => $item['id_sms'] ?? '', 
+                                'text' => isset($item['nama_prodi']) ? $item['nama_prodi'] . (isset($item['nm_jenj_didik']) ? ' (' . $item['nm_jenj_didik'] . ')' : '') : ''
+                            ],
+                            default => null,
+                        };
+                    }
+                    $results = array_filter($results);
             } catch (\Exception $e) {
                 Log::error("Tracer Study Lookup Error ({$type}): " . $e->getMessage());
 
@@ -251,6 +308,6 @@ class TracerController extends Controller
             Cache::forget($cacheKey);
         }
 
-        return response()->json(['results' => $results ?? []]);
+        return response()->json($results ?? []);
     }
 }

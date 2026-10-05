@@ -107,14 +107,33 @@ class AdminResponController extends Controller
         }
 
         $pekerjaan = $respon->pekerjaanAlumni;
-        if ($pekerjaan) {
-            $pertanyaans = \App\Models\Pertanyaan::whereIn('kode_pertanyaan', ['f5a1', 'f5a2'])->get()->keyBy('kode_pertanyaan');
+        $pertanyaans = \App\Models\Pertanyaan::whereIn('kode_pertanyaan', ['F5A0', 'F5A1', 'F5A2', 'f5a0', 'f5a1', 'f5a2'])->get();
+        
+        foreach ($pertanyaans as $p) {
+            $id = $p->id_pertanyaan;
+            $kode = strtolower($p->kode_pertanyaan);
             
-            if (isset($pertanyaans['f5a1']) && empty($jawabanUser[$pertanyaans['f5a1']->id_pertanyaan])) {
-                $jawabanUser[$pertanyaans['f5a1']->id_pertanyaan] = $pekerjaan->provinsi ?? $pekerjaan->kode_provinsi;
-            }
-            if (isset($pertanyaans['f5a2']) && empty($jawabanUser[$pertanyaans['f5a2']->id_pertanyaan])) {
-                $jawabanUser[$pertanyaans['f5a2']->id_pertanyaan] = $pekerjaan->kabupaten ?? $pekerjaan->kode_kabupaten;
+            if ($kode === 'f5a0') {
+                if (!empty($jawabanUser[$id]) && strlen($jawabanUser[$id]) == 2) { // Kode Negara ID
+                    $negara = \Illuminate\Support\Facades\DB::table('master_negara')->where('kode_wilayah_negara', $jawabanUser[$id])->first();
+                    if ($negara) $jawabanUser[$id] = $negara->negara;
+                }
+            } elseif ($kode === 'f5a1') {
+                if (empty($jawabanUser[$id]) && $pekerjaan) {
+                    $jawabanUser[$id] = $pekerjaan->provinsi ?? $pekerjaan->kode_provinsi;
+                }
+                if (!empty($jawabanUser[$id]) && preg_match('/^\d+$/', $jawabanUser[$id])) { // Kode Provinsi
+                    $prov = \Illuminate\Support\Facades\DB::table('master_provinsi')->where('kode_wilayah_provinsi', $jawabanUser[$id])->first();
+                    if ($prov) $jawabanUser[$id] = $prov->provinsi;
+                }
+            } elseif ($kode === 'f5a2') {
+                if (empty($jawabanUser[$id]) && $pekerjaan) {
+                    $jawabanUser[$id] = $pekerjaan->kabupaten ?? $pekerjaan->kode_kabupaten;
+                }
+                if (!empty($jawabanUser[$id]) && preg_match('/^\d+$/', $jawabanUser[$id])) { // Kode Kabupaten
+                    $kab = \Illuminate\Support\Facades\DB::table('master_kota_kabupaten')->where('kode_wilayah_kota_kabupaten', $jawabanUser[$id])->first();
+                    if ($kab) $jawabanUser[$id] = $kab->kota_kabupaten;
+                }
             }
         }
 

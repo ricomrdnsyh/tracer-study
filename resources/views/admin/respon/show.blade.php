@@ -57,16 +57,7 @@
                         <div class="card-body">
                             <form id="form_respon">
                                 @foreach ($respon->kuesioner->kategoriPertanyaans as $kategori)
-                                    <div class="mb-10 p-8 rounded shadow-sm border border-dashed border-gray-300 kategori-container" data-syarat-pertanyaan="{{ $kategori->syarat_pertanyaan_id }}" data-syarat-jawaban="{{ json_encode($kategori->syarat_jawaban) }}">
-                                        <div class="mb-8 border-bottom border-primary border-2 pb-4 d-flex align-items-center">
-                                            <span class="symbol symbol-40px bg-light-primary me-4">
-                                                <span class="symbol-label">
-                                                    <i class="fas fa-layer-group text-primary fs-3"></i>
-                                                </span>
-                                            </span>
-                                            <h4 class="text-gray-900 fw-bolder m-0 fs-3">{{ $kategori->nama_kategori }}</h4>
-                                        </div>
-
+                                    <div class="kategori-container" data-syarat-pertanyaan="{{ $kategori->syarat_pertanyaan_id }}" data-syarat-jawaban="{{ json_encode($kategori->syarat_jawaban) }}">
                                         <div class="row">
                                             @foreach ($kategori->pertanyaans as $pertanyaan)
                                                 @php
@@ -78,11 +69,12 @@
                                                         $answer = $jawabanUser[$pertanyaan->id_pertanyaan] ?? null;
                                                     @endphp
                                                     <label class="form-label fs-5 fw-bold text-gray-800 {{ $pertanyaan->wajib ? 'required' : '' }} mb-3">
+                                                        {!! $pertanyaan->kode_pertanyaan ? '[' . $pertanyaan->kode_pertanyaan . '] ' : '' !!}
                                                         {{ $pertanyaan->teks_pertanyaan }}
                                                     </label>
 
-                                                    @if ($pertanyaan->tipe_jawaban == 'text')
-                                                        <input type="text" class="form-control border-gray-300"
+                                                    @if (in_array($pertanyaan->tipe_jawaban, ['text', 'number', 'email']))
+                                                        <input type="{{ $pertanyaan->tipe_jawaban }}" class="form-control border-gray-300"
                                                             name="jawaban[{{ $pertanyaan->id_pertanyaan }}]"
                                                             value="{{ is_array($answer) ? implode(', ', $answer) : $answer }}" disabled>
                                                     @elseif($pertanyaan->tipe_jawaban == 'textarea')

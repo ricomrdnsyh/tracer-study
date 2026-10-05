@@ -52,15 +52,10 @@
                                         <div class="row">
                                             @foreach ($kategori->pertanyaans as $pertanyaan)
                                                 @php
-                                                    $isKompetensi =
-                                                        str_contains(
-                                                            strtolower($kategori->nama_kategori),
-                                                            'kompetensi',
-                                                        ) ||
-                                                        str_contains(
-                                                            strtolower($kategori->nama_kategori),
-                                                            'metode pembelajaran',
-                                                        );
+                                                    $isKompetensi = str_contains(
+                                                        strtolower($kategori->nama_kategori),
+                                                        'kompetensi'
+                                                    );
                                                     $colClass = $isKompetensi ? 'col-12 col-md-6' : 'col-12';
                                                 @endphp
                                                 <div class="{{ $colClass }} mb-6 pertanyaan-container"
@@ -68,6 +63,13 @@
                                                     data-syarat-jawaban='@json($pertanyaan->syarat_jawaban)'>
                                                     @php
                                                         $answer = $jawabanUser[$pertanyaan->id_pertanyaan] ?? null;
+                                                        $lbl = $jawabanLabel[$pertanyaan->id_pertanyaan] ?? '';
+                                                        
+                                                        // Default "Indonesia" untuk pertanyaan Negara (F5A0) jika belum ada jawaban
+                                                        if (strtolower($pertanyaan->kode_pertanyaan) === 'f5a0' && empty($answer)) {
+                                                            $answer = 'ID'; // Kode negara untuk Indonesia pada API Kemdikbud
+                                                            $lbl = 'Indonesia';
+                                                        }
                                                     @endphp
                                                     <label
                                                         class="form-label fs-6 fw-bold text-gray-800 {{ $pertanyaan->wajib ? 'required' : '' }} mb-2">
@@ -76,10 +78,22 @@
                                                     </label>
 
                                                     @if ($pertanyaan->tipe_jawaban == 'text')
-                                                        @if (in_array($pertanyaan->kode_pertanyaan, ['f5a1', 'f5a2', 'f18b', 'f18c']))
+                                                                                                                @if (in_array(strtolower($pertanyaan->kode_pertanyaan), ['f5a0', 'f5a1', 'f5a2']))
+                                                              <select class="form-select form-select-sm border-gray-300"
+                                                                  name="jawaban[{{ $pertanyaan->id_pertanyaan }}]"
+                                                                  data-wilayah-select="{{ strtolower($pertanyaan->kode_pertanyaan) }}"
+                                                                  data-id-pertanyaan="{{ $pertanyaan->id_pertanyaan }}"
+                                                                  data-placeholder="Pilih atau cari..."
+                                                                  {{ $pertanyaan->wajib ? 'required' : '' }}>
+                                                                  @if ($answer && $lbl)
+                                                                      <option value="{{ $answer }}" selected>{{ $lbl }}</option>
+                                                                  @endif
+                                                              </select>
+                                                              <input type="hidden" name="jawaban_label[{{ $pertanyaan->id_pertanyaan }}]" id="hidden_label_{{ $pertanyaan->id_pertanyaan }}" value="{{ $lbl }}">
+                                                        @elseif (in_array(strtolower($pertanyaan->kode_pertanyaan), ['f18b', 'f18c']))
                                                             <div class="position-relative"
-                                                                data-remote-select="{{ $pertanyaan->kode_pertanyaan }}"
-                                                                data-disabled="{{ in_array($pertanyaan->kode_pertanyaan, ['f5a2', 'f18c']) ? 'true' : 'false' }}">
+                                                                data-remote-select="{{ strtolower($pertanyaan->kode_pertanyaan) }}"
+                                                                data-disabled="{{ in_array(strtolower($pertanyaan->kode_pertanyaan), ['f5a1', 'f5a2', 'f18c']) ? 'true' : 'false' }}">
                                                                 <input type="hidden"
                                                                     name="jawaban[{{ $pertanyaan->id_pertanyaan }}]"
                                                                     value="{{ $answer }}"
@@ -88,8 +102,8 @@
                                                                     name="jawaban_label[{{ $pertanyaan->id_pertanyaan }}]"
                                                                     class="form-control form-control-sm border-gray-300"
                                                                     placeholder="Ketik untuk mencari..." autocomplete="off"
-                                                                    value="{{ $jawabanLabel[$pertanyaan->id_pertanyaan] ?? '' }}"
-                                                                    {{ in_array($pertanyaan->kode_pertanyaan, ['f5a2', 'f18c']) ? 'readonly' : '' }}>
+                                                                    value="{{ $lbl }}"
+                                                                    {{ in_array(strtolower($pertanyaan->kode_pertanyaan), ['f5a1', 'f5a2', 'f18c']) ? 'readonly' : '' }}>
                                                                 <div class="position-absolute w-100 mt-1 d-none overflow-hidden rounded border border-gray-300 bg-white shadow-sm"
                                                                     data-remote-select-results
                                                                     style="max-height: 200px; overflow-y: auto; z-index: 1000;">
