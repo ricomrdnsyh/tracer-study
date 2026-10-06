@@ -21,6 +21,11 @@ class ClientSSO
         return $this->fetchData('program_studi', ['id_fakultas' => $idFakultas]);
     }
 
+    public function getTahunAkademikFromApi(): array
+    {
+        return $this->fetchData('tahun_ajaran');
+    }
+
     public function getLembagaFromApi(): array
     {
         return $this->fetchData('lembaga');

@@ -267,7 +267,17 @@
                                     <span class="menu-icon">
                                         <i class="fa-solid fa-graduation-cap fs-4"></i>
                                     </span>
-                                    <span class="menu-title">Prodi</span>
+                                    <span class="menu-title">Program Studi</span>
+                                </a>
+                            </div>
+
+                            <div class="menu-item">
+                                <a class="menu-link {{ Request::is('admin/tahun-akademik*') ? 'active' : '' }}"
+                                    href="{{ route('admin.tahun-akademik.index') }}">
+                                    <span class="menu-icon">
+                                        <i class="fa-solid fa-calendar-days fs-4"></i>
+                                    </span>
+                                    <span class="menu-title">Tahun Akademik</span>
                                 </a>
                             </div>
 

@@ -10,6 +10,7 @@ use App\Http\Controllers\Admin\AdminProdiController;
 use App\Http\Controllers\Admin\AdminResponController;
 use App\Http\Controllers\Admin\AdminUserController;
 use App\Http\Controllers\Admin\AdminPerusahaanController;
+use App\Http\Controllers\Admin\AdminTahunAkademikController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboard;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Fakultas\DashboardController as FakultasDashboard;
@@ -40,6 +41,10 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:Admin,Fakultas
         Route::get('/users/data', [AdminUserController::class, 'getUsers'])->name('users.data');
         Route::resource('users', AdminUserController::class);
     });
+
+    Route::get('/tahun-akademik/data', [AdminTahunAkademikController::class, 'getTahunAkademik'])->name('tahun-akademik.data');
+    Route::match(['get', 'post'], '/tahun-akademik/sync', [AdminTahunAkademikController::class, 'sync'])->name('tahun-akademik.sync');
+    Route::resource('tahun-akademik', AdminTahunAkademikController::class)->only(['index', 'show']);
 
     Route::get('/fakultas/data', [AdminFakultasController::class, 'getFakultas'])->name('fakultas.data');
     Route::match(['get', 'post'], '/fakultas/sync', [AdminFakultasController::class, 'sync'])->name('fakultas.sync');
