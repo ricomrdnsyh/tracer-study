@@ -111,36 +111,45 @@
                                 <!-- Tombol toolbar jika ada nantinya -->
                             </div>
                         </div>
-                        
+
                         <div class="card-body py-4 px-8 filter-container mt-4">
                             <div class="border border-dashed rounded p-5 mb-5" style="border-color: #b5b5c3 !important;">
-                                <h5 class="text-primary mb-4"><i class="fas fa-filter text-primary me-2"></i>Filter Data</h5>
+                                <h5 class="text-primary mb-4"><i class="fas fa-filter text-primary me-2"></i>Filter Data
+                                </h5>
                                 <div class="row g-5">
-                                    @if(auth()->user()->role !== 'Fakultas')
-                                    <div class="col-lg-4 col-md-12 col-sm-12">
-                                        <label class="form-label fw-bold mb-2">Fakultas:</label>
-                                        <select id="filter_fakultas" class="form-select form-select-sm" data-control="select2" data-placeholder="Semua Fakultas" data-allow-clear="true">
-                                            <option value="">Semua Fakultas</option>
-                                            @foreach($fakultas as $f)
-                                                <option value="{{ $f->id_fakultas }}">{{ $f->nama_fakultas }}</option>
-                                            @endforeach
-                                        </select>
-                                    </div>
+                                    @if (auth()->user()->role !== 'Fakultas')
+                                        <div class="col-lg-4 col-md-12 col-sm-12">
+                                            <label class="form-label fw-bold mb-2">Fakultas:</label>
+                                            <select id="filter_fakultas" class="form-select form-select-sm"
+                                                data-control="select2" data-placeholder="Semua Fakultas"
+                                                data-allow-clear="true">
+                                                <option value="">Semua Fakultas</option>
+                                                @foreach ($fakultas as $f)
+                                                    <option value="{{ $f->id_fakultas }}">{{ $f->nama_fakultas }}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
                                     @endif
-                                    <div class="{{ auth()->user()->role !== 'Fakultas' ? 'col-lg-4' : 'col-lg-6' }} col-md-12 col-sm-12">
+                                    <div
+                                        class="{{ auth()->user()->role !== 'Fakultas' ? 'col-lg-4' : 'col-lg-6' }} col-md-12 col-sm-12">
                                         <label class="form-label fw-bold mb-2">Program Studi:</label>
-                                        <select id="filter_prodi" class="form-select form-select-sm" data-control="select2" data-placeholder="Semua Program Studi" data-allow-clear="true">
+                                        <select id="filter_prodi" class="form-select form-select-sm" data-control="select2"
+                                            data-placeholder="Semua Program Studi" data-allow-clear="true">
                                             <option value="">Semua Program Studi</option>
-                                            @foreach($prodi as $p)
-                                                <option value="{{ $p->id_prodi }}" data-fakultas="{{ $p->fakultas_id }}">{{ $p->nama_prodi }}</option>
+                                            @foreach ($prodi as $p)
+                                                <option value="{{ $p->id_prodi }}" data-fakultas="{{ $p->fakultas_id }}">
+                                                    {{ $p->nama_prodi }}</option>
                                             @endforeach
                                         </select>
                                     </div>
-                                    <div class="{{ auth()->user()->role !== 'Fakultas' ? 'col-lg-4' : 'col-lg-6' }} col-md-12 col-sm-12">
+                                    <div
+                                        class="{{ auth()->user()->role !== 'Fakultas' ? 'col-lg-4' : 'col-lg-6' }} col-md-12 col-sm-12">
                                         <label class="form-label fw-bold mb-2">Kuesioner:</label>
-                                        <select id="filter_kuesioner" class="form-select form-select-sm" data-control="select2" data-placeholder="Semua Kuesioner" data-allow-clear="true">
+                                        <select id="filter_kuesioner" class="form-select form-select-sm"
+                                            data-control="select2" data-placeholder="Semua Kuesioner"
+                                            data-allow-clear="true">
                                             <option value="">Semua Kuesioner</option>
-                                            @foreach($kuesioner as $k)
+                                            @foreach ($kuesioner as $k)
                                                 <option value="{{ $k->id_kuesioner }}">{{ $k->judul }}</option>
                                             @endforeach
                                         </select>
@@ -182,7 +191,7 @@
     <script src="{{ asset('assets/plugins/custom/datatables/dataTables.colReorder.min.js') }}"></script>
     <script src="{{ asset('assets/plugins/custom/datatables/dataTables.responsive.min.js') }}"></script>
     <script src="{{ asset('assets/plugins/custom/datatables/dataTables.buttons.min.js') }}"></script>
-    
+
     <script src="{{ asset('assets/plugins/custom/datatables/vfs_fonts.js') }}"></script>
     <script src="{{ asset('assets/plugins/custom/datatables/buttons.html5.min.js') }}"></script>
     <script src="{{ asset('assets/plugins/custom/datatables/jszip.min.js') }}"></script>

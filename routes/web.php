@@ -62,6 +62,12 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:Admin,Fakultas
     Route::post('/kuesioner/{kuesioner}/import-json', [AdminKuesionerController::class, 'importJson'])->name('kuesioner.import-json');
     Route::resource('kuesioner', AdminKuesionerController::class);
 
+    Route::get('/wilayah', [\App\Http\Controllers\Admin\AdminWilayahController::class, 'index'])->name('wilayah.index');
+    Route::get('/wilayah/negara', [\App\Http\Controllers\Admin\AdminWilayahController::class, 'getNegara'])->name('wilayah.negara');
+    Route::get('/wilayah/provinsi', [\App\Http\Controllers\Admin\AdminWilayahController::class, 'getProvinsi'])->name('wilayah.provinsi');
+    Route::get('/wilayah/kabupaten', [\App\Http\Controllers\Admin\AdminWilayahController::class, 'getKabupaten'])->name('wilayah.kabupaten');
+    Route::post('/wilayah/import', [\App\Http\Controllers\Admin\AdminWilayahController::class, 'import'])->name('wilayah.import');
+
     Route::get('/respon/data', [AdminResponController::class, 'getRespon'])->name('respon.data');
     Route::resource('respon', AdminResponController::class)->only(['index', 'show']);
 

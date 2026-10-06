@@ -282,6 +282,16 @@
                             </a>
                         </div>
 
+                        <div class="menu-item">
+                            <a class="menu-link {{ Request::is('admin/wilayah*') ? 'active' : '' }}"
+                                href="{{ route('admin.wilayah.index') }}">
+                                <span class="menu-icon">
+                                    <i class="fa-solid fa-map-location-dot fs-4"></i>
+                                </span>
+                                <span class="menu-title">Wilayah</span>
+                            </a>
+                        </div>
+
                         <div class="menu-item pt-1">
                             <div class="menu-content">
                                 <span class="menu-heading fw-bold text-uppercase fs-8">Tracer Study</span>
