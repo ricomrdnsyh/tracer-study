@@ -470,7 +470,7 @@
                                 onclick="window.location.href='#'">
                                 <div class="card-body d-flex align-items-center">
                                     <div class="stat-icon bg-body shadow-sm me-4 icon-glow-primary">
-                                        <i class="fa-solid fa-reply-all fs-2x text-primary"></i>
+                                        <i class="fa-solid fa-user-check fs-2x text-primary"></i>
                                     </div>
                                     <div>
                                         <div class="text-gray-600 fw-semibold fs-7 mb-1">Total Responden</div>

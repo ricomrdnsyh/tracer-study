@@ -84,7 +84,7 @@ class AdminPerusahaanController extends Controller
             abort(404);
         }
 
-        $pekerjaanListQuery = PekerjaanAlumni::with(['responTracer.mahasiswa.prodi'])
+        $pekerjaanListQuery = PekerjaanAlumni::with(['responTracer.mahasiswa.prodi.fakultas'])
             ->where('nama', $nama);
         if (auth()->user()->role === 'Fakultas') {
             $pekerjaanListQuery->whereHas('responTracer.mahasiswa.prodi', function ($q) {

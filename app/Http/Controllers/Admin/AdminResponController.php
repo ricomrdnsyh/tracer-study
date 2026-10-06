@@ -26,7 +26,7 @@ class AdminResponController extends Controller
 
     public function getRespon(Request $request)
     {
-        $query = ResponTracer::with(['mahasiswa.prodi', 'kuesioner'])->select(['id_respon', 'mahasiswa_id', 'kuesioner_id', 'status', 'tgl_isi'])->orderByDesc('tgl_isi');
+        $query = ResponTracer::with(['mahasiswa.prodi.fakultas', 'kuesioner'])->select(['id_respon', 'mahasiswa_id', 'kuesioner_id', 'status', 'tgl_isi'])->orderByDesc('tgl_isi');
 
         if (auth()->user()->role === 'Fakultas') {
             $query->whereHas('mahasiswa.prodi', function ($q) {
@@ -55,6 +55,12 @@ class AdminResponController extends Controller
             ->addColumn('mahasiswa_nim', function ($row) {
                 return $row->mahasiswa_id;
             })
+            ->addColumn('fakultas_nama', function ($row) {
+                return $row->mahasiswa && $row->mahasiswa->prodi && $row->mahasiswa->prodi->fakultas ? $row->mahasiswa->prodi->fakultas->nama_fakultas : '-';
+            })
+            ->addColumn('prodi_nama', function ($row) {
+                return $row->mahasiswa && $row->mahasiswa->prodi ? $row->mahasiswa->prodi->nama_prodi : '-';
+            })
             ->addColumn('kuesioner_judul', function ($row) {
                 return $row->kuesioner ? $row->kuesioner->judul : '-';
             })
@@ -77,7 +83,7 @@ class AdminResponController extends Controller
     public function show($id)
     {
         $query = ResponTracer::with([
-            'mahasiswa',
+            'mahasiswa.prodi.fakultas',
             'kuesioner.kategoriPertanyaans.pertanyaans',
             'jawabanDetails.pertanyaan',
             'pekerjaanAlumni'
@@ -94,6 +100,8 @@ class AdminResponController extends Controller
         // Map jawaban user for easy access
         $jawabanUser = [];
         foreach ($respon->jawabanDetails as $detail) {
+            $pertanyaan = $detail->pertanyaan;
+            
             if ($detail->jawaban_json) {
                 $decoded = is_string($detail->jawaban_json) ? json_decode($detail->jawaban_json, true) : $detail->jawaban_json;
                 if (is_array($decoded) && isset($decoded['label'])) {
@@ -102,12 +110,17 @@ class AdminResponController extends Controller
                     $jawabanUser[$detail->pertanyaan_id] = $decoded;
                 }
             } else {
-                $jawabanUser[$detail->pertanyaan_id] = $detail->jawaban_text;
+                $val = $detail->jawaban_text;
+                if ($pertanyaan && $pertanyaan->tipe_jawaban === 'checkbox' && is_string($val)) {
+                    $jawabanUser[$detail->pertanyaan_id] = array_map('trim', explode(',', $val));
+                } else {
+                    $jawabanUser[$detail->pertanyaan_id] = $val;
+                }
             }
         }
 
         $pekerjaan = $respon->pekerjaanAlumni;
-        $pertanyaans = \App\Models\Pertanyaan::whereIn('kode_pertanyaan', ['F5A0', 'F5A1', 'F5A2', 'f5a0', 'f5a1', 'f5a2'])->get();
+        $pertanyaans = \App\Models\Pertanyaan::whereIn('kode_pertanyaan', ['F5A0', 'F5A1', 'F5A2', 'f5a0', 'f5a1', 'f5a2', 'f18b', 'F18B'])->get();
         
         foreach ($pertanyaans as $p) {
             $id = $p->id_pertanyaan;
@@ -117,6 +130,10 @@ class AdminResponController extends Controller
                 if (!empty($jawabanUser[$id]) && strlen($jawabanUser[$id]) == 2) { // Kode Negara ID
                     $negara = \Illuminate\Support\Facades\DB::table('master_negara')->where('kode_wilayah_negara', $jawabanUser[$id])->first();
                     if ($negara) $jawabanUser[$id] = $negara->negara;
+                }
+            } elseif ($kode === 'f18b') {
+                if (empty($jawabanUser[$id]) && $pekerjaan) {
+                    $jawabanUser[$id] = $pekerjaan->nama;
                 }
             } elseif ($kode === 'f5a1') {
                 if (empty($jawabanUser[$id]) && $pekerjaan) {

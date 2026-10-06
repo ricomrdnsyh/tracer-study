@@ -6,8 +6,6 @@
         });
 
         $('#example').DataTable({
-            processing: false,
-            serverSide: true,
             responsive: {
                 details: {
                     type: 'column',
@@ -43,51 +41,15 @@
                     extend: 'csv',
                     action: newexportaction,
                     titleAttr: 'Csv',
-                    title: 'Data PT / Instansi',
+                    title: 'Data Mahasiswa Alumni',
                     className: 'btn btn-sm btn-primary mt-2 rounded-2'
                 },
                 {
                     extend: 'excel',
                     action: newexportaction,
                     titleAttr: 'Excel',
-                    title: 'Data PT / Instansi',
+                    title: 'Data Mahasiswa Alumni',
                     className: 'btn btn-sm btn-primary mt-2 rounded-2'
-                }
-            ],
-            ajax: '{{ route('admin.perusahaan.data', [], false) }}',
-            columns: [{
-                    data: null,
-                    defaultContent: '',
-                    orderable: false,
-                    searchable: false
-                },
-                {
-                    data: 'action',
-                    name: 'action',
-                    orderable: false,
-                    searchable: false
-                },
-                {
-                    data: 'nama',
-                    name: 'nama'
-                },
-                {
-                    data: 'jenis_instansi',
-                    name: 'jenis_instansi',
-                    render: function(data) {
-                        return data || '-';
-                    }
-                },
-                {
-                    data: 'lokasi',
-                    name: 'lokasi',
-                    orderable: false,
-                    searchable: false
-                },
-                {
-                    data: 'jumlah_mahasiswa',
-                    name: 'jumlah_mahasiswa',
-                    className: 'text-center'
                 }
             ]
         });

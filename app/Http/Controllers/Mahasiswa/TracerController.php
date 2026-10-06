@@ -33,7 +33,7 @@ class TracerController extends Controller
             return view('mahasiswa.tracer.empty', ['message' => 'Belum ada Tracer Study yang aktif saat ini.']);
         }
 
-        $respon = ResponTracer::with('jawabanDetails')->where('kuesioner_id', $kuesioner->id_kuesioner)
+        $respon = ResponTracer::with('jawabanDetails.pertanyaan')->where('kuesioner_id', $kuesioner->id_kuesioner)
             ->where('mahasiswa_id', $mahasiswa->nim)
             ->first();
 
@@ -45,6 +45,7 @@ class TracerController extends Controller
         $jawabanLabel = [];
         if ($respon) {
             foreach ($respon->jawabanDetails as $detail) {
+                $pertanyaan = $detail->pertanyaan;
                 if ($detail->jawaban_json) {
                     $decoded = is_string($detail->jawaban_json) ? json_decode($detail->jawaban_json, true) : $detail->jawaban_json;
                     if (is_array($decoded) && isset($decoded['label'])) {
@@ -55,7 +56,12 @@ class TracerController extends Controller
                         $jawabanUser[$detail->pertanyaan_id] = $decoded;
                     }
                 } else {
-                    $jawabanUser[$detail->pertanyaan_id] = $detail->jawaban_text;
+                    $val = $detail->jawaban_text;
+                    if ($pertanyaan && $pertanyaan->tipe_jawaban === 'checkbox' && is_string($val)) {
+                        $jawabanUser[$detail->pertanyaan_id] = array_map('trim', explode(',', $val));
+                    } else {
+                        $jawabanUser[$detail->pertanyaan_id] = $val;
+                    }
                 }
             }
             
@@ -82,6 +88,11 @@ class TracerController extends Controller
                             $kab = \Illuminate\Support\Facades\DB::table('master_kota_kabupaten')->where('kode_wilayah_kota_kabupaten', $jawabanUser[$id])->first();
                             if ($kab) $jawabanLabel[$id] = $kab->kota_kabupaten;
                         }
+                    }
+
+                    // Fallback for imported raw text
+                    if (empty($jawabanLabel[$id])) {
+                        $jawabanLabel[$id] = is_array($jawabanUser[$id]) ? implode(', ', $jawabanUser[$id]) : $jawabanUser[$id];
                     }
                 }
             }
@@ -154,7 +165,7 @@ class TracerController extends Controller
                 $kode = strtolower($p->kode_pertanyaan);
 
                 if ($kode === 'f5b' && isset($request->jawaban[$id]) && !empty($request->jawaban[$id])) {
-                    $nama = $request->jawaban[$id];
+                    $nama = !empty($request->jawaban_label[$id]) ? $request->jawaban_label[$id] : $request->jawaban[$id];
                 } elseif ($kode === 'f1101' && isset($request->jawaban[$id]) && !empty($request->jawaban[$id])) {
                     $jenis_instansi = $request->jawaban[$id];
                 } elseif ($kode === 'f5a1' && isset($request->jawaban[$id]) && !empty($request->jawaban[$id])) {

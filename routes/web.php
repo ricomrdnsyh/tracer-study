@@ -68,6 +68,9 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:Admin,Fakultas
     Route::get('/wilayah/kabupaten', [\App\Http\Controllers\Admin\AdminWilayahController::class, 'getKabupaten'])->name('wilayah.kabupaten');
     Route::post('/wilayah/import', [\App\Http\Controllers\Admin\AdminWilayahController::class, 'import'])->name('wilayah.import');
 
+    Route::get('/respon/template', [\App\Http\Controllers\Admin\ResponImportController::class, 'template'])->name('respon.template');
+    Route::post('/respon/import', [\App\Http\Controllers\Admin\ResponImportController::class, 'import'])->name('respon.import');
+    Route::get('/respon/export', [\App\Http\Controllers\Admin\ResponImportController::class, 'export'])->name('respon.export');
     Route::get('/respon/data', [AdminResponController::class, 'getRespon'])->name('respon.data');
     Route::resource('respon', AdminResponController::class)->only(['index', 'show']);
 

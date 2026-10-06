@@ -64,8 +64,8 @@
             background: #dc3545 !important;
         }
 
-        #example td:nth-child(2),
-        #example th:nth-child(2) {
+        #example.dataTable td:nth-child(2),
+        #example.dataTable th:nth-child(2) {
             padding-left: .25rem !important;
         }
 
@@ -111,17 +111,18 @@
                             <div class="card-toolbar">
                             </div>
                         </div>
-                        <div class="card-body pt-0 mt-4">
+                        <div class="separator my-5"></div>
+                        <div class="card-body pt-0">
                             <div class="table-responsive">
                                 <table class="table align-middle table-row-dashed fs-6 gy-5 w-100" id="example">
                                     <thead class="">
                                         <tr class="text-start text-gray-400 fw-bolder fs-7 text-uppercase gs-0">
                                             <th class="text-center p-0" style="width:28px; min-width:28px;"></th>
                                             <th class="text-center ps-1 min-w-100px">Aksi</th>
-                                            <th class="min-w-150px">PT / Instansi</th>
-                                            <th class="min-w-100px">Jenis</th>
+                                            <th class="min-w-150px">Nama PT/Instansi</th>
+                                            <th class="min-w-100px">Jenis PT/Instansi</th>
                                             <th class="min-w-150px">Lokasi</th>
-                                            <th class="min-w-50px text-center">Jumlah Mahasiswa</th>
+                                            <th class="min-w-50px text-center">Jumlah Mahasiswa Terhubung</th>
                                         </tr>
                                     </thead>
                                     <tbody class="fw-bold text-gray-800"></tbody>

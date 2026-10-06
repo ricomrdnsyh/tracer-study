@@ -64,9 +64,30 @@
             background: #dc3545 !important;
         }
 
-        #example td:nth-child(2),
-        #example th:nth-child(2) {
+        #example.dataTable td:nth-child(2),
+        #example.dataTable th:nth-child(2) {
             padding-left: .25rem !important;
+        }
+
+        #example .action-wrap {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: .5rem;
+            padding: .5rem .6rem;
+            background: #f5f8fa;
+            border-radius: .5rem;
+            white-space: nowrap;
+        }
+
+        #example .action-wrap .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #example .action-wrap i {
+            line-height: 1 !important;
         }
     </style>
 @endsection
@@ -175,31 +196,39 @@
                         </div>
                     </div>
 
-                    <div class="card shadow-sm border border-dashed border-dark rounded-4">
-                        <div class="card-header border-0 pt-8 pb-4">
-                            <h3 class="card-title align-items-start flex-column">
-                                <span class="card-label fw-bolder text-dark fs-4">Daftar Mahasiswa Alumni</span>
-                                <span class="text-gray-500 mt-2 fw-semibold fs-6">Mahasiswa yang terhubung ke PT / Instansi
-                                    ini</span>
-                            </h3>
+                    <div class="card shadow-sm border border-dashed border-dark rounded">
+                        <div class="card-header border-0 pt-6">
+                            <div class="card-title">
+                                <div class="d-flex align-items-center position-relative my-1">
+                                    <h3 class="card-title align-items-start flex-column">
+                                        <span class="card-label fw-bolder fs-3 mb-1">Daftar Mahasiswa Alumni</span>
+                                        <span class="text-gray-500 mt-1 fw-semibold fs-6">Mahasiswa yang terhubung ke PT / Instansi ini</span>
+                                    </h3>
+                                </div>
+                            </div>
+                            <div class="card-toolbar">
+                            </div>
                         </div>
-                        <div class="card-body pt-0 mt-4">
+                        <div class="separator my-5"></div>
+                        <div class="card-body pt-0">
                             <div class="table-responsive">
-                                <table class="table align-middle table-row-dashed fs-6 gy-5 mt-2" id="example">
-                                    <thead>
-                                        <tr class="text-start text-gray-500 fw-bolder fs-7 text-uppercase gs-0">
+                                <table class="table align-middle table-row-dashed fs-6 gy-5 w-100" id="example">
+                                    <thead class="">
+                                        <tr class="text-start text-gray-400 fw-bolder fs-7 text-uppercase gs-0">
                                             <th class="text-center p-0" style="width:28px; min-width:28px;"></th>
                                             <th class="text-center ps-1 min-w-100px">Aksi</th>
                                             <th class="min-w-150px">NIM</th>
                                             <th class="min-w-200px">Nama Mahasiswa</th>
+                                            <th class="min-w-150px">Fakultas</th>
                                             <th class="min-w-150px">Program Studi</th>
                                         </tr>
                                     </thead>
-                                    <tbody class="fw-semibold text-gray-600">
+                                    <tbody class="fw-bold text-gray-800">
                                         @forelse($pekerjaanList as $p)
                                             @php
                                                 $mhs = $p->responTracer->mahasiswa ?? null;
                                                 $prodi = $mhs->prodi ?? null;
+                                                $fakultas = $prodi->fakultas ?? null;
                                                 $nama_mhs = $mhs ? $mhs->nama : '-';
                                             @endphp
                                             <tr>
@@ -223,12 +252,16 @@
                                                 </td>
                                                 <td>
                                                     <span
+                                                        class="text-gray-800 fw-bold">{{ $fakultas ? $fakultas->nama_fakultas : '-' }}</span>
+                                                </td>
+                                                <td>
+                                                    <span
                                                         class="text-gray-800 fw-bold">{{ $prodi ? $prodi->nama_prodi : '-' }}</span>
                                                 </td>
                                             </tr>
                                         @empty
                                             <tr>
-                                                <td colspan="5" class="text-center text-muted py-8">
+                                                <td colspan="6" class="text-center text-muted py-8">
                                                     <div class="d-flex flex-column align-items-center">
                                                         <i class="fas fa-box-open fs-2x text-muted mb-3"></i>
                                                         <span class="fw-semibold fs-6">Belum ada alumni yang
@@ -253,76 +286,18 @@
 
 @section('js')
     <script src="{{ asset('assets/plugins/custom/datatables/jquery.dataTables.min.js') }}"></script>
+    <script src="{{ asset('assets/plugins/custom/datatables/lodash.min.js') }}"></script>
     <script src="{{ asset('assets/plugins/custom/datatables/dataTables.bootstrap5.min.js') }}"></script>
+    <script src="{{ asset('assets/plugins/custom/datatables/dataTables.colReorder.min.js') }}"></script>
     <script src="{{ asset('assets/plugins/custom/datatables/dataTables.responsive.min.js') }}"></script>
-    <script src="{{ asset('assets/plugins/custom/datatables/responsive.bootstrap.min.js') }}"></script>
     <script src="{{ asset('assets/plugins/custom/datatables/dataTables.buttons.min.js') }}"></script>
+
     <script src="{{ asset('assets/plugins/custom/datatables/vfs_fonts.js') }}"></script>
     <script src="{{ asset('assets/plugins/custom/datatables/buttons.html5.min.js') }}"></script>
     <script src="{{ asset('assets/plugins/custom/datatables/jszip.min.js') }}"></script>
     <script src="{{ asset('assets/plugins/custom/datatables/buttons.colVis.min.js') }}"></script>
-    <script>
-        $(document).ready(function() {
-            $('#example').DataTable({
-                dom: 'lBfrtip',
-                buttons: [{
-                        extend: 'colvis',
-                        collectionLayout: 'fixed columns',
-                        collectionTitle: 'Pengaturan Kolom',
-                        className: 'btn btn-sm btn-primary mt-2 rounded-2',
-                        columns: ':not(.noVis)'
-                    },
-                    {
-                        extend: 'csv',
-                        action: newexportaction,
-                        titleAttr: 'Csv',
-                        title: 'Data Mahasiswa Alumni',
-                        className: 'btn btn-sm btn-primary mt-2 rounded-2'
-                    },
-                    {
-                        extend: 'excel',
-                        action: newexportaction,
-                        titleAttr: 'Excel',
-                        title: 'Data Mahasiswa Alumni',
-                        className: 'btn btn-sm btn-primary mt-2 rounded-2'
-                    }
-                ],
-                responsive: {
-                    details: {
-                        type: 'column',
-                        target: 0
-                    }
-                },
-                language: {
-                    processing: "Memproses...",
-                    search: "Cari:",
-                    lengthMenu: "Tampilkan _MENU_ entri",
-                    info: "Menampilkan _START_ sampai _END_ dari _TOTAL_ entri",
-                    infoEmpty: "Menampilkan 0 sampai 0 dari 0 entri",
-                    infoFiltered: "(disaring dari _MAX_ total entri)",
-                    loadingRecords: "Memuat...",
-                    zeroRecords: "Tidak ditemukan data yang sesuai",
-                    emptyTable: "Tidak ada data yang tersedia pada tabel ini",
-                    paginate: {
-                        first: "Pertama",
-                        previous: "Sebelumnya",
-                        next: "Selanjutnya",
-                        last: "Terakhir"
-                    }
-                },
-                columnDefs: [{
-                        targets: 0,
-                        className: 'dt-control',
-                        orderable: false,
-                        searchable: false
-                    },
-                    {
-                        targets: 1,
-                        orderable: false,
-                        searchable: false
-                    }
-                ]
-            });
-        });
-    </script>
+    <script src="{{ asset('assets/plugins/custom/datatables/print.js') }}"></script>
+    <script src="{{ asset('assets/plugins/custom/datatables/responsive.bootstrap.min.js') }}"></script>
+
+    @include('admin.perusahaan.script.show')
 @endsection

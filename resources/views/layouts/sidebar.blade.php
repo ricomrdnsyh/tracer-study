@@ -244,53 +244,63 @@
                                     <span class="menu-title">Pengguna</span>
                                 </a>
                             </div>
-                        @endif
 
-                        <div class="menu-item pt-1">
-                            <div class="menu-content">
-                                <span class="menu-heading fw-bold text-uppercase fs-8">Master</span>
+                            <div class="menu-item pt-1">
+                                <div class="menu-content">
+                                    <span class="menu-heading fw-bold text-uppercase fs-8">Master</span>
+                                </div>
                             </div>
-                        </div>
 
-                        <div class="menu-item">
-                            <a class="menu-link {{ Request::is('admin/fakultas*') ? 'active' : '' }}"
-                                href="{{ route('admin.fakultas.index') }}">
-                                <span class="menu-icon">
-                                    <i class="fa-solid fa-building fs-4"></i>
-                                </span>
-                                <span class="menu-title">Fakultas</span>
-                            </a>
-                        </div>
+                            <div class="menu-item">
+                                <a class="menu-link {{ Request::is('admin/fakultas*') ? 'active' : '' }}"
+                                    href="{{ route('admin.fakultas.index') }}">
+                                    <span class="menu-icon">
+                                        <i class="fa-solid fa-building fs-4"></i>
+                                    </span>
+                                    <span class="menu-title">Fakultas</span>
+                                </a>
+                            </div>
 
-                        <div class="menu-item">
-                            <a class="menu-link {{ Request::is('admin/prodi*') ? 'active' : '' }}"
-                                href="{{ route('admin.prodi.index') }}">
-                                <span class="menu-icon">
-                                    <i class="fa-solid fa-graduation-cap fs-4"></i>
-                                </span>
-                                <span class="menu-title">Prodi</span>
-                            </a>
-                        </div>
+                            <div class="menu-item">
+                                <a class="menu-link {{ Request::is('admin/prodi*') ? 'active' : '' }}"
+                                    href="{{ route('admin.prodi.index') }}">
+                                    <span class="menu-icon">
+                                        <i class="fa-solid fa-graduation-cap fs-4"></i>
+                                    </span>
+                                    <span class="menu-title">Prodi</span>
+                                </a>
+                            </div>
 
-                        <div class="menu-item">
-                            <a class="menu-link {{ Request::is('admin/mahasiswa*') ? 'active' : '' }}"
-                                href="{{ route('admin.mahasiswa.index') }}">
-                                <span class="menu-icon">
-                                    <i class="fa-solid fa-users fs-4"></i>
-                                </span>
-                                <span class="menu-title">Mahasiswa</span>
-                            </a>
-                        </div>
+                            <div class="menu-item">
+                                <a class="menu-link {{ Request::is('admin/mahasiswa*') ? 'active' : '' }}"
+                                    href="{{ route('admin.mahasiswa.index') }}">
+                                    <span class="menu-icon">
+                                        <i class="fa-solid fa-users fs-4"></i>
+                                    </span>
+                                    <span class="menu-title">Mahasiswa</span>
+                                </a>
+                            </div>
 
-                        <div class="menu-item">
-                            <a class="menu-link {{ Request::is('admin/wilayah*') ? 'active' : '' }}"
-                                href="{{ route('admin.wilayah.index') }}">
-                                <span class="menu-icon">
-                                    <i class="fa-solid fa-map-location-dot fs-4"></i>
-                                </span>
-                                <span class="menu-title">Wilayah</span>
-                            </a>
-                        </div>
+                            <div class="menu-item">
+                                <a class="menu-link {{ Request::is('admin/wilayah*') ? 'active' : '' }}"
+                                    href="{{ route('admin.wilayah.index') }}">
+                                    <span class="menu-icon">
+                                        <i class="fa-solid fa-map-location-dot fs-4"></i>
+                                    </span>
+                                    <span class="menu-title">Wilayah</span>
+                                </a>
+                            </div>
+
+                            <div class="menu-item">
+                                <a class="menu-link {{ Request::is('admin/kuesioner*') ? 'active' : '' }}"
+                                    href="{{ route('admin.kuesioner.index') }}">
+                                    <span class="menu-icon">
+                                        <i class="fa-solid fa-clipboard-list fs-4"></i>
+                                    </span>
+                                    <span class="menu-title">Kuesioner</span>
+                                </a>
+                            </div>
+                        @endif
 
                         <div class="menu-item pt-1">
                             <div class="menu-content">
@@ -298,25 +308,13 @@
                             </div>
                         </div>
 
-
-
-                        <div class="menu-item">
-                            <a class="menu-link {{ Request::is('admin/kuesioner*') ? 'active' : '' }}"
-                                href="{{ route('admin.kuesioner.index') }}">
-                                <span class="menu-icon">
-                                    <i class="fa-solid fa-clipboard-list fs-4"></i>
-                                </span>
-                                <span class="menu-title">Kuesioner</span>
-                            </a>
-                        </div>
-
                         <div class="menu-item">
                             <a class="menu-link {{ Request::is('admin/respon*') ? 'active' : '' }}"
                                 href="{{ route('admin.respon.index') }}">
                                 <span class="menu-icon">
-                                    <i class="fa-solid fa-reply-all fs-4"></i>
+                                    <i class="fa-solid fa-user-check fs-4"></i>
                                 </span>
-                                <span class="menu-title">Respon Tracer</span>
+                                <span class="menu-title">Responden Tracer</span>
                             </a>
                         </div>
 

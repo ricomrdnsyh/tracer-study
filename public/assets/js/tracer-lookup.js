@@ -34,29 +34,31 @@ $(document).ready(function() {
         const statusText = container.find('div[data-remote-select-status]');
         
         let initialSearchText = searchInput.val();
+        let initialHiddenText = hiddenInput.val();
         
-        const setInactiveState = () => {
-            searchInput.prop('readonly', true).val('');
+        const setInactiveState = (isInit = false) => {
+            searchInput.prop('readonly', true);
+            if (!isInit) {
+                searchInput.val('');
+                hiddenInput.val('').trigger('change');
+            }
             searchInput.attr('placeholder', config.inactivePlaceholder);
             statusText.text(config.inactiveHelperText);
-            hiddenInput.val('').trigger('change');
             resultsContainer.addClass('d-none').empty();
         };
 
-        const setActiveState = () => {
+        const setActiveState = (isInit = false) => {
             searchInput.prop('readonly', false);
-            if (!initialSearchText) {
-                searchInput.val('');
-                hiddenInput.val('');
-            } else {
-                initialSearchText = '';
+            if (isInit) {
+                searchInput.val(initialSearchText);
+                hiddenInput.val(initialHiddenText);
             }
             searchInput.attr('placeholder', config.placeholder);
             statusText.text(config.helperText);
         };
 
         if (container.data('disabled') === true) {
-            setInactiveState();
+            setInactiveState(true);
         } else {
             statusText.text(config.helperText);
         }
@@ -64,16 +66,16 @@ $(document).ready(function() {
         if (config.dependsOn) {
             const parentHidden = $(`div[data-remote-select="${config.dependsOn}"]`).find('input[type="hidden"]');
             
-            parentHidden.on('change', function() {
+            parentHidden.on('change', function(e, isInit = false) {
                 if ($(this).val()) {
-                    setActiveState();
+                    setActiveState(isInit);
                 } else {
-                    setInactiveState();
+                    setInactiveState(isInit);
                 }
             });
 
             if (parentHidden.val()) {
-                parentHidden.trigger('change');
+                parentHidden.trigger('change', [true]);
             }
         }
 
