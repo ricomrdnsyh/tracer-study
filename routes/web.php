@@ -56,7 +56,8 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:Admin,Fakultas
 
 
     Route::get('/mahasiswa/data', [AdminMahasiswaController::class, 'getMahasiswa'])->name('mahasiswa.data');
-    Route::resource('mahasiswa', AdminMahasiswaController::class);
+    Route::match(['get', 'post'], '/mahasiswa/sync', [AdminMahasiswaController::class, 'sync'])->name('mahasiswa.sync');
+    Route::resource('mahasiswa', AdminMahasiswaController::class)->only(['index', 'show']);
 
 
     Route::get('/perusahaan/data', [AdminPerusahaanController::class, 'getPerusahaan'])->name('perusahaan.data');

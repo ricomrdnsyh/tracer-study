@@ -31,9 +31,29 @@
                     <div class="col-md-6">
                         <div class="d-flex flex-column mb-2">
                             <label class="d-flex align-items-center fs-sm-8 fs-lg-6 fw-bolder mb-1">
+                                <span>Fakultas</span>
+                            </label>
+                            <input type="text" id="show_fakultas"
+                                class="form-control form-control-sm fs-sm-8 fs-lg-6 bg-light" readonly>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="d-flex flex-column mb-2">
+                            <label class="d-flex align-items-center fs-sm-8 fs-lg-6 fw-bolder mb-1">
                                 <span>Program Studi</span>
                             </label>
                             <input type="text" id="show_prodi"
+                                class="form-control form-control-sm fs-sm-8 fs-lg-6 bg-light" readonly>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="d-flex flex-column mb-2">
+                            <label class="d-flex align-items-center fs-sm-8 fs-lg-6 fw-bolder mb-1">
+                                <span>Jenis Kelamin</span>
+                            </label>
+                            <input type="text" id="show_jenis_kelamin"
                                 class="form-control form-control-sm fs-sm-8 fs-lg-6 bg-light" readonly>
                         </div>
                     </div>
@@ -54,6 +74,16 @@
                                 <span>Nomor HP</span>
                             </label>
                             <input type="text" id="show_no_hp"
+                                class="form-control form-control-sm fs-sm-8 fs-lg-6 bg-light" readonly>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="d-flex flex-column mb-2">
+                            <label class="d-flex align-items-center fs-sm-8 fs-lg-6 fw-bolder mb-1">
+                                <span>Tahun Akademik Kelulusan</span>
+                            </label>
+                            <input type="text" id="show_tahun_keluar"
                                 class="form-control form-control-sm fs-sm-8 fs-lg-6 bg-light" readonly>
                         </div>
                     </div>

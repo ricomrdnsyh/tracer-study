@@ -54,7 +54,13 @@
                     className: 'btn btn-sm btn-primary mt-2 rounded-2'
                 }
             ],
-            ajax: '{{ route('admin.mahasiswa.data', [], false) }}',
+            ajax: {
+                url: '{{ route('admin.mahasiswa.data', [], false) }}',
+                data: function(d) {
+                    d.prodi_id = $('#filter_prodi').val();
+                    d.tahun_keluar = $('#filter_tahun_keluar').val();
+                }
+            },
             columns: [{
                     data: null,
                     defaultContent: '',
@@ -83,6 +89,13 @@
                     }
                 },
                 {
+                    data: 'tahun_keluar_label',
+                    name: 'akademik_id',
+                    render: function(data) {
+                        return data || '-';
+                    }
+                },
+                {
                     data: 'status',
                     name: 'status',
                     render: function(data) {
@@ -97,18 +110,27 @@
             ]
         });
 
+        $('#filter_prodi, #filter_tahun_keluar').on('change', function() {
+            $('#example').DataTable().ajax.reload();
+        });
+
+        $('#btn_reset_filter').on('click', function() {
+            $('#filter_prodi').val('').trigger('change');
+            $('#filter_tahun_keluar').val('').trigger('change');
+        });
+
         @if ($message = Session::get('success'))
             Swal.fire({
-                text: "{{ $message }}",
+                text: {!! json_encode($message) !!},
                 icon: "success",
                 confirmButtonText: "Ok, got it!",
                 confirmButtonColor: '#004289',
             });
         @endif
 
-        @if ($message = Session::get('failed'))
+        @if ($message = Session::get('failed') ?? Session::get('error'))
             Swal.fire({
-                text: "{{ $message }}",
+                text: {!! json_encode($message) !!},
                 icon: "error",
                 buttonsStyling: false,
                 confirmButtonText: "Ok, got it!",
@@ -117,53 +139,78 @@
                 }
             });
         @endif
-    });
 
-    function confirmDelete(id) {
-        Swal.fire({
-            title: "Apakah Anda yakin?",
-            text: "Data akan dihapus permanen.",
-            icon: "warning",
-            showCancelButton: true,
-            confirmButtonText: "Ya, hapus!",
-            cancelButtonText: "Batal",
-            customClass: {
-                confirmButton: "btn btn-danger",
-                cancelButton: 'btn btn-secondary'
-            }
-        }).then((result) => {
-            if (result.isConfirmed) {
-                $.ajax({
-                    url: '/admin/mahasiswa/' + id,
-                    type: 'DELETE',
-                    data: {
-                        _token: '{{ csrf_token() }}'
-                    },
-                    beforeSend: function() {
-                        Swal.fire({
-                            title: "Tunggu Sebentar..",
-                            icon: "info",
-                            text: 'Sedang menghapus Data...',
-                            allowOutsideClick: false,
-                            didOpen: () => {
-                                Swal.showLoading()
+        $('#btn_sync_alumni').on('click', function() {
+            $('#modal_sync_alumni').modal('show');
+        });
+
+        $('#btn_process_sync_alumni').on('click', function() {
+            let selectedTa = $('#sync_tahun_akademik').val();
+            let selectedTaText = $('#sync_tahun_akademik option:selected').text().trim();
+
+            let confirmText = selectedTa 
+                ? "Sinkronkan data alumni untuk Tahun Akademik " + selectedTaText + "?" 
+                : "Sinkronkan SEMUA data alumni dari SIM PT?";
+
+            Swal.fire({
+                title: "Konfirmasi Sinkronisasi",
+                text: confirmText,
+                icon: "question",
+                showCancelButton: true,
+                confirmButtonText: "Ya, Sinkronkan!",
+                cancelButtonText: "Batal",
+                customClass: {
+                    confirmButton: "btn btn-primary",
+                    cancelButton: 'btn btn-secondary'
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $('#modal_sync_alumni').modal('hide');
+
+                    $.ajax({
+                        url: '{{ route('admin.mahasiswa.sync') }}',
+                        type: 'POST',
+                        data: {
+                            _token: '{{ csrf_token() }}',
+                            tahun_keluar: selectedTa
+                        },
+                        beforeSend: function() {
+                            Swal.fire({
+                                title: 'Menyinkronkan...',
+                                icon: 'info',
+                                text: 'Mohon tunggu, sedang memproses data alumni dari SIM PT...',
+                                allowOutsideClick: false,
+                                didOpen: () => {
+                                    Swal.showLoading();
+                                }
+                            });
+                        },
+                        success: function(response) {
+                            if (response.success) {
+                                Swal.fire({
+                                    text: response.message,
+                                    icon: "success",
+                                    buttonsStyling: false,
+                                    confirmButtonText: "Ok",
+                                    customClass: {
+                                        confirmButton: "btn btn-primary"
+                                    }
+                                });
+                                $('#example').DataTable().ajax.reload(null, false);
+                            } else {
+                                Swal.fire("Gagal!", response.message, "error");
                             }
-                        });
-                    },
-                    success: function(response) {
-                        Swal.fire({
-                            text: response.message,
-                            icon: "success",
-                            confirmButtonText: "Ok, got it!",
-                            confirmButtonColor: '#004289',
-                        });
-                        $('#example').DataTable().ajax.reload(null, false);
-                    },
-                    error: function() {
-                        Swal.fire("Error!", "Terjadi kesalahan saat menghapus data.", "error");
-                    }
-                });
-            }
-        })
-    }
+                        },
+                        error: function(xhr) {
+                            let msg = "Terjadi kesalahan saat menyinkronkan data alumni.";
+                            if (xhr.responseJSON && xhr.responseJSON.message) {
+                                msg = xhr.responseJSON.message;
+                            }
+                            Swal.fire("Error!", msg, "error");
+                        }
+                    });
+                }
+            });
+        });
+    });
 </script>

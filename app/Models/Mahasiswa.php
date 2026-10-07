@@ -20,10 +20,13 @@ class Mahasiswa extends Authenticatable
     protected $fillable = [
         'nim',
         'prodi_id',
+        'akademik_id',
         'nama',
+        'jenis_kelamin',
         'email',
         'no_hp',
         'status',
+        'id_jenis_keluar',
         'password',
     ];
 
@@ -34,6 +37,16 @@ class Mahasiswa extends Authenticatable
     public function prodi()
     {
         return $this->belongsTo(Prodi::class, 'prodi_id', 'id_prodi');
+    }
+
+    public function tahunAkademik()
+    {
+        return $this->belongsTo(TahunAkademik::class, 'akademik_id', 'id_smt');
+    }
+
+    public function tahunAkademikKeluar()
+    {
+        return $this->tahunAkademik();
     }
 
     /**

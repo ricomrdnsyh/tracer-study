@@ -108,15 +108,46 @@
                                 </div>
                             </div>
                             <div class="card-toolbar">
-                                @if(auth()->user()->role === 'Admin')
-                                    <a type="button" class="btn btn-sm btn-primary m-0" data-bs-toggle="modal"
-                                        data-bs-target="#form_create" title="Tambah Mahasiswa">
-                                        <i class="fas fa-plus me-2"></i>Tambah Mahasiswa
-                                    </a>
+                                @if (auth()->user()->role === 'Admin')
+                                    <button type="button" class="btn btn-sm btn-primary m-0" id="btn_sync_alumni"
+                                        data-bs-toggle="modal" data-bs-target="#modal_sync_alumni"
+                                        title="Sinkronisasi Data Alumni">
+                                        <i class="fas fa-sync me-2"></i>Tarik Data Alumni Dari SIM-PT
+                                    </button>
                                 @endif
                             </div>
                         </div>
-                        <div class="separator my-5"></div>
+                        <div class="card-body py-4 px-8 filter-container mt-4">
+                            <div class="border border-dashed rounded p-5 mb-5" style="border-color: #b5b5c3 !important;">
+                                <h5 class="text-primary mb-4"><i class="fas fa-filter text-primary me-2"></i>Filter Data
+                                </h5>
+                                <div class="row g-5">
+                                    <div class="col-lg-6 col-md-6 col-sm-12">
+                                        <label class="form-label fw-bold mb-2">Program Studi:</label>
+                                        <select id="filter_prodi" class="form-select form-select-sm" data-control="select2"
+                                            data-placeholder="Semua Program Studi" data-allow-clear="true">
+                                            <option value="">Semua Program Studi</option>
+                                            @foreach ($prodi as $p)
+                                                <option value="{{ $p->id_prodi }}">{{ $p->nama_prodi }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                    <div class="col-lg-6 col-md-6 col-sm-12">
+                                        <label class="form-label fw-bold mb-2">Tahun Akademik:</label>
+                                        <select id="filter_tahun_keluar" class="form-select form-select-sm"
+                                            data-control="select2" data-placeholder="Semua Tahun Akademik"
+                                            data-allow-clear="true">
+                                            <option value="">Semua Tahun Akademik</option>
+                                            @foreach ($tahunAkademik as $ta)
+                                                <option value="{{ $ta->id_smt }}">{{ $ta->nm_smt }}
+                                                    ({{ $ta->id_smt }})</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                         <div class="card-body pt-0">
                             <div class="table-responsive">
                                 <table class="table align-middle table-row-dashed fs-6 gy-5 w-100" id="example">
@@ -127,6 +158,7 @@
                                             <th class="min-w-100px">NIM</th>
                                             <th class="min-w-150px">Nama</th>
                                             <th class="min-w-150px">Prodi</th>
+                                            <th class="min-w-125px">Tahun Akademik</th>
                                             <th class="min-w-100px">Status</th>
                                         </tr>
                                     </thead>
@@ -137,8 +169,7 @@
                     </div>
                 </div>
             </div>
-            @include('admin.mahasiswa.create')
-            @include('admin.mahasiswa.edit')
+            @include('admin.mahasiswa.sync')
             @include('admin.mahasiswa.show')
 
             @include('layouts.footer')
@@ -162,7 +193,5 @@
     <script src="{{ asset('assets/plugins/custom/datatables/responsive.bootstrap.min.js') }}"></script>
 
     @include('admin.mahasiswa.script.index')
-    @include('admin.mahasiswa.script.create')
-    @include('admin.mahasiswa.script.edit')
     @include('admin.mahasiswa.script.show')
 @endsection
