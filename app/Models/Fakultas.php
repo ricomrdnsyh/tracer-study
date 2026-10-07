@@ -18,4 +18,9 @@ class Fakultas extends Model
         'nama_fakultas',
         'singkatan'
     ];
+
+    public function prodis()
+    {
+        return $this->hasMany(Prodi::class, 'fakultas_id', 'id_fakultas');
+    }
 }

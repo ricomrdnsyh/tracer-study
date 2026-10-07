@@ -337,6 +337,16 @@
                                 <span class="menu-title">PT / Instansi Alumni</span>
                             </a>
                         </div>
+
+                        <div class="menu-item">
+                            <a class="menu-link {{ Request::is('admin/statistik*') ? 'active' : '' }}"
+                                href="{{ route('admin.statistik.index') }}">
+                                <span class="menu-icon">
+                                    <i class="fa-solid fa-chart-pie fs-4"></i>
+                                </span>
+                                <span class="menu-title">Statistik Tracer</span>
+                            </a>
+                        </div>
                     @endif
 
                 </div>

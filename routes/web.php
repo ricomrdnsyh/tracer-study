@@ -11,6 +11,7 @@ use App\Http\Controllers\Admin\AdminResponController;
 use App\Http\Controllers\Admin\AdminUserController;
 use App\Http\Controllers\Admin\AdminPerusahaanController;
 use App\Http\Controllers\Admin\AdminTahunAkademikController;
+use App\Http\Controllers\Admin\AdminStatistikController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboard;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Fakultas\DashboardController as FakultasDashboard;
@@ -79,6 +80,9 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:Admin,Fakultas
     Route::get('/respon/export', [\App\Http\Controllers\Admin\ResponImportController::class, 'export'])->name('respon.export');
     Route::get('/respon/data', [AdminResponController::class, 'getRespon'])->name('respon.data');
     Route::resource('respon', AdminResponController::class)->only(['index', 'show']);
+
+    Route::get('/statistik', [AdminStatistikController::class, 'index'])->name('statistik.index');
+    Route::get('/statistik/data', [AdminStatistikController::class, 'getData'])->name('statistik.data');
 
     Route::resource('kategori', AdminKategoriPertanyaanController::class)->except(['index', 'show']);
     Route::resource('pertanyaan', AdminPertanyaanController::class)->except(['index', 'show']);

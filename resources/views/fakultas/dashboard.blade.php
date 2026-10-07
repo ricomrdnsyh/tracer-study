@@ -543,13 +543,12 @@
                                             </a>
                                         </div>
                                         <div class="col-md-6">
-                                            <a href="#"
-                                                onclick="alert('Fitur Laporan Detail akan segera hadir di halaman khusus!'); return false;"
+                                            <a href="{{ route('admin.statistik.index') }}"
                                                 class="btn btn-outline btn-outline-dashed pintasan-btn pintasan-info p-7 d-flex align-items-center mb-0 w-100"
                                                 style="border-radius: 1rem;">
                                                 <i class="fa-solid fa-chart-pie fs-2x me-4 text-info"></i>
                                                 <div class="text-start">
-                                                    <span class="d-block fw-bold fs-5 text-gray-800 pintasan-title" style="transition: color 0.3s ease;">Laporan Lengkap</span>
+                                                    <span class="d-block fw-bold fs-5 text-gray-800 pintasan-title" style="transition: color 0.3s ease;">Statistik & Laporan</span>
                                                     <span class="d-block fw-semibold fs-7 text-gray-600 mt-1">Lihat
                                                         analitik keseluruhan</span>
                                                 </div>
