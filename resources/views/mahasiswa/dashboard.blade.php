@@ -535,8 +535,8 @@
                                 <div>
                                     <div class="text-muted fs-8 fw-bolder text-uppercase tracking-wider mb-1">Masa Berlaku
                                     </div>
-                                    <div class="text-main fs-4 fw-bolder">
-                                        {{ $kuesionerAktif && $kuesionerAktif->tgl_mulai ? \Carbon\Carbon::parse($kuesionerAktif->tgl_mulai)->format('d M') . ' - ' . \Carbon\Carbon::parse($kuesionerAktif->tgl_selesai)->format('d M Y') : 'Belum Tersedia' }}
+                                    <div class="text-main fs-5 fw-bolder">
+                                        {{ $kuesionerAktif && $kuesionerAktif->tgl_mulai ? \Carbon\Carbon::parse($kuesionerAktif->tgl_mulai)->locale('id')->translatedFormat('d F Y') . ' - ' . \Carbon\Carbon::parse($kuesionerAktif->tgl_selesai)->locale('id')->translatedFormat('d F Y') : 'Belum Tersedia' }}
                                     </div>
                                 </div>
                             </div>

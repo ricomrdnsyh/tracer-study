@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Kuesioner;
-
+use App\Models\TahunAkademik;
 use App\Http\Requests\Admin\KuesionerRequest;
 use Illuminate\Http\Request;
 use Yajra\DataTables\Facades\DataTables;
@@ -13,14 +13,23 @@ class AdminKuesionerController extends Controller
 {
     public function index()
     {
-        return view('admin.kuesioner.index');
+        $tahunAkademik = TahunAkademik::orderByDesc('id_smt')->get();
+        return view('admin.kuesioner.index', compact('tahunAkademik'));
     }
 
     public function getKuesioner(Request $request)
     {
-        $query = Kuesioner::select(['id_kuesioner', 'judul', 'tgl_mulai', 'tgl_selesai', 'status'])->orderByDesc('id_kuesioner');
+        $query = Kuesioner::with('tahunAkademik')
+            ->select(['id_kuesioner', 'akademik_id', 'judul', 'tgl_mulai', 'tgl_selesai', 'status'])
+            ->orderByDesc('id_kuesioner');
 
         return DataTables::of($query)
+            ->addColumn('target_lulusan', function ($row) {
+                if ($row->tahunAkademik) {
+                    return '<span class="badge badge-light-primary fw-bold">' . $row->tahunAkademik->nm_smt . '</span>';
+                }
+                return $row->akademik_id ? '<span class="badge badge-light-primary fw-bold">' . $row->akademik_id . '</span>' : '<span class="badge badge-light-secondary text-dark fw-bold">Semua Lulusan</span>';
+            })
             ->addColumn('periode_nama', function ($row) {
                 if (!$row->tgl_mulai || !$row->tgl_selesai) return '-';
                 $mulai = \Carbon\Carbon::parse($row->tgl_mulai)->translatedFormat('d F Y');
@@ -49,14 +58,20 @@ class AdminKuesionerController extends Controller
 
                 return '<div class="text-center">' . $showBtn . ' ' . $editBtn . ' ' . $deleteBtn . '</div>';
             })
-            ->rawColumns(['action'])
+            ->rawColumns(['action', 'target_lulusan'])
             ->make(true);
     }
 
     public function store(KuesionerRequest $request)
     {
         if ($request->status === 'Published') {
-            Kuesioner::where('status', 'Published')->update(['status' => 'Closed']);
+            $closeQuery = Kuesioner::where('status', 'Published');
+            if ($request->filled('akademik_id')) {
+                $closeQuery->where('akademik_id', $request->akademik_id);
+            } else {
+                $closeQuery->whereNull('akademik_id');
+            }
+            $closeQuery->update(['status' => 'Closed']);
         }
 
         Kuesioner::create($request->validated());
@@ -73,7 +88,13 @@ class AdminKuesionerController extends Controller
     public function update(KuesionerRequest $request, $id)
     {
         if ($request->status === 'Published') {
-            Kuesioner::where('id_kuesioner', '!=', $id)->where('status', 'Published')->update(['status' => 'Closed']);
+            $closeQuery = Kuesioner::where('id_kuesioner', '!=', $id)->where('status', 'Published');
+            if ($request->filled('akademik_id')) {
+                $closeQuery->where('akademik_id', $request->akademik_id);
+            } else {
+                $closeQuery->whereNull('akademik_id');
+            }
+            $closeQuery->update(['status' => 'Closed']);
         }
 
         $kuesioner = Kuesioner::findOrFail($id);

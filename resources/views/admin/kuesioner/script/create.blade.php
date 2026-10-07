@@ -18,5 +18,10 @@
         $(this).find('form')[0].reset();
         $(this).find('form').removeClass('was-validated');
         $(this).find('select').val('').trigger('change');
+        $('#create_tgl_mulai, #create_tgl_selesai').each(function() {
+            if (this._flatpickr) {
+                this._flatpickr.clear();
+            }
+        });
     });
 </script>

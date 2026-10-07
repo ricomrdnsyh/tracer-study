@@ -72,6 +72,10 @@
                     name: 'judul'
                 },
                 {
+                    data: 'target_lulusan',
+                    name: 'akademik_id'
+                },
+                {
                     data: 'periode_nama',
                     name: 'tgl_mulai'
                 },
@@ -89,6 +93,10 @@
                     }
                 }
             ]
+        });
+
+        $(".kt_datepicker").flatpickr({
+            dateFormat: "Y-m-d",
         });
 
         @if ($message = Session::get('success'))

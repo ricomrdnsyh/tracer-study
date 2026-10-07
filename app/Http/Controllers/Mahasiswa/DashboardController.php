@@ -18,6 +18,15 @@ class DashboardController extends Controller
             ->where('status', 'Published')
             ->whereDate('tgl_mulai', '<=', now())
             ->whereDate('tgl_selesai', '>=', now())
+            ->where(function ($q) use ($mahasiswa) {
+                if (!empty($mahasiswa->akademik_id)) {
+                    $q->where('akademik_id', $mahasiswa->akademik_id)
+                      ->orWhereNull('akademik_id');
+                } else {
+                    $q->whereNull('akademik_id');
+                }
+            })
+            ->orderByRaw('akademik_id IS NULL ASC')
             ->first();
 
         $sudahMengisi = false;

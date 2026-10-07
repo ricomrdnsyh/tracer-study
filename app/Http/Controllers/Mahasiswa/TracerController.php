@@ -27,10 +27,25 @@ class TracerController extends Controller
         ->where('status', 'Published')
         ->whereDate('tgl_mulai', '<=', now())
         ->whereDate('tgl_selesai', '>=', now())
+        ->where(function ($q) use ($mahasiswa) {
+            if (!empty($mahasiswa->akademik_id)) {
+                $q->where('akademik_id', $mahasiswa->akademik_id)
+                  ->orWhereNull('akademik_id');
+            } else {
+                $q->whereNull('akademik_id');
+            }
+        })
+        ->orderByRaw('akademik_id IS NULL ASC')
         ->first();
 
         if (!$kuesioner) {
-            return view('mahasiswa.tracer.empty', ['message' => 'Belum ada Tracer Study yang aktif saat ini.']);
+            $taInfo = '';
+            if ($mahasiswa->tahunAkademik) {
+                $taInfo = ' untuk lulusan Tahun Akademik ' . $mahasiswa->tahunAkademik->nm_smt;
+            } elseif (!empty($mahasiswa->akademik_id)) {
+                $taInfo = ' untuk lulusan Tahun Akademik ' . $mahasiswa->akademik_id;
+            }
+            return view('mahasiswa.tracer.empty', ['message' => 'Belum ada Tracer Study yang aktif' . $taInfo . ' saat ini.']);
         }
 
         $respon = ResponTracer::with('jawabanDetails.pertanyaan')->where('kuesioner_id', $kuesioner->id_kuesioner)

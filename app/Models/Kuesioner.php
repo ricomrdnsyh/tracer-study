@@ -13,11 +13,17 @@ class Kuesioner extends Model
     protected $primaryKey = 'id_kuesioner';
 
     protected $fillable = [
+        'akademik_id',
         'tgl_mulai',
         'tgl_selesai',
         'judul',
         'status',
     ];
+
+    public function tahunAkademik()
+    {
+        return $this->belongsTo(TahunAkademik::class, 'akademik_id', 'id_smt');
+    }
 
     public function kategoriPertanyaans()
     {
