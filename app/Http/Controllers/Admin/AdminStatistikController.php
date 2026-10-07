@@ -137,6 +137,29 @@ class AdminStatistikController extends Controller
                     'labels' => [],
                     'series' => [],
                 ],
+                'take_home_pay' => [
+                    'total_responden' => 0,
+                    'rata_rata' => 'Rp 0,00',
+                    'rata_rata_numeric' => 0,
+                    'labels' => [
+                        's.d. Rp1.500.000',
+                        'Rp1.500.000 - Rp2.500.000',
+                        'Rp2.500.000 - Rp5.000.000',
+                        'Rp5.000.000 - Rp10.000.000',
+                        'Rp10.000.000 - Rp20.000.000',
+                        'Diatas Rp20.000.000'
+                    ],
+                    'series' => [0, 0, 0, 0, 0, 0],
+                    'table' => [
+                        ['label' => 's.d. Rp1.500.000', 'jumlah' => 0, 'persentase' => '0,00%', 'pct_numeric' => 0],
+                        ['label' => 'Rp1.500.000 - Rp2.500.000', 'jumlah' => 0, 'persentase' => '0,00%', 'pct_numeric' => 0],
+                        ['label' => 'Rp2.500.000 - Rp5.000.000', 'jumlah' => 0, 'persentase' => '0,00%', 'pct_numeric' => 0],
+                        ['label' => 'Rp5.000.000 - Rp10.000.000', 'jumlah' => 0, 'persentase' => '0,00%', 'pct_numeric' => 0],
+                        ['label' => 'Rp10.000.000 - Rp20.000.000', 'jumlah' => 0, 'persentase' => '0,00%', 'pct_numeric' => 0],
+                        ['label' => 'Diatas Rp20.000.000', 'jumlah' => 0, 'persentase' => '0,00%', 'pct_numeric' => 0],
+                    ],
+                    'updated_at' => \Carbon\Carbon::now()->translatedFormat('d F Y \p\u\k\u\l H:i:s') . ' WIB',
+                ],
                 'rekap_prodi' => $this->getRekapProdi($fakultasId, $prodiId, $akademikId, $kuesionerId),
             ];
         }
@@ -334,6 +357,76 @@ class AdminStatistikController extends Controller
             $provinsiSeries[] = (int) $p->total;
         }
 
+        // 10. Take Home Pay - Rentang & Rata-rata (F505)
+        $f505Details = JawabanDetail::whereIn('respon_id', $responIds)
+            ->whereHas('pertanyaan', fn($q) => $q->where('kode_pertanyaan', 'F505'))
+            ->get();
+
+        $f505Ranges = [
+            's.d. Rp1.500.000' => 0,
+            'Rp1.500.000 - Rp2.500.000' => 0,
+            'Rp2.500.000 - Rp5.000.000' => 0,
+            'Rp5.000.000 - Rp10.000.000' => 0,
+            'Rp10.000.000 - Rp20.000.000' => 0,
+            'Diatas Rp20.000.000' => 0,
+        ];
+
+        $responF505Values = [];
+        foreach ($f505Details as $d) {
+            if (!isset($responF505Values[$d->respon_id])) {
+                $rawStr = preg_replace('/[^0-9]/', '', (string)$d->jawaban_text);
+                if ($rawStr !== '' && is_numeric($rawStr)) {
+                    $val = (float) $rawStr;
+                    if ($val > 0) {
+                        $responF505Values[$d->respon_id] = $val;
+                    }
+                }
+            }
+        }
+
+        $f505Sum = 0;
+        $totalRespondenF505 = count($responF505Values);
+
+        foreach ($responF505Values as $val) {
+            $f505Sum += $val;
+            if ($val <= 1500000) {
+                $f505Ranges['s.d. Rp1.500.000']++;
+            } elseif ($val <= 2500000) {
+                $f505Ranges['Rp1.500.000 - Rp2.500.000']++;
+            } elseif ($val <= 5000000) {
+                $f505Ranges['Rp2.500.000 - Rp5.000.000']++;
+            } elseif ($val <= 10000000) {
+                $f505Ranges['Rp5.000.000 - Rp10.000.000']++;
+            } elseif ($val <= 20000000) {
+                $f505Ranges['Rp10.000.000 - Rp20.000.000']++;
+            } else {
+                $f505Ranges['Diatas Rp20.000.000']++;
+            }
+        }
+
+        $avgF505 = $totalRespondenF505 > 0 ? $f505Sum / $totalRespondenF505 : 0;
+
+        $f505Table = [];
+        foreach ($f505Ranges as $label => $count) {
+            $pct = $totalRespondenF505 > 0 ? round(($count / $totalRespondenF505) * 100, 2) : 0;
+            $f505Table[] = [
+                'label' => $label,
+                'jumlah' => $count,
+                'persentase' => number_format($pct, 2, ',', '.') . '%',
+                'pct_numeric' => $pct
+            ];
+        }
+
+        $takeHomePayData = [
+            'total_responden' => $totalRespondenF505,
+            'rata_rata' => number_format($avgF505, 2, ',', '.'),
+            'rata_rata_numeric' => round($avgF505, 2),
+            'labels' => array_keys($f505Ranges),
+            'series' => array_values($f505Ranges),
+            'table' => $f505Table,
+            'updated_at' => \Carbon\Carbon::now()->translatedFormat('F j, Y \a\t H:i:s \G\M\T+7'),
+        ];
+
         return [
             'kpi' => [
                 'total_alumni' => $totalAlumni,
@@ -370,6 +463,7 @@ class AdminStatistikController extends Controller
                 'labels' => $provinsiLabels,
                 'series' => $provinsiSeries,
             ],
+            'take_home_pay' => $takeHomePayData,
             'rekap_prodi' => $this->getRekapProdi($fakultasId, $prodiId, $akademikId, $kuesionerId),
         ];
     }

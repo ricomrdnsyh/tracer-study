@@ -12,6 +12,7 @@
         var chartJenjang = null;
         var chartInstansi = null;
         var chartProvinsi = null;
+        var chartTakeHomePay = null;
 
         // Metronic Palette
         var colorPrimary = '#009ef7';
@@ -322,6 +323,118 @@
             chartProvinsi.render();
         }
 
+        // Initialize Horizontal Bar: Take Home Pay (F505) Kemdiktisaintek Style
+        function initChartTakeHomePay(data) {
+            var el = document.getElementById('chart_take_home_pay');
+            if (!el) return;
+
+            var series = (data && data.series && data.series.length) ? data.series : [0, 0, 0, 0, 0, 0];
+            var labels = (data && data.labels && data.labels.length) ? data.labels : [
+                's.d. Rp1.500.000',
+                'Rp1.500.000 - Rp2.500.000',
+                'Rp2.500.000 - Rp5.000.000',
+                'Rp5.000.000 - Rp10.000.000',
+                'Rp10.000.000 - Rp20.000.000',
+                'Diatas Rp20.000.000'
+            ];
+
+            var options = {
+                series: [{
+                    name: 'Responden',
+                    data: series
+                }],
+                chart: {
+                    type: 'bar',
+                    height: 320,
+                    toolbar: { show: false }
+                },
+                plotOptions: {
+                    bar: {
+                        borderRadius: 3,
+                        horizontal: true,
+                        barHeight: '48%',
+                        distributed: true,
+                        dataLabels: {
+                            position: 'top'
+                        }
+                    }
+                },
+                colors: ['#5b67ec', '#22c55e', '#f97316', '#8b5cf6', '#ec4899', '#06b6d4'],
+                dataLabels: {
+                    enabled: true,
+                    offsetX: 25,
+                    style: {
+                        fontSize: '12px',
+                        fontWeight: 600,
+                        colors: ['#3f4254']
+                    },
+                    formatter: function(val) {
+                        return Number(val).toLocaleString('id-ID');
+                    }
+                },
+                legend: { show: false },
+                xaxis: {
+                    categories: labels,
+                    labels: {
+                        formatter: function(val) {
+                            return Number(val).toLocaleString('id-ID');
+                        }
+                    }
+                },
+                yaxis: {
+                    labels: {
+                        style: {
+                            fontSize: '11px',
+                            fontWeight: 500,
+                            colors: ['#5e6278']
+                        }
+                    }
+                },
+                tooltip: {
+                    y: {
+                        formatter: function(val) {
+                            return Number(val).toLocaleString('id-ID') + " Responden";
+                        }
+                    }
+                }
+            };
+
+            chartTakeHomePay = new ApexCharts(el, options);
+            chartTakeHomePay.render();
+        }
+
+        // Render / Update Take Home Pay Table & Summary
+        function updateTableF505(data) {
+            if (!data) return;
+
+            $('#f505_total_responden').text(Number(data.total_responden || 0).toLocaleString('id-ID'));
+            $('#f505_rata_rata').text(data.rata_rata || '0,00');
+            $('#f505_updated_at').text('Terakhir diupdate: ' + (data.updated_at || '-'));
+            $('#f505_table_total_count').text(Number(data.total_responden || 0).toLocaleString('id-ID') + ' responden');
+
+            var $tbody = $('#tbody_f505');
+            $tbody.empty();
+
+            if (data.table && data.table.length) {
+                data.table.forEach(function(row) {
+                    var tr = '<tr>' +
+                        '<td class="ps-4 text-gray-800">' + row.label + '</td>' +
+                        '<td class="text-end">' + Number(row.jumlah).toLocaleString('id-ID') + ' responden</td>' +
+                        '<td class="pe-4 text-end">' + row.persentase + '</td>' +
+                    '</tr>';
+                    $tbody.append(tr);
+                });
+            }
+
+            // Append Total Row
+            var totalTr = '<tr class="fw-bolder bg-light">' +
+                '<td class="ps-4 text-gray-900">Total</td>' +
+                '<td class="text-end text-gray-900" id="f505_table_total_count">' + Number(data.total_responden || 0).toLocaleString('id-ID') + ' responden</td>' +
+                '<td class="pe-4 text-end text-gray-900">100%</td>' +
+            '</tr>';
+            $tbody.append(totalTr);
+        }
+
         // Render / Update Rekap Prodi Table
         function updateTableRekap(rows) {
             var $tbody = $('#tbody_rekap_prodi');
@@ -444,6 +557,15 @@
                         });
                     }
 
+                    // Update Take Home Pay (F505)
+                    if (chartTakeHomePay && res.take_home_pay) {
+                        chartTakeHomePay.updateOptions({
+                            series: [{ data: res.take_home_pay.series || [0, 0, 0, 0, 0, 0] }],
+                            xaxis: { categories: res.take_home_pay.labels || [] }
+                        });
+                        updateTableF505(res.take_home_pay);
+                    }
+
                     // Update Table
                     updateTableRekap(res.rekap_prodi);
                 },
@@ -463,6 +585,7 @@
             initChartJenjang(statsData.kesesuaian_jenjang);
             initChartInstansi(statsData.jenis_instansi);
             initChartProvinsi(statsData.sebaran_provinsi);
+            initChartTakeHomePay(statsData.take_home_pay);
 
             // Filter Event Listeners
             $('#filter_kuesioner, #filter_akademik, #filter_fakultas, #filter_prodi').on('change', function() {

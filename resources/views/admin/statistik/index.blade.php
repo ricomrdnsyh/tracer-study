@@ -403,6 +403,72 @@
                         </div>
                     </div>
 
+                    <!-- Section Kemdiktisaintek: Take Home Pay - Rentang & Rata-rata (F505) -->
+                    <div class="card shadow-sm border mb-8" style="border: 1px solid #7c83fd !important; border-radius: 1.25rem;">
+                        <div class="card-header border-0 pt-6 pb-2 d-flex align-items-center justify-content-between">
+                            <div>
+                                <h4 class="card-label fw-bolder fs-4 text-gray-900 mb-0">
+                                    Take home pay &ndash; rentang &amp; rata-rata (F505)
+                                </h4>
+                                <span class="text-gray-500 fs-8 fw-semibold">F505</span>
+                            </div>
+                            <div class="text-end">
+                                <span class="text-gray-500 fs-8 d-block fw-semibold">Total Responden</span>
+                                <span class="text-gray-900 fw-bolder fs-2" id="f505_total_responden">
+                                    {{ number_format($statsData['take_home_pay']['total_responden'] ?? 0, 0, ',', '.') }}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="card-body pt-2 pb-6">
+                            <!-- Horizontal Bar Chart -->
+                            <div id="chart_take_home_pay" style="min-height: 320px;"></div>
+
+                            <!-- Average Value Display -->
+                            <div class="text-center my-4 py-2 border-top border-bottom border-gray-200">
+                                <span class="fs-6 fw-bold text-gray-700">Rata-rata: </span>
+                                <span class="fs-6 fw-bolder text-gray-900" id="f505_rata_rata">
+                                    {{ $statsData['take_home_pay']['rata_rata'] ?? '0,00' }}
+                                </span>
+                            </div>
+
+                            <!-- Breakdown Table -->
+                            <div class="table-responsive">
+                                <table class="table align-middle table-row-dashed fs-7 gy-3 mb-0" id="table_f505">
+                                    <thead>
+                                        <tr class="fw-bolder text-white" style="background-color: #5b67ec;">
+                                            <th class="ps-4">Label</th>
+                                            <th class="text-end">Jumlah</th>
+                                            <th class="pe-4 text-end">Persentase</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="fw-bold text-gray-700" id="tbody_f505">
+                                        @if(isset($statsData['take_home_pay']['table']))
+                                            @foreach ($statsData['take_home_pay']['table'] as $row)
+                                                <tr>
+                                                    <td class="ps-4 text-gray-800">{{ $row['label'] }}</td>
+                                                    <td class="text-end">{{ number_format($row['jumlah'], 0, ',', '.') }} responden</td>
+                                                    <td class="pe-4 text-end">{{ $row['persentase'] }}</td>
+                                                </tr>
+                                            @endforeach
+                                        @endif
+                                        <tr class="fw-bolder bg-light">
+                                            <td class="ps-4 text-gray-900">Total</td>
+                                            <td class="text-end text-gray-900" id="f505_table_total_count">
+                                                {{ number_format($statsData['take_home_pay']['total_responden'] ?? 0, 0, ',', '.') }} responden
+                                            </td>
+                                            <td class="pe-4 text-end text-gray-900">100%</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <!-- Timestamp Footnote -->
+                            <div class="mt-4 text-gray-500 fs-8" id="f505_updated_at">
+                                Terakhir diupdate: {{ $statsData['take_home_pay']['updated_at'] ?? '-' }}
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Row 4: Tabel Rekapitulasi per Program Studi -->
                     <div class="card shadow-sm border border-dashed border-dark mb-8" style="border-radius: 1.25rem;">
                         <div class="card-header border-0 pt-6">
