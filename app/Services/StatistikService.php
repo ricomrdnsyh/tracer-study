@@ -38,7 +38,13 @@ class StatistikService
         $mahasiswaQuery = Mahasiswa::query();
         if ($akademikId) {
             $mahasiswaQuery->where('akademik_id', $akademikId);
+        } elseif ($kuesionerId) {
+            $kuesioner = Kuesioner::find($kuesionerId);
+            if ($kuesioner && $kuesioner->akademik_id) {
+                $mahasiswaQuery->where('akademik_id', $kuesioner->akademik_id);
+            }
         }
+        
         if ($prodiId) {
             $mahasiswaQuery->where('prodi_id', $prodiId);
         } elseif ($fakultasId) {

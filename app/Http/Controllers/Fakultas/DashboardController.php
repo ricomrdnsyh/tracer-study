@@ -5,10 +5,10 @@ namespace App\Http\Controllers\Fakultas;
 use App\Http\Controllers\Controller;
 use App\Models\Kuesioner;
 use App\Models\PekerjaanAlumni;
-
 use App\Models\ResponTracer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use App\Services\StatistikService;
 
 class DashboardController extends Controller
 {
@@ -21,10 +21,12 @@ class DashboardController extends Controller
         $selectedKuesioner = $this->resolveSelectedKuesioner($request, $kuesionerList);
         $kuesionerId = $selectedKuesioner?->id_kuesioner;
 
-        $totalResponden = $this->totalResponden($kuesionerId, $fakultasId);
-        $totalKuesioner = Kuesioner::count();
-        $totalPerusahaan = $this->totalPerusahaan($kuesionerId, $fakultasId);
-        $totalPekerjaan = $this->totalPekerjaan($kuesionerId, $fakultasId);
+        $statsRequest = new Request([
+            'kuesioner_id' => $kuesionerId,
+            'fakultas_id' => $fakultasId
+        ]);
+
+        $statsData = app(StatistikService::class)->buildStatisticsData($statsRequest);
 
 
         $recentQuery = ResponTracer::with(['mahasiswa.prodi', 'kuesioner'])
@@ -41,10 +43,7 @@ class DashboardController extends Controller
         return view('fakultas.dashboard', compact(
             'kuesionerList',
             'selectedKuesioner',
-            'totalResponden',
-            'totalKuesioner',
-            'totalPerusahaan',
-            'totalPekerjaan',
+            'statsData',
             'recentRespon'
         ));
     }
@@ -70,38 +69,4 @@ class DashboardController extends Controller
             ?? $kuesionerList->first();
     }
 
-    private function totalResponden($kuesionerId, $fakultasId)
-    {
-        $query = ResponTracer::whereHas('mahasiswa.prodi', function($q) use ($fakultasId) {
-            $q->where('fakultas_id', $fakultasId);
-        });
-        
-        if ($kuesionerId) {
-            $query->where('kuesioner_id', $kuesionerId);
-        }
-        return $query->count();
-    }
-
-    private function totalPerusahaan($kuesionerId, $fakultasId)
-    {
-        $query = $this->pekerjaanBaseQuery($kuesionerId, $fakultasId);
-        return (clone $query)->whereNotNull('nama')->distinct('nama')->count('nama');
-    }
-
-    private function totalPekerjaan($kuesionerId, $fakultasId)
-    {
-        return $this->pekerjaanBaseQuery($kuesionerId, $fakultasId)->count();
-    }
-
-    private function pekerjaanBaseQuery($kuesionerId, $fakultasId)
-    {
-        $query = PekerjaanAlumni::whereHas('responTracer.mahasiswa.prodi', function($q) use ($fakultasId) {
-            $q->where('fakultas_id', $fakultasId);
-        });
-        
-        if ($kuesionerId) {
-            $query->whereHas('responTracer', fn ($q) => $q->where('kuesioner_id', $kuesionerId));
-        }
-        return $query;
-    }
 }

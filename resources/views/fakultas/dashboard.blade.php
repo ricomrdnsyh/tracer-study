@@ -467,43 +467,57 @@
                     <div class="row g-5 g-xl-8 mb-8">
                         <div class="col-xl-3 col-md-6 animate-fade-in-up delay-200">
                             <div class="card stat-card shadow-sm h-100 border border-dashed border-primary bg-light-primary"
-                                onclick="window.location.href='#'">
+                                onclick="window.location.href='{{ route('admin.respon.index') }}'">
                                 <div class="card-body d-flex align-items-center">
                                     <div class="stat-icon bg-body shadow-sm me-4 icon-glow-primary">
-                                        <i class="fa-solid fa-user-check fs-2x text-primary"></i>
+                                        <i class="fa-solid fa-graduation-cap fs-2x text-primary"></i>
                                     </div>
                                     <div>
-                                        <div class="text-gray-600 fw-semibold fs-7 mb-1">Total Responden</div>
-                                        <div class="text-gray-900 fw-bolder fs-2x">{{ $totalResponden }}</div>
+                                        <div class="text-gray-600 fw-semibold fs-7 mb-1">Total Alumni</div>
+                                        <div class="text-gray-900 fw-bolder fs-2x">{{ number_format($statsData['kpi']['total_alumni'] ?? 0, 0, ',', '.') }}</div>
                                     </div>
                                 </div>
                             </div>
                         </div>
+
                         <div class="col-xl-3 col-md-6 animate-fade-in-up delay-300">
-                            <div class="card stat-card shadow-sm h-100 border border-dashed border-info bg-light-info"
-                                onclick="window.location.href='#'">
+                            <div class="card stat-card shadow-sm h-100 border border-dashed border-success bg-light-success"
+                                onclick="window.location.href='{{ route('admin.respon.index') }}'">
                                 <div class="card-body d-flex align-items-center">
-                                    <div class="stat-icon bg-body shadow-sm me-4 icon-glow-info">
-                                        <i class="fa-solid fa-clipboard-list fs-2x text-info"></i>
+                                    <div class="stat-icon bg-body shadow-sm me-4 icon-glow-success">
+                                        <i class="fa-solid fa-user-check fs-2x text-success"></i>
                                     </div>
                                     <div>
-                                        <div class="text-gray-600 fw-semibold fs-7 mb-1">Total Kuesioner</div>
-                                        <div class="text-gray-900 fw-bolder fs-2x">{{ $totalKuesioner }}</div>
+                                        <div class="text-gray-600 fw-semibold fs-7 mb-1">Total Responden</div>
+                                        <div class="text-gray-900 fw-bolder fs-2x">{{ number_format($statsData['kpi']['total_responden'] ?? 0, 0, ',', '.') }}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-xl-3 col-md-6 animate-fade-in-up delay-400">
+                            <div class="card stat-card shadow-sm h-100 border border-dashed border-info bg-light-info">
+                                <div class="card-body d-flex align-items-center">
+                                    <div class="stat-icon bg-body shadow-sm me-4 icon-glow-info">
+                                        <i class="fa-solid fa-percent fs-2x text-info"></i>
+                                    </div>
+                                    <div>
+                                        <div class="text-gray-600 fw-semibold fs-7 mb-1">Response Rate</div>
+                                        <div class="text-gray-900 fw-bolder fs-2x">{{ number_format($statsData['kpi']['response_rate'] ?? 0, 1, ',', '.') }}%</div>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
                         <div class="col-xl-3 col-md-6 animate-fade-in-up delay-500">
-                            <div class="card stat-card shadow-sm h-100 border border-dashed border-warning bg-light-warning"
-                                onclick="window.location.href='#'">
+                            <div class="card stat-card shadow-sm h-100 border border-dashed border-warning bg-light-warning">
                                 <div class="card-body d-flex align-items-center">
                                     <div class="stat-icon bg-body shadow-sm me-4 icon-glow-warning">
-                                        <i class="fa-solid fa-building-user fs-2x text-warning"></i>
+                                        <i class="fa-solid fa-briefcase fs-2x text-warning"></i>
                                     </div>
                                     <div>
-                                        <div class="text-gray-600 fw-semibold fs-7 mb-1">Instansi Tercatat</div>
-                                        <div class="text-gray-900 fw-bolder fs-2x">{{ $totalPerusahaan }}</div>
+                                        <div class="text-gray-600 fw-semibold fs-7 mb-1">Rata-rata Waktu Tunggu</div>
+                                        <div class="text-gray-900 fw-bolder fs-2x">{{ $statsData['kpi']['waktu_tunggu_bekerja'] ?? 0 }} <span class="fs-6 fw-semibold text-gray-600">Bulan</span></div>
                                     </div>
                                 </div>
                             </div>
@@ -531,18 +545,6 @@
                                 <div class="card-body pb-6">
                                     <div class="row g-4">
                                         <div class="col-md-6">
-                                            <a href="#"
-                                                class="btn btn-outline btn-outline-dashed pintasan-btn pintasan-primary p-7 d-flex align-items-center mb-0 w-100"
-                                                style="border-radius: 1rem;">
-                                                <i class="fa-solid fa-plus fs-2x me-4 text-primary"></i>
-                                                <div class="text-start">
-                                                    <span class="d-block fw-bold fs-5 text-gray-800 pintasan-title" style="transition: color 0.3s ease;">Buat Kuesioner</span>
-                                                    <span class="d-block fw-semibold fs-7 text-gray-600 mt-1">Siapkan
-                                                        format tracer baru</span>
-                                                </div>
-                                            </a>
-                                        </div>
-                                        <div class="col-md-6">
                                             <a href="{{ route('admin.statistik.index') }}"
                                                 class="btn btn-outline btn-outline-dashed pintasan-btn pintasan-info p-7 d-flex align-items-center mb-0 w-100"
                                                 style="border-radius: 1rem;">
@@ -551,6 +553,18 @@
                                                     <span class="d-block fw-bold fs-5 text-gray-800 pintasan-title" style="transition: color 0.3s ease;">Statistik & Laporan</span>
                                                     <span class="d-block fw-semibold fs-7 text-gray-600 mt-1">Lihat
                                                         analitik keseluruhan</span>
+                                                </div>
+                                            </a>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <a href="{{ route('admin.laporan.index') }}"
+                                                class="btn btn-outline btn-outline-dashed pintasan-btn pintasan-success p-7 d-flex align-items-center mb-0 w-100"
+                                                style="border-radius: 1rem;">
+                                                <i class="fa-solid fa-file-word fs-2x me-4 text-success"></i>
+                                                <div class="text-start">
+                                                    <span class="d-block fw-bold fs-5 text-gray-800 pintasan-title" style="transition: color 0.3s ease;">Cetak Laporan</span>
+                                                    <span class="d-block fw-semibold fs-7 text-gray-600 mt-1">Ekspor
+                                                        hasil tracer ke Word</span>
                                                 </div>
                                             </a>
                                         </div>
