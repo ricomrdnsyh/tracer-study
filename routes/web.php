@@ -88,6 +88,13 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:Admin,Fakultas
     Route::get('/statistik', [AdminStatistikController::class, 'index'])->name('statistik.index');
     Route::get('/statistik/data', [AdminStatistikController::class, 'getData'])->name('statistik.data');
 
+    Route::get('/laporan', [App\Http\Controllers\Admin\AdminLaporanController::class, 'index'])->name('laporan.index');
+    Route::get('/laporan/export', [AdminStatistikController::class, 'exportLaporanWord'])->name('laporan.export');
+
+    Route::get('/template-laporan', [App\Http\Controllers\Admin\AdminTemplateLaporanController::class, 'index'])->name('template-laporan.index');
+    Route::get('/template-laporan/download', [App\Http\Controllers\Admin\AdminTemplateLaporanController::class, 'downloadCurrent'])->name('template-laporan.download');
+    Route::post('/template-laporan/upload', [App\Http\Controllers\Admin\AdminTemplateLaporanController::class, 'upload'])->name('template-laporan.upload');
+
     Route::resource('kategori', AdminKategoriPertanyaanController::class)->except(['index', 'show']);
     Route::resource('pertanyaan', AdminPertanyaanController::class)->except(['index', 'show']);
 });

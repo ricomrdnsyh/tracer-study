@@ -310,6 +310,16 @@
                                     <span class="menu-title">Kuesioner</span>
                                 </a>
                             </div>
+
+                            <div class="menu-item">
+                                <a class="menu-link {{ Request::is('admin/template-laporan*') ? 'active' : '' }}"
+                                    href="{{ route('admin.template-laporan.index') }}">
+                                    <span class="menu-icon">
+                                        <i class="fa-solid fa-file-word fs-4"></i>
+                                    </span>
+                                    <span class="menu-title">Template Laporan</span>
+                                </a>
+                            </div>
                         @endif
 
                         <div class="menu-item pt-1">
@@ -351,6 +361,16 @@
                                     <i class="fa-solid fa-chart-pie fs-4"></i>
                                 </span>
                                 <span class="menu-title">Statistik Tracer</span>
+                            </a>
+                        </div>
+
+                        <div class="menu-item">
+                            <a class="menu-link {{ Request::is('admin/laporan*') ? 'active' : '' }}"
+                                href="{{ route('admin.laporan.index') }}">
+                                <span class="menu-icon">
+                                    <i class="fa-solid fa-file-word fs-4"></i>
+                                </span>
+                                <span class="menu-title">Cetak Laporan Tracer</span>
                             </a>
                         </div>
                     @endif

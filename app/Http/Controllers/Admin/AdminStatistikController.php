@@ -14,6 +14,7 @@ use App\Models\TahunAkademik;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use PhpOffice\PhpWord\TemplateProcessor;
 
 class AdminStatistikController extends Controller
 {
@@ -55,6 +56,266 @@ class AdminStatistikController extends Controller
     {
         $statsData = $this->buildStatisticsData($request);
         return response()->json($statsData);
+    }
+
+    public function exportLaporanWord(Request $request)
+    {
+        $statsData = $this->buildStatisticsData($request);
+        
+        // Gunakan template kustom hasil upload
+        if (\Illuminate\Support\Facades\Storage::exists('templates/laporan_prodi.docx')) {
+            $templatePath = \Illuminate\Support\Facades\Storage::path('templates/laporan_prodi.docx');
+        } else {
+            return back()->with('error', 'File template laporan belum diunggah. Silakan kelola pada menu Template Laporan.');
+        }
+
+        $templateProcessor = new TemplateProcessor($templatePath);
+        
+        $totalLulusan = $statsData['kpi']['total_alumni'] ?? 0;
+        $totalResponden = $statsData['kpi']['total_responden'] ?? 0;
+        $responseRate = $statsData['kpi']['response_rate'] ?? '0%';
+        
+        $coverTop = 'UNUJA';
+        $coverBottom = 'UNUJA';
+        $prodiName = 'UNUJA';
+        $jenjangName = 'PT';
+        
+        $user = auth()->user();
+        $isFakultas = $user && $user->role === 'Fakultas';
+        $userFakultasId = $isFakultas ? $user->fakultas_id : null;
+        
+        $fakultasId = $isFakultas ? $userFakultasId : $request->input('fakultas_id');
+        
+        if ($request->input('prodi_id') && $request->input('prodi_id') !== 'all') {
+            $prodiObj = Prodi::with('fakultas')->find($request->input('prodi_id'));
+            if ($prodiObj) {
+                $coverTop = strtoupper($prodiObj->nama_prodi);
+                
+                $fakultasName = $prodiObj->fakultas->nama_fakultas ?? '';
+                if ($fakultasName && stripos($fakultasName, 'Fakultas') === false) {
+                    $fakultasName = 'Fakultas ' . $fakultasName;
+                }
+                
+                $coverBottom = strtoupper($fakultasName ?: 'UNUJA');
+                $prodiName = $prodiObj->nama_prodi;
+                $jenjangName = $prodiObj->jenjang;
+            }
+        } elseif ($fakultasId && $fakultasId !== 'all') {
+            $fakultasObj = Fakultas::find($fakultasId);
+            if ($fakultasObj) {
+                $fakultasName = $fakultasObj->nama_fakultas;
+                if (stripos($fakultasName, 'Fakultas') === false) {
+                    $fakultasName = 'Fakultas ' . $fakultasName;
+                }
+                
+                $coverTop = strtoupper($fakultasName);
+                $coverBottom = strtoupper($fakultasName);
+                $prodiName = $fakultasName;
+                $jenjangName = 'Fakultas';
+            }
+        }
+        
+        // Tahun Lulus Dinamis
+        $lulusanTahun = 'SEMUA LULUSAN';
+        if ($request->input('akademik_id') && $request->input('akademik_id') !== 'all') {
+            $tahunAkademikObj = \App\Models\TahunAkademik::find($request->input('akademik_id'));
+            if ($tahunAkademikObj) {
+                // Ekstrak tahun berdasarkan Ganjil/Genap
+                // Contoh: "2024/2025 Ganjil" -> 2024, "2024/2025 Genap" -> 2025
+                if (preg_match('/^(\d{4})\/(\d{4})\s+(.*)$/i', trim($tahunAkademikObj->nm_smt), $matches)) {
+                    $tahun1 = $matches[1];
+                    $tahun2 = $matches[2];
+                    $semester = strtolower(trim($matches[3]));
+                    
+                    if ($semester === 'genap' || $semester === 'pendek') {
+                        $lulusanTahun = 'LULUSAN ' . $tahun2;
+                    } else {
+                        // Ganjil
+                        $lulusanTahun = 'LULUSAN ' . $tahun1;
+                    }
+                } else {
+                    // Fallback
+                    $lulusanTahun = 'LULUSAN ' . $tahunAkademikObj->nm_smt;
+                }
+            }
+        }
+        
+        $bekerja = 0;
+        $wiraswasta = 0;
+        $studi = 0;
+        if (isset($statsData['status_aktivitas']['table'])) {
+            foreach ($statsData['status_aktivitas']['table'] as $row) {
+                if (isset($row['value'])) {
+                    if ($row['value'] == 1) {
+                        $bekerja += $row['jumlah'];
+                    } elseif ($row['value'] == 3) {
+                        $wiraswasta += $row['jumlah'];
+                    } elseif ($row['value'] == 4) {
+                        $studi += $row['jumlah'];
+                    }
+                } else {
+                    // Fallback jika tidak ada value
+                    if (stripos($row['label'], 'Bekerja (full time') !== false) {
+                        $bekerja += $row['jumlah'];
+                    } elseif (stripos($row['label'], 'Wiraswasta') !== false) {
+                        $wiraswasta += $row['jumlah'];
+                    } elseif (stripos($row['label'], 'Melanjutkan Pendidikan') !== false || stripos($row['label'], 'Melanjutkan Studi') !== false) {
+                        $studi += $row['jumlah'];
+                    }
+                }
+            }
+        }
+        
+        $avgWaktuTunggu = $statsData['waktu_tunggu_bekerja']['rata_rata'] ?? '0 bulan';
+        $pendapatan = $statsData['take_home_pay']['rata_rata'] ?? '0';
+        
+        $maxKerja = $statsData['take_home_pay']['max'] ?? 'Rp 0';
+        $minKerja = $statsData['take_home_pay']['min'] ?? 'Rp 0';
+        $medianKerja = $statsData['take_home_pay']['median'] ?? 'Rp 0';
+
+        $pendapatanWiraswasta = $statsData['take_home_pay_wiraswasta']['rata_rata'] ?? 'Rp 0';
+        $maxWiraswasta = $statsData['take_home_pay_wiraswasta']['max'] ?? 'Rp 0';
+        $minWiraswasta = $statsData['take_home_pay_wiraswasta']['min'] ?? 'Rp 0';
+        $medianWiraswasta = $statsData['take_home_pay_wiraswasta']['median'] ?? 'Rp 0';
+        
+        $pembelajaran = $statsData['aspek_pembelajaran']['aspek'] ?? [];
+        $perkuliahan = isset($pembelajaran['perkuliahan']) ? number_format($pembelajaran['perkuliahan']['rata_rata'], 2, ',', '.') : '0,00';
+        $demonstrasi = isset($pembelajaran['demonstrasi']) ? number_format($pembelajaran['demonstrasi']['rata_rata'], 2, ',', '.') : '0,00';
+        $proyekRiset = isset($pembelajaran['proyek_riset']) ? number_format($pembelajaran['proyek_riset']['rata_rata'], 2, ',', '.') : '0,00';
+        $magang = isset($pembelajaran['magang']) ? number_format($pembelajaran['magang']['rata_rata'], 2, ',', '.') : '0,00';
+        $praktikum = isset($pembelajaran['praktikum']) ? number_format($pembelajaran['praktikum']['rata_rata'], 2, ',', '.') : '0,00';
+        $kerjaLapangan = isset($pembelajaran['kerja_lapangan']) ? number_format($pembelajaran['kerja_lapangan']['rata_rata'], 2, ',', '.') : '0,00';
+        $diskusi = isset($pembelajaran['diskusi']) ? number_format($pembelajaran['diskusi']['rata_rata'], 2, ',', '.') : '0,00';
+        $responsi = isset($pembelajaran['responsi']) ? number_format($pembelajaran['responsi']['rata_rata'], 2, ',', '.') : '0,00';
+        $seminar = isset($pembelajaran['seminar']) ? number_format($pembelajaran['seminar']['rata_rata'], 2, ',', '.') : '0,00';
+        $studio = isset($pembelajaran['studio']) ? number_format($pembelajaran['studio']['rata_rata'], 2, ',', '.') : '0,00';
+        $perancangan = isset($pembelajaran['perancangan']) ? number_format($pembelajaran['perancangan']['rata_rata'], 2, ',', '.') : '0,00';
+        $pengembangan = isset($pembelajaran['pengembangan']) ? number_format($pembelajaran['pengembangan']['rata_rata'], 2, ',', '.') : '0,00';
+        $tugasAkhir = isset($pembelajaran['tugas_akhir']) ? number_format($pembelajaran['tugas_akhir']['rata_rata'], 2, ',', '.') : '0,00';
+        $belaNegara = isset($pembelajaran['bela_negara']) ? number_format($pembelajaran['bela_negara']['rata_rata'], 2, ',', '.') : '0,00';
+        $pertukaranPelajar = isset($pembelajaran['pertukaran_pelajar']) ? number_format($pembelajaran['pertukaran_pelajar']['rata_rata'], 2, ',', '.') : '0,00';
+        $wirausaha = isset($pembelajaran['wirausaha']) ? number_format($pembelajaran['wirausaha']['rata_rata'], 2, ',', '.') : '0,00';
+        $pengabdian = isset($pembelajaran['pengabdian']) ? number_format($pembelajaran['pengabdian']['rata_rata'], 2, ',', '.') : '0,00';
+        $rataRataPembelajaran = isset($statsData['aspek_pembelajaran']['rata_rata_semua']) ? number_format($statsData['aspek_pembelajaran']['rata_rata_semua'], 2, ',', '.') : '0,00';
+        
+        // KOMPETENSI (11 Aspek)
+        $komp = $statsData['kompetensi']['details'] ?? [];
+        $etika1 = isset($komp['etika']['a']) ? number_format($komp['etika']['a']['avg_score'], 2, ',', '.') : '0,00';
+        $etika2 = isset($komp['etika']['b']) ? number_format($komp['etika']['b']['avg_score'], 2, ',', '.') : '0,00';
+        $keahlian1 = isset($komp['keahlian']['a']) ? number_format($komp['keahlian']['a']['avg_score'], 2, ',', '.') : '0,00';
+        $keahlian2 = isset($komp['keahlian']['b']) ? number_format($komp['keahlian']['b']['avg_score'], 2, ',', '.') : '0,00';
+        $bahasa1 = isset($komp['bahasa_inggris']['a']) ? number_format($komp['bahasa_inggris']['a']['avg_score'], 2, ',', '.') : '0,00';
+        $bahasa2 = isset($komp['bahasa_inggris']['b']) ? number_format($komp['bahasa_inggris']['b']['avg_score'], 2, ',', '.') : '0,00';
+        $ti1 = isset($komp['teknologi_informasi']['a']) ? number_format($komp['teknologi_informasi']['a']['avg_score'], 2, ',', '.') : '0,00';
+        $ti2 = isset($komp['teknologi_informasi']['b']) ? number_format($komp['teknologi_informasi']['b']['avg_score'], 2, ',', '.') : '0,00';
+        $komunikasi1 = isset($komp['komunikasi']['a']) ? number_format($komp['komunikasi']['a']['avg_score'], 2, ',', '.') : '0,00';
+        $komunikasi2 = isset($komp['komunikasi']['b']) ? number_format($komp['komunikasi']['b']['avg_score'], 2, ',', '.') : '0,00';
+        $kerjasama1 = isset($komp['kerjasama']['a']) ? number_format($komp['kerjasama']['a']['avg_score'], 2, ',', '.') : '0,00';
+        $kerjasama2 = isset($komp['kerjasama']['b']) ? number_format($komp['kerjasama']['b']['avg_score'], 2, ',', '.') : '0,00';
+        $pengembangan1 = isset($komp['pengembangan']['a']) ? number_format($komp['pengembangan']['a']['avg_score'], 2, ',', '.') : '0,00';
+        $pengembangan2 = isset($komp['pengembangan']['b']) ? number_format($komp['pengembangan']['b']['avg_score'], 2, ',', '.') : '0,00';
+        $kritis1 = isset($komp['berpikir_kritis']['a']) ? number_format($komp['berpikir_kritis']['a']['avg_score'], 2, ',', '.') : '0,00';
+        $kritis2 = isset($komp['berpikir_kritis']['b']) ? number_format($komp['berpikir_kritis']['b']['avg_score'], 2, ',', '.') : '0,00';
+        $kreativitas1 = isset($komp['kreativitas']['a']) ? number_format($komp['kreativitas']['a']['avg_score'], 2, ',', '.') : '0,00';
+        $kreativitas2 = isset($komp['kreativitas']['b']) ? number_format($komp['kreativitas']['b']['avg_score'], 2, ',', '.') : '0,00';
+        $kewirausahaan1 = isset($komp['kewirausahaan']['a']) ? number_format($komp['kewirausahaan']['a']['avg_score'], 2, ',', '.') : '0,00';
+        $kewirausahaan2 = isset($komp['kewirausahaan']['b']) ? number_format($komp['kewirausahaan']['b']['avg_score'], 2, ',', '.') : '0,00';
+        $adaptasi1 = isset($komp['adaptasi']['a']) ? number_format($komp['adaptasi']['a']['avg_score'], 2, ',', '.') : '0,00';
+        $adaptasi2 = isset($komp['adaptasi']['b']) ? number_format($komp['adaptasi']['b']['avg_score'], 2, ',', '.') : '0,00';
+        
+        $keselarasanHorizontal = '0%';
+        if (isset($statsData['keselarasan_horizontal']['table'])) {
+            foreach ($statsData['keselarasan_horizontal']['table'] as $row) {
+                if ($row['label'] === 'Selaras') {
+                    $keselarasanHorizontal = $row['persentase'];
+                    break;
+                }
+            }
+        }
+        
+        $keselarasanVertikal = '0%';
+        if (isset($statsData['keselarasan_vertikal']['table'])) {
+            foreach ($statsData['keselarasan_vertikal']['table'] as $row) {
+                if (stripos($row['label'], 'Tinggi') !== false) {
+                    $keselarasanVertikal = $row['persentase'];
+                    break;
+                }
+            }
+        }
+
+        $templateProcessor->setValue('CoverTop', $coverTop);
+        $templateProcessor->setValue('CoverBottom', $coverBottom);
+        $templateProcessor->setValue('Tahun_Lulus', $lulusanTahun);
+        $templateProcessor->setValue('Tahun_Cetak', date('Y'));
+        $templateProcessor->setValue('Prodi', $prodiName);
+        $templateProcessor->setValue('Jenjang', $jenjangName);
+        $templateProcessor->setValue('Responden', $totalResponden);
+        $templateProcessor->setValue('Persentase', $responseRate);
+        $templateProcessor->setValue('Lulusan', $totalLulusan);
+        $templateProcessor->setValue('Bekerja', $bekerja);
+        $templateProcessor->setValue('Wiraswasta', $wiraswasta);
+        $templateProcessor->setValue('Melanjutkan Studi', $studi);
+        $templateProcessor->setValue('Rata-rata Waktu Tunggu', $avgWaktuTunggu);
+        $templateProcessor->setValue('Median Waktu Tunggu', $avgWaktuTunggu);
+        $templateProcessor->setValue('Keselarasan Horizontal', $keselarasanHorizontal);
+        $templateProcessor->setValue('Keselarasan Vertikal', $keselarasanVertikal);
+        $templateProcessor->setValue('Pendapatan Kerja', $pendapatan);
+        $templateProcessor->setValue('Max Kerja', $maxKerja);
+        $templateProcessor->setValue('Min Kerja', $minKerja);
+        $templateProcessor->setValue('Median Kerja', $medianKerja);
+        
+        $templateProcessor->setValue('Pendapatan Wiraswasta', $pendapatanWiraswasta);
+        $templateProcessor->setValue('Max Wiraswasta', $maxWiraswasta);
+        $templateProcessor->setValue('Min Wiraswasta', $minWiraswasta);
+        $templateProcessor->setValue('Median Wiraswasta', $medianWiraswasta);
+        
+        $templateProcessor->setValue('Perkuliahan', $perkuliahan);
+        $templateProcessor->setValue('Demonstrasi', $demonstrasi);
+        $templateProcessor->setValue('Partisipasi dalam Proyek Riset', $proyekRiset);
+        $templateProcessor->setValue('Magang', $magang);
+        $templateProcessor->setValue('Praktikum', $praktikum);
+        $templateProcessor->setValue('Kerja Lapangan', $kerjaLapangan);
+        $templateProcessor->setValue('Diskusi', $diskusi);
+        $templateProcessor->setValue('Responsi', $responsi);
+        $templateProcessor->setValue('Seminar', $seminar);
+        $templateProcessor->setValue('Studio', $studio);
+        $templateProcessor->setValue('Perancangan', $perancangan);
+        $templateProcessor->setValue('Pengembangan', $pengembangan);
+        $templateProcessor->setValue('Tugas Akhir', $tugasAkhir);
+        $templateProcessor->setValue('Bela Negara', $belaNegara);
+        $templateProcessor->setValue('Pertukaran Pelajar', $pertukaranPelajar);
+        $templateProcessor->setValue('Wirausaha', $wirausaha);
+        $templateProcessor->setValue('Pengabdian', $pengabdian);
+        $templateProcessor->setValue('Rata-rata', $rataRataPembelajaran);
+        
+        $templateProcessor->setValue('Etika-1', $etika1);
+        $templateProcessor->setValue('Etika-2', $etika2);
+        $templateProcessor->setValue('Keahlian-1', $keahlian1);
+        $templateProcessor->setValue('Keahlian-2', $keahlian2);
+        $templateProcessor->setValue('Bahasa Inggris-1', $bahasa1);
+        $templateProcessor->setValue('Bahasa Inggris-2', $bahasa2);
+        $templateProcessor->setValue('TI-1', $ti1);
+        $templateProcessor->setValue('TI-2', $ti2);
+        $templateProcessor->setValue('Komunikasi-1', $komunikasi1);
+        $templateProcessor->setValue('Komunikasi-2', $komunikasi2);
+        $templateProcessor->setValue('Kerjasama-1', $kerjasama1);
+        $templateProcessor->setValue('Kerjasama-2', $kerjasama2);
+        $templateProcessor->setValue('Pengembangan-1', $pengembangan1);
+        $templateProcessor->setValue('Pengembangan-2', $pengembangan2);
+        $templateProcessor->setValue('Kritis-1', $kritis1);
+        $templateProcessor->setValue('Kritis-2', $kritis2);
+        $templateProcessor->setValue('Kreativitas-1', $kreativitas1);
+        $templateProcessor->setValue('Kreativitas-2', $kreativitas2);
+        $templateProcessor->setValue('Kewirausahaan-1', $kewirausahaan1);
+        $templateProcessor->setValue('Kewirausahaan-2', $kewirausahaan2);
+        $templateProcessor->setValue('Adaptasi-1', $adaptasi1);
+        $templateProcessor->setValue('Adaptasi-2', $adaptasi2);
+        
+        $fileName = 'Laporan_Tracer_Study_' . date('Ymd_His') . '.docx';
+        $tempFile = tempnam(sys_get_temp_dir(), 'PHPWord');
+        $templateProcessor->saveAs($tempFile);
+        
+        return response()->download($tempFile, $fileName)->deleteFileAfterSend(true);
     }
 
     private function buildStatisticsData(Request $request)
@@ -135,6 +396,9 @@ class AdminStatistikController extends Controller
 
         // 4. Take Home Pay (F505) - Kemdiktisaintek Hal 2
         $takeHomePayData = $this->buildTakeHomePayData($responIds, $nowFormatted);
+        
+        // 4b. Take Home Pay Khusus Wiraswasta (F505)
+        $takeHomePayWiraswastaData = $this->buildTakeHomePayData($wiraswastaResponIds, $nowFormatted);
 
         // 5. Sumber Dana Pembiayaan Kuliah (F1201) - Kemdiktisaintek Hal 3
         $sumberDanaData = $this->buildSumberDanaData($responIds, $nowFormatted);
@@ -166,6 +430,9 @@ class AdminStatistikController extends Controller
         // 14. Sebaran Provinsi Tempat Bekerja
         $sebaranProvinsiData = $this->buildSebaranProvinsiData($responIds);
 
+        // 15. Aspek Pembelajaran (F2)
+        $aspekPembelajaranData = $this->buildAspekPembelajaranData($responIds, $nowFormatted);
+
         // KPI Metrik
         $avgWaktuTungguNumeric = $waktuTungguBekerjaData['rata_rata_numeric'] ?? 0;
         $keselarasanRate = $keselarasanHorizontalData['table'][0]['pct_numeric'] ?? 0;
@@ -181,6 +448,7 @@ class AdminStatistikController extends Controller
             'status_pelaporan' => $statusPelaporanData,
             'status_aktivitas' => $statusAktivitasData,
             'take_home_pay' => $takeHomePayData,
+            'take_home_pay_wiraswasta' => $takeHomePayWiraswastaData,
             'sumber_dana' => $sumberDanaData,
             'jenis_instansi' => $jenisInstansiData,
             'waktu_tunggu_bekerja' => $waktuTungguBekerjaData,
@@ -191,6 +459,7 @@ class AdminStatistikController extends Controller
             'kompetensi' => $kompetensiData,
             'skala_kerja' => $skalaData,
             'sebaran_provinsi' => $sebaranProvinsiData,
+            'aspek_pembelajaran' => $aspekPembelajaranData,
             'rekap_prodi' => $this->getRekapProdi($fakultasId, $prodiId, $akademikId, $kuesionerId),
         ];
     }
@@ -310,6 +579,25 @@ class AdminStatistikController extends Controller
 
         $f505Sum = 0;
         $totalRespondenF505 = count($responF505Values);
+        
+        $maxF505 = 0;
+        $minF505 = 0;
+        $medianF505 = 0;
+        
+        if ($totalRespondenF505 > 0) {
+            $maxF505 = max($responF505Values);
+            $minF505 = min($responF505Values);
+            
+            $sortedValues = array_values($responF505Values);
+            sort($sortedValues);
+            $middleIndex = floor($totalRespondenF505 / 2);
+            if ($totalRespondenF505 % 2 == 0) {
+                $medianF505 = ($sortedValues[$middleIndex - 1] + $sortedValues[$middleIndex]) / 2;
+            } else {
+                $medianF505 = $sortedValues[$middleIndex];
+            }
+        }
+
         foreach ($responF505Values as $val) {
             $f505Sum += $val;
             if ($val <= 1500000) $f505Ranges['s.d. Rp1.500.000']++;
@@ -334,8 +622,11 @@ class AdminStatistikController extends Controller
 
         return [
             'total_responden' => $totalRespondenF505,
-            'rata_rata' => 'Rp ' . number_format($avgF505, 2, ',', '.'),
+            'rata_rata' => 'Rp ' . number_format($avgF505, 0, ',', '.'),
             'rata_rata_numeric' => round($avgF505, 2),
+            'max' => 'Rp ' . number_format($maxF505, 0, ',', '.'),
+            'min' => 'Rp ' . number_format($minF505, 0, ',', '.'),
+            'median' => 'Rp ' . number_format($medianF505, 0, ',', '.'),
             'labels' => array_keys($f505Ranges),
             'series' => array_values($f505Ranges),
             'colors' => ['#5b67ec', '#22c55e', '#f59e0b', '#8b5cf6', '#ef4444', '#14b8a6'],
@@ -868,6 +1159,77 @@ class AdminStatistikController extends Controller
         ];
     }
 
+    private function buildAspekPembelajaranData(array $responIds, string $nowFormatted)
+    {
+        $aspects = [
+            'perkuliahan' => ['label' => 'Perkuliahan', 'kode' => 'F21'],
+            'demonstrasi' => ['label' => 'Demonstrasi', 'kode' => 'F22'],
+            'proyek_riset' => ['label' => 'Partisipasi dalam Proyek Riset', 'kode' => 'F23'],
+            'magang' => ['label' => 'Magang', 'kode' => 'F24'],
+            'praktikum' => ['label' => 'Praktikum', 'kode' => 'F25'],
+            'kerja_lapangan' => ['label' => 'Kerja Lapangan', 'kode' => 'F26'],
+            'diskusi' => ['label' => 'Diskusi', 'kode' => 'F27'],
+            'responsi' => ['label' => 'Responsi/Tutorial', 'kode' => 'F28'],
+            'seminar' => ['label' => 'Seminar', 'kode' => 'F29'],
+            'studio' => ['label' => 'Studio', 'kode' => 'F30'],
+            'perancangan' => ['label' => 'Perancangan', 'kode' => 'F31'],
+            'pengembangan' => ['label' => 'Pengembangan', 'kode' => 'F32'],
+            'tugas_akhir' => ['label' => 'Tugas akhir', 'kode' => 'F33'],
+            'bela_negara' => ['label' => 'Pelatihan bela negara', 'kode' => 'F34'],
+            'pertukaran_pelajar' => ['label' => 'Pertukaran pelajar', 'kode' => 'F35'],
+            'wirausaha' => ['label' => 'Wirausaha', 'kode' => 'F36'],
+            'pengabdian' => ['label' => 'Pengabdian kepada masyarakat', 'kode' => 'F37'],
+        ];
+
+        $results = [];
+        $totalAverages = 0;
+        $countAspects = 0;
+
+        foreach ($aspects as $key => $info) {
+            $details = !empty($responIds) ? JawabanDetail::whereIn('respon_id', $responIds)
+                ->whereHas('pertanyaan', fn($q) => $q->where('kode_pertanyaan', $info['kode']))
+                ->get() : collect([]);
+
+            $sumScore = 0;
+            $responCount = 0;
+
+            foreach ($details as $d) {
+                $t = strtolower(trim((string)$d->jawaban_text));
+                $val = null;
+                if ($t !== '') {
+                    if (is_numeric($t) && (int)$t >= 1 && (int)$t <= 5) $val = (int)$t;
+                    elseif (str_contains($t, 'sangat besar')) $val = 5;
+                    elseif (str_contains($t, 'besar')) $val = 4;
+                    elseif (str_contains($t, 'cukup')) $val = 3;
+                    elseif (str_contains($t, 'kurang')) $val = 2;
+                    elseif (str_contains($t, 'tidak ada') || str_contains($t, 'tidak sama sekali')) $val = 1;
+                }
+
+                if ($val !== null) {
+                    $sumScore += $val;
+                    $responCount++;
+                }
+            }
+
+            $avg = $responCount > 0 ? $sumScore / $responCount : 0;
+            $results[$key] = [
+                'label' => $info['label'],
+                'rata_rata' => $avg
+            ];
+            
+            $totalAverages += $avg;
+            $countAspects++;
+        }
+
+        $rataRataSemua = $countAspects > 0 ? $totalAverages / $countAspects : 0;
+
+        return [
+            'aspek' => $results,
+            'rata_rata_semua' => $rataRataSemua,
+            'updated_at' => $nowFormatted,
+        ];
+    }
+
     private function getEmptyStatisticsData($totalAlumni, $statusPelaporanData, $fakultasId, $prodiId, $akademikId, $kuesionerId, $nowFormatted)
     {
         return [
@@ -895,8 +1257,31 @@ class AdminStatistikController extends Controller
             ],
             'take_home_pay' => [
                 'total_responden' => 0,
-                'rata_rata' => 'Rp 0,00',
+                'rata_rata' => 'Rp 0',
                 'rata_rata_numeric' => 0,
+                'max' => 'Rp 0',
+                'min' => 'Rp 0',
+                'median' => 'Rp 0',
+                'labels' => ['s.d. Rp1.500.000', 'Rp1.500.000 - Rp2.500.000', 'Rp2.500.000 - Rp5.000.000', 'Rp5.000.000 - Rp10.000.000', 'Rp10.000.000 - Rp20.000.000', 'Di atas Rp20.000.000'],
+                'series' => [0, 0, 0, 0, 0, 0],
+                'colors' => ['#5b67ec', '#22c55e', '#f59e0b', '#8b5cf6', '#ef4444', '#14b8a6'],
+                'table' => [
+                    ['label' => 's.d. Rp1.500.000', 'jumlah' => 0, 'persentase' => '0,00%', 'pct_numeric' => 0],
+                    ['label' => 'Rp1.500.000 - Rp2.500.000', 'jumlah' => 0, 'persentase' => '0,00%', 'pct_numeric' => 0],
+                    ['label' => 'Rp2.500.000 - Rp5.000.000', 'jumlah' => 0, 'persentase' => '0,00%', 'pct_numeric' => 0],
+                    ['label' => 'Rp5.000.000 - Rp10.000.000', 'jumlah' => 0, 'persentase' => '0,00%', 'pct_numeric' => 0],
+                    ['label' => 'Rp10.000.000 - Rp20.000.000', 'jumlah' => 0, 'persentase' => '0,00%', 'pct_numeric' => 0],
+                    ['label' => 'Di atas Rp20.000.000', 'jumlah' => 0, 'persentase' => '0,00%', 'pct_numeric' => 0],
+                ],
+                'updated_at' => $nowFormatted,
+            ],
+            'take_home_pay_wiraswasta' => [
+                'total_responden' => 0,
+                'rata_rata' => 'Rp 0',
+                'rata_rata_numeric' => 0,
+                'max' => 'Rp 0',
+                'min' => 'Rp 0',
+                'median' => 'Rp 0',
                 'labels' => ['s.d. Rp1.500.000', 'Rp1.500.000 - Rp2.500.000', 'Rp2.500.000 - Rp5.000.000', 'Rp5.000.000 - Rp10.000.000', 'Rp10.000.000 - Rp20.000.000', 'Di atas Rp20.000.000'],
                 'series' => [0, 0, 0, 0, 0, 0],
                 'colors' => ['#5b67ec', '#22c55e', '#f59e0b', '#8b5cf6', '#ef4444', '#14b8a6'],
@@ -1011,6 +1396,11 @@ class AdminStatistikController extends Controller
             'sebaran_provinsi' => [
                 'labels' => [],
                 'series' => [],
+            ],
+            'aspek_pembelajaran' => [
+                'aspek' => [],
+                'rata_rata_semua' => 0,
+                'updated_at' => $nowFormatted,
             ],
             'rekap_prodi' => $this->getRekapProdi($fakultasId, $prodiId, $akademikId, $kuesionerId),
         ];

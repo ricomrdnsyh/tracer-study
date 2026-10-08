@@ -426,7 +426,6 @@
                             </span>
                         </div>
                         <div class="d-flex align-items-center gap-3 no-print">
-
                             <button type="button" class="btn btn-sm btn-primary fw-bold" id="btn_print_pdf">
                                 <i class="fa-solid fa-print me-2"></i>Cetak / Ekspor PDF
                             </button>
