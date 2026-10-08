@@ -78,6 +78,13 @@
                         return data || '-';
                     }
                 },
+                {
+                    data: 'nama_dekan',
+                    name: 'nama_dekan',
+                    render: function(data) {
+                        return data || '-';
+                    }
+                },
             ]
         });
 

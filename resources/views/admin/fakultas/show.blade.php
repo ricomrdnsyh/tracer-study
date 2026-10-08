@@ -21,6 +21,16 @@
                     <div class="col-12">
                         <div class="d-flex flex-column mb-2">
                             <label class="d-flex align-items-center fs-sm-8 fs-lg-6 fw-bolder mb-1">
+                                <span>Nama Dekan</span>
+                            </label>
+                            <input type="text" id="show_nama_dekan"
+                                class="form-control form-control-sm fs-sm-8 fs-lg-6 bg-light" readonly>
+                        </div>
+                    </div>
+
+                    <div class="col-12">
+                        <div class="d-flex flex-column mb-2">
+                            <label class="d-flex align-items-center fs-sm-8 fs-lg-6 fw-bolder mb-1">
                                 <span>Singkatan</span>
                             </label>
                             <input type="text" id="show_singkatan"

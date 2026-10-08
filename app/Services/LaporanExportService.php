@@ -31,14 +31,16 @@ class LaporanExportService
         $coverBottom = 'UNUJA';
         $prodiName = 'UNUJA';
         $jenjangName = 'PT';
+        $namaDekan = '-';
+        $namaKaprodi = '-';
         
         $user = auth()->user();
         $isFakultas = $user && $user->role === 'Fakultas';
         $userFakultasId = $isFakultas ? $user->fakultas_id : null;
         
-        $fakultasId = $isFakultas ? $userFakultasId : $filters['fakultas_id'];
+        $fakultasId = $isFakultas ? $userFakultasId : ($filters['fakultas_id'] ?? null);
         
-        if ($filters['prodi_id'] && $filters['prodi_id'] !== 'all') {
+        if (isset($filters['prodi_id']) && $filters['prodi_id'] !== 'all' && $filters['prodi_id'] !== '') {
             $prodiObj = Prodi::with('fakultas')->find($filters['prodi_id']);
             if ($prodiObj) {
                 $coverTop = strtoupper($prodiObj->nama_prodi);
@@ -50,7 +52,9 @@ class LaporanExportService
                 
                 $coverBottom = strtoupper($fakultasName ?: 'UNUJA');
                 $prodiName = $prodiObj->nama_prodi;
-                $jenjangName = $prodiObj->jenjang;
+                $jenjangName = $prodiObj->jenjang ?? '-';
+                $namaKaprodi = $prodiObj->nama_kaprodi ?? '-';
+                $namaDekan = $prodiObj->fakultas->nama_dekan ?? '-';
             }
         } elseif ($fakultasId && $fakultasId !== 'all') {
             $fakultasObj = Fakultas::find($fakultasId);
@@ -64,12 +68,13 @@ class LaporanExportService
                 $coverBottom = strtoupper($fakultasName);
                 $prodiName = $fakultasName;
                 $jenjangName = 'Fakultas';
+                $namaDekan = $fakultasObj->nama_dekan ?? '-';
             }
         }
         
         // Tahun Lulus Dinamis
         $lulusanTahun = 'SEMUA LULUSAN';
-        if ($filters['akademik_id'] && $filters['akademik_id'] !== 'all') {
+        if (isset($filters['akademik_id']) && $filters['akademik_id'] !== 'all' && $filters['akademik_id'] !== '') {
             $tahunAkademikObj = \App\Models\TahunAkademik::find($filters['akademik_id']);
             if ($tahunAkademikObj) {
                 // Ekstrak tahun berdasarkan Ganjil/Genap
@@ -201,6 +206,8 @@ class LaporanExportService
         $templateProcessor->setValue('Tahun_Cetak', date('Y'));
         $templateProcessor->setValue('Prodi', $prodiName);
         $templateProcessor->setValue('Jenjang', $jenjangName);
+        $templateProcessor->setValue('Dekan', $namaDekan);
+        $templateProcessor->setValue('Kaprodi', $namaKaprodi);
         $templateProcessor->setValue('Responden', $totalResponden);
         $templateProcessor->setValue('Persentase', $responseRate);
         $templateProcessor->setValue('Lulusan', $totalLulusan);

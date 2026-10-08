@@ -17,7 +17,7 @@ class AdminFakultasController extends Controller
 
     public function getFakultas()
     {
-        $query = Fakultas::select(['id_fakultas', 'nama_fakultas', 'singkatan'])->orderByDesc('id_fakultas');
+        $query = Fakultas::select(['id_fakultas', 'nama_fakultas', 'singkatan', 'nama_dekan'])->orderByDesc('id_fakultas');
 
         if (auth()->user()->role === 'Fakultas') {
             $query->where('id_fakultas', auth()->user()->fakultas_id);
@@ -32,7 +32,14 @@ class AdminFakultasController extends Controller
                                 <i class="fa fa-file-alt"></i>
                             </a>';
 
-                return '<div class="text-center">' . $showBtn . '</div>';
+                $editBtn = '<a href="javascript:void(0)"
+                                class="btn btn-sm btn-light btn-active-light-warning text-center btn-edit"
+                                data-id="' . $row->id_fakultas . '"
+                                data-bs-toggle="tooltip" title="Edit" data-bs-title="Edit">
+                                <i class="fa fa-edit"></i>
+                            </a>';
+
+                return '<div class="text-center">' . $showBtn . ' ' . $editBtn . '</div>';
             })
             ->rawColumns(['action'])
             ->make(true);
@@ -42,6 +49,20 @@ class AdminFakultasController extends Controller
     {
         $fakultas = Fakultas::findOrFail($id);
         return response()->json($fakultas);
+    }
+
+    public function update(Request $request, string $id)
+    {
+        $request->validate([
+            'nama_dekan' => 'nullable|string|max:255',
+        ]);
+
+        $fakultas = Fakultas::findOrFail($id);
+        $fakultas->update([
+            'nama_dekan' => $request->nama_dekan,
+        ]);
+
+        return response()->json(['success' => true, 'message' => 'Data fakultas berhasil diperbarui!']);
     }
 
     public function sync(ClientSSO $clientSSO)

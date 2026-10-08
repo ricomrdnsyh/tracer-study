@@ -92,6 +92,20 @@
                         return data || '-';
                     }
                 },
+                {
+                    data: 'jenjang',
+                    name: 'jenjang',
+                    render: function(data) {
+                        return data || '-';
+                    }
+                },
+                {
+                    data: 'nama_kaprodi',
+                    name: 'nama_kaprodi',
+                    render: function(data) {
+                        return data || '-';
+                    }
+                },
             ]
         });
 

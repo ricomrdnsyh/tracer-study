@@ -144,6 +144,8 @@
                                             <th class="min-w-150px">Fakultas</th>
                                             <th class="min-w-150px">Nama Prodi</th>
                                             <th class="min-w-100px">Singkatan</th>
+                                            <th class="min-w-100px">Jenjang</th>
+                                            <th class="min-w-150px">Nama Kaprodi</th>
                                         </tr>
                                     </thead>
                                     <tbody class="fw-bold text-gray-800"></tbody>
@@ -154,6 +156,7 @@
                 </div>
             </div>
             @include('admin.prodi.show')
+            @include('admin.prodi.edit')
 
             @include('layouts.footer')
         </div>
@@ -177,4 +180,5 @@
 
     @include('admin.prodi.script.index')
     @include('admin.prodi.script.show')
+    @include('admin.prodi.script.edit')
 @endsection

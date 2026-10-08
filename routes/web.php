@@ -53,11 +53,11 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:Admin,Fakultas
 
     Route::get('/fakultas/data', [AdminFakultasController::class, 'getFakultas'])->name('fakultas.data');
     Route::match(['get', 'post'], '/fakultas/sync', [AdminFakultasController::class, 'sync'])->name('fakultas.sync');
-    Route::resource('fakultas', AdminFakultasController::class)->only(['index', 'show']);
+    Route::resource('fakultas', AdminFakultasController::class)->only(['index', 'show', 'update']);
 
     Route::get('/prodi/data', [AdminProdiController::class, 'getProdi'])->name('prodi.data');
     Route::match(['get', 'post'], '/prodi/sync', [AdminProdiController::class, 'sync'])->name('prodi.sync');
-    Route::resource('prodi', AdminProdiController::class)->only(['index', 'show']);
+    Route::resource('prodi', AdminProdiController::class)->only(['index', 'show', 'update']);
 
 
     Route::get('/mahasiswa/data', [AdminMahasiswaController::class, 'getMahasiswa'])->name('mahasiswa.data');

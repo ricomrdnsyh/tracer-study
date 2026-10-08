@@ -89,6 +89,15 @@
                                             <div class="d-flex flex-wrap gap-2">
                                                 <span
                                                     class="badge bg-white text-dark fw-bold px-3 py-2 border border-gray-300 shadow-sm"><code
+                                                        class="text-primary">${Dekan}</code></span>
+                                                <span
+                                                    class="badge bg-white text-dark fw-bold px-3 py-2 border border-gray-300 shadow-sm"><code
+                                                        class="text-primary">${Jenjang}</code></span>
+                                                <span
+                                                    class="badge bg-white text-dark fw-bold px-3 py-2 border border-gray-300 shadow-sm"><code
+                                                        class="text-primary">${Kaprodi}</code></span>
+                                                <span
+                                                    class="badge bg-white text-dark fw-bold px-3 py-2 border border-gray-300 shadow-sm"><code
                                                         class="text-primary">${Responden}</code></span>
                                                 <span
                                                     class="badge bg-white text-dark fw-bold px-3 py-2 border border-gray-300 shadow-sm"><code

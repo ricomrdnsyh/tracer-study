@@ -25,7 +25,7 @@ class AdminProdiController extends Controller
 
     public function getProdi(Request $request)
     {
-        $query = Prodi::with('fakultas')->select(['id_prodi', 'fakultas_id', 'nama_prodi', 'singkatan'])->orderByDesc('created_at');
+        $query = Prodi::with('fakultas')->select(['id_prodi', 'fakultas_id', 'nama_prodi', 'jenjang', 'nama_kaprodi', 'singkatan'])->orderByDesc('created_at');
 
         if (auth()->user()->role === 'Fakultas') {
             $query->where('fakultas_id', auth()->user()->fakultas_id);
@@ -45,7 +45,14 @@ class AdminProdiController extends Controller
                                 <i class="fa fa-file-alt"></i>
                             </a>';
 
-                return '<div class="text-center">' . $showBtn . '</div>';
+                $editBtn = '<a href="javascript:void(0)"
+                                class="btn btn-sm btn-light btn-active-light-warning text-center btn-edit"
+                                data-id="' . $row->id_prodi . '"
+                                data-bs-toggle="tooltip" title="Edit" data-bs-title="Edit">
+                                <i class="fa fa-edit"></i>
+                            </a>';
+
+                return '<div class="text-center">' . $showBtn . ' ' . $editBtn . '</div>';
             })
             ->rawColumns(['action'])
             ->make(true);
@@ -55,6 +62,22 @@ class AdminProdiController extends Controller
     {
         $prodi = Prodi::with('fakultas')->findOrFail($id);
         return response()->json($prodi);
+    }
+
+    public function update(Request $request, string $id)
+    {
+        $request->validate([
+            'jenjang' => 'nullable|string|max:255',
+            'nama_kaprodi' => 'nullable|string|max:255',
+        ]);
+
+        $prodi = Prodi::findOrFail($id);
+        $prodi->update([
+            'jenjang' => $request->jenjang,
+            'nama_kaprodi' => $request->nama_kaprodi,
+        ]);
+
+        return response()->json(['success' => true, 'message' => 'Data prodi berhasil diperbarui!']);
     }
 
     public function sync(ClientSSO $clientSSO)

@@ -125,6 +125,7 @@
                                             <th class="text-center ps-1 min-w-175px">Aksi</th>
                                             <th class="min-w-150px">Nama Fakultas</th>
                                             <th class="min-w-100px">Singkatan</th>
+                                            <th class="min-w-150px">Nama Dekan</th>
                                         </tr>
                                     </thead>
                                     <tbody class="fw-bold text-gray-800"></tbody>
@@ -134,7 +135,9 @@
                     </div>
                 </div>
             </div>
+            </div>
             @include('admin.fakultas.show')
+            @include('admin.fakultas.edit')
 
             @include('layouts.footer')
         </div>
@@ -158,4 +161,5 @@
 
     @include('admin.fakultas.script.index')
     @include('admin.fakultas.script.show')
+    @include('admin.fakultas.script.edit')
 @endsection

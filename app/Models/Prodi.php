@@ -21,6 +21,8 @@ class Prodi extends Model
         'id_prodi',
         'fakultas_id',
         'nama_prodi',
+        'jenjang',
+        'nama_kaprodi',
         'singkatan'
     ];
 

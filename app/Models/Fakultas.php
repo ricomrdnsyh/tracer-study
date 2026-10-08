@@ -16,6 +16,7 @@ class Fakultas extends Model
     protected $fillable = [
         'id_fakultas',
         'nama_fakultas',
+        'nama_dekan',
         'singkatan'
     ];
 
