@@ -338,6 +338,12 @@
                             </a>
                         </div>
 
+                        <div class="menu-item pt-1">
+                            <div class="menu-content">
+                                <span class="menu-heading fw-bold text-uppercase fs-8">Statistik</span>
+                            </div>
+                        </div>
+
                         <div class="menu-item">
                             <a class="menu-link {{ Request::is('admin/statistik*') ? 'active' : '' }}"
                                 href="{{ route('admin.statistik.index') }}">

@@ -81,6 +81,15 @@
                 order: unset;
             }
         }
+
+        /* Dark mode overrides */
+        [data-bs-theme="dark"] .header-corak-container {
+            background: var(--bs-card-bg) !important;
+        }
+        
+        [data-bs-theme="dark"] .header-corak-container::before {
+            opacity: 0.05;
+        }
     </style>
 @endsection
 
@@ -162,7 +171,7 @@
                                 <!-- 2. Kartu Profil Alumni Responden -->
                                 <div class="grid-profile">
                                     <div
-                                        class="card bg-white border border-gray-300 rounded-3 shadow-sm position-relative overflow-hidden">
+                                        class="card border border-gray-300 rounded-3 shadow-sm position-relative overflow-hidden">
                                         <!-- Top Accent line -->
                                         <div class="position-absolute top-0 start-0 w-100"
                                             style="height: 3px; background: linear-gradient(90deg, #009ef7, #50cd89);">
@@ -264,7 +273,7 @@
                                     <div class="row g-3">
                                         <div class="col-12 col-sm-6">
                                             <div
-                                                class="d-flex align-items-center bg-white rounded-3 p-4 border border-gray-200 border-start border-start-4 border-start-primary shadow-xs">
+                                                class="d-flex align-items-center bg-body rounded-3 p-4 border border-gray-200 border-start border-start-4 border-start-primary shadow-xs">
                                                 <div
                                                     class="symbol symbol-40px bg-light-primary rounded-3 me-3 d-flex align-items-center justify-content-center">
                                                     <i class="fas fa-calendar-alt text-primary fs-5"></i>
@@ -282,7 +291,7 @@
 
                                         <div class="col-12 col-sm-6">
                                             <div
-                                                class="d-flex align-items-center bg-white rounded-3 p-4 border border-gray-200 border-start border-start-4 border-start-warning shadow-xs">
+                                                class="d-flex align-items-center bg-body rounded-3 p-4 border border-gray-200 border-start border-start-4 border-start-warning shadow-xs">
                                                 <div
                                                     class="symbol symbol-40px bg-light-warning rounded-3 me-3 d-flex align-items-center justify-content-center">
                                                     <i class="fas fa-clock text-warning fs-5"></i>
@@ -306,7 +315,7 @@
                     <!-- Main Answers Card -->
                     <div class="card shadow-sm border border-dashed border-dark rounded mb-7">
                         <div
-                            class="card-header border-bottom py-5 px-6 px-lg-8 bg-white d-flex align-items-center justify-content-between rounded-top">
+                            class="card-header border-bottom py-5 px-6 px-lg-8 d-flex align-items-center justify-content-between rounded-top">
                             <div class="d-flex align-items-center">
                                 <span
                                     class="symbol symbol-40px bg-light-primary rounded-3 me-4 d-flex align-items-center justify-content-center">

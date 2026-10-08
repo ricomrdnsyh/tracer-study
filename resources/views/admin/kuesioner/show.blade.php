@@ -58,7 +58,7 @@
                         <div class="separator my-5"></div>
                         <div class="card-body pt-0">
                             <div class="d-flex flex-stack mb-5">
-                                <h4 class="text-dark fw-bolder my-1"><i class="fas fa-list-ul text-primary me-2"></i>Daftar
+                                <h4 class="text-gray-900 fw-bolder my-1"><i class="fas fa-list-ul text-primary me-2"></i>Daftar
                                     Kategori Pertanyaan</h4>
                             </div>
                             <div class="accordion accordion-icon-toggle" id="kategoriAccordion">
@@ -66,7 +66,7 @@
                                     <div class="accordion-item mb-5 border-0 shadow-sm rounded">
                                         <h2 class="accordion-header" id="heading-{{ $kategori->id_kategori }}">
                                             <button
-                                                class="accordion-button collapsed fw-bolder fs-6 fs-md-4 bg-light-primary text-dark rounded d-flex align-items-center px-4 py-3"
+                                                class="accordion-button collapsed fw-bolder fs-6 fs-md-4 bg-light-primary text-gray-900 rounded d-flex align-items-center px-4 py-3"
                                                 type="button" data-bs-toggle="collapse"
                                                 data-bs-target="#collapse-{{ $kategori->id_kategori }}"
                                                 aria-expanded="false" aria-controls="collapse-{{ $kategori->id_kategori }}">
@@ -109,7 +109,7 @@
                                                     </div>
                                                 @endif
 
-                                                <div class="table-responsive border rounded px-3 py-2 bg-white">
+                                                <div class="table-responsive border rounded px-3 py-2 bg-body">
                                                     <table
                                                         class="table table-hover table-row-dashed table-row-gray-200 align-middle gs-0 gy-4">
                                                         <thead>
@@ -129,9 +129,9 @@
                                                         <tbody>
                                                             @forelse($kategori->pertanyaans as $pertanyaan)
                                                                 <tr>
-                                                                    <td class="ps-3 text-dark fw-bold">
+                                                                    <td class="ps-3 text-gray-900 fw-bold">
                                                                         {{ $pertanyaan->kode_pertanyaan ?? '-' }}</td>
-                                                                    <td class="text-dark fw-bold">
+                                                                    <td class="text-gray-900 fw-bold">
                                                                         {{ $pertanyaan->teks_pertanyaan }}</td>
                                                                     <td><span
                                                                             class="badge badge-light-primary fw-bolder">{{ ucfirst($pertanyaan->tipe_jawaban) }}</span>
