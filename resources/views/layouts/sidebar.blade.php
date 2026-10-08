@@ -350,7 +350,7 @@
 
                         <div class="menu-item pt-1">
                             <div class="menu-content">
-                                <span class="menu-heading fw-bold text-uppercase fs-8">Statistik</span>
+                                <span class="menu-heading fw-bold text-uppercase fs-8">Statistik & Laporan</span>
                             </div>
                         </div>
 
