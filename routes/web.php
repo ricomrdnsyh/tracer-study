@@ -34,6 +34,10 @@ Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [AuthController::class, 'login'])->name('login.post');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
+// Public route for Tracer Login
+Route::get('/isi-kuesioner', [AuthController::class, 'showTracerLoginForm'])->name('tracer.login');
+Route::post('/isi-kuesioner', [AuthController::class, 'tracerLogin'])->name('tracer.login.post');
+
 Route::get('log-viewer', [LogViewerController::class, 'index'])->middleware(['auth', 'role:Admin']);
 
 Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:Admin,Fakultas'])->group(function () {

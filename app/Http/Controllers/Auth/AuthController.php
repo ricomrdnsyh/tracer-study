@@ -5,12 +5,37 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Models\Mahasiswa;
 
 class AuthController extends Controller
 {
     public function showLoginForm()
     {
         return view('auth.login');
+    }
+
+    public function showTracerLoginForm()
+    {
+        return view('auth.tracer-login');
+    }
+
+    public function tracerLogin(Request $request)
+    {
+        $request->validate([
+            'nim' => 'required|string',
+        ]);
+
+        $mahasiswa = Mahasiswa::where('nim', $request->nim)->first();
+
+        if ($mahasiswa) {
+            Auth::guard('mahasiswa')->login($mahasiswa);
+            $request->session()->regenerate();
+            return redirect()->route('mahasiswa.tracer.index');
+        }
+
+        return back()->withErrors([
+            'nim' => 'NIM tidak ditemukan. Pastikan Anda memasukkan NIM yang terdaftar.',
+        ])->onlyInput('nim');
     }
 
     public function login(Request $request)
