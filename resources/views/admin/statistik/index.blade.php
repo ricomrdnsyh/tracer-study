@@ -484,23 +484,25 @@
                                 </div>
 
                                 <!-- Filter Fakultas -->
+                                @if($isFakultas)
+                                    <input type="hidden" id="filter_fakultas" value="{{ $userFakultasId }}">
+                                @else
                                 <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12">
                                     <label class="form-label fw-bold fs-7 mb-2 text-gray-700">Fakultas:</label>
                                     <select id="filter_fakultas" class="form-select form-select-sm" data-control="select2"
-                                        data-placeholder="Semua Fakultas" data-allow-clear="true"
-                                        {{ $isFakultas ? 'disabled' : '' }}>
+                                        data-placeholder="Semua Fakultas" data-allow-clear="true">
                                         <option value="all">Semua Fakultas</option>
                                         @foreach ($fakultasList as $f)
-                                            <option value="{{ $f->id_fakultas }}"
-                                                {{ $isFakultas && $userFakultasId == $f->id_fakultas ? 'selected' : '' }}>
+                                            <option value="{{ $f->id_fakultas }}">
                                                 {{ $f->nama_fakultas }}
                                             </option>
                                         @endforeach
                                     </select>
                                 </div>
+                                @endif
 
                                 <!-- Filter Program Studi -->
-                                <div class="col-xl-2 col-lg-3 col-md-6 col-sm-12">
+                                <div class="{{ $isFakultas ? 'col-xl-5 col-lg-6' : 'col-xl-2 col-lg-3' }} col-md-6 col-sm-12">
                                     <label class="form-label fw-bold fs-7 mb-2 text-gray-700">Program Studi:</label>
                                     <select id="filter_prodi" class="form-select form-select-sm" data-control="select2"
                                         data-placeholder="Semua Prodi" data-allow-clear="true">
@@ -532,11 +534,10 @@
 
                     <!-- Empty State -->
                     <div id="empty_filter_state"
-                        class="card text-center py-10 my-10 rounded-4 border border-dashed border-gray-400 shadow-sm">
-                        <i class="fa-solid fa-chart-pie fa-4x text-muted mb-4 mt-4"></i>
-                        <h3 class="text-gray-900 fw-bolder fs-2">Pilih Filter untuk Menampilkan Statistik</h3>
-                        <p class="text-gray-500 fs-6 mb-4">Silakan sesuaikan filter di atas untuk memuat data statistik
-                            tracer study.</p>
+                        class="card text-center py-20 my-10 rounded-4 border border-dashed border-gray-400 shadow-sm d-flex flex-column justify-content-center align-items-center" style="min-height: 350px;">
+                        <i class="fa-solid fa-chart-pie text-muted mb-6" style="font-size: 5rem;"></i>
+                        <h3 class="text-gray-900 fw-bolder fs-1 mb-3">Pilih Filter untuk Menampilkan Statistik</h3>
+                        <p class="text-gray-500 fs-5 mb-0">Silakan sesuaikan filter di atas untuk memuat data statistik tracer study.</p>
                     </div>
 
                     <!-- Statistics Container (Hidden by default) -->

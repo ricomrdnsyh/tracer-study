@@ -27,12 +27,20 @@ class AdminStatistikController extends Controller
     {
         $kuesionerList = Kuesioner::orderByDesc('id_kuesioner')->get();
         $tahunAkademikList = TahunAkademik::orderByDesc('id_smt')->get();
-        $fakultasList = Fakultas::orderBy('nama_fakultas')->get();
-        $prodiList = Prodi::orderBy('nama_prodi')->get();
-
+        
         $user = auth()->user();
         $isFakultas = $user && $user->role === 'Fakultas';
         $userFakultasId = $isFakultas ? $user->fakultas_id : null;
+
+        if ($isFakultas) {
+            $fakultasList = Fakultas::where('id_fakultas', $userFakultasId)->get();
+            $prodiList = Prodi::where('fakultas_id', $userFakultasId)->orderBy('nama_prodi')->get();
+        } else {
+            $fakultasList = Fakultas::orderBy('nama_fakultas')->get();
+            $prodiList = Prodi::orderBy('nama_prodi')->get();
+        }
+
+        
 
         $statsData = $this->statistikService->buildStatisticsData($request);
 

@@ -1562,7 +1562,7 @@
                     $loading.hide();
                     if (!res) return;
 
-                    $('#empty_filter_state').hide();
+                    $('#empty_filter_state').addClass('d-none');
                     $('#statistics_container').fadeIn(function() {
                         // Ensure charts resize correctly after unhiding
                         window.dispatchEvent(new Event('resize'));
@@ -1852,27 +1852,34 @@
             });
 
             // Cascading Prodi Filter based on Fakultas
-            $('#filter_fakultas').on('change', function() {
-                var selectedFakultas = $(this).val();
-                var $prodiSelect = $('#filter_prodi');
+            var $prodiSelect = $('#filter_prodi');
+            var originalProdiOptions = $prodiSelect.find('option').clone();
 
-                $prodiSelect.find('option').each(function() {
+            function toggleProdiStatistik() {
+                var selectedFakultas = $('#filter_fakultas').val();
+
+                // Bersihkan lalu masukkan opsi yang relevan
+                $prodiSelect.empty();
+                originalProdiOptions.each(function() {
                     var val = $(this).val();
                     var fakultas = $(this).data('fakultas');
 
-                    if (val === 'all' || !selectedFakultas || selectedFakultas === 'all' ||
-                        fakultas == selectedFakultas) {
-                        $(this).prop('disabled', false);
-                    } else {
-                        $(this).prop('disabled', true);
+                    if (val === 'all' || !selectedFakultas || selectedFakultas === 'all' || fakultas == selectedFakultas) {
+                        $prodiSelect.append($(this).clone());
                     }
                 });
 
-                if ($prodiSelect.find('option:selected').prop('disabled')) {
-                    $prodiSelect.val('all').trigger('change.select2');
-                } else {
-                    $prodiSelect.trigger('change.select2');
-                }
+                // Pilih 'all' secara default setelah difilter
+                $prodiSelect.val('all').trigger('change.select2');
+            }
+
+            // Inisialisasi awal jika ada hidden input (Role Fakultas)
+            if ($('#filter_fakultas').length && $('#filter_fakultas').is(':hidden')) {
+                toggleProdiStatistik();
+            }
+
+            $('#filter_fakultas').on('change', function() {
+                toggleProdiStatistik();
             });
 
             // Reset Filter Button
