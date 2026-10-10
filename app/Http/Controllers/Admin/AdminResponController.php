@@ -3,9 +3,16 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\ResponTracer;
+use App\Models\Fakultas;
 use App\Models\Kuesioner;
+use App\Models\Mahasiswa;
+use App\Models\Pertanyaan;
+use App\Models\Prodi;
+use App\Models\ResponTracer;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 use Yajra\DataTables\Facades\DataTables;
 
 class AdminResponController extends Controller
@@ -13,12 +20,12 @@ class AdminResponController extends Controller
     public function index()
     {
         $kuesioner = Kuesioner::orderByDesc('id_kuesioner')->get();
-        $fakultas = \App\Models\Fakultas::orderBy('nama_fakultas')->get();
+        $fakultas = Fakultas::orderBy('nama_fakultas')->get();
 
         if (auth()->user()->role === 'Fakultas') {
-            $prodi = \App\Models\Prodi::where('fakultas_id', auth()->user()->fakultas_id)->orderBy('nama_prodi')->get();
+            $prodi = Prodi::where('fakultas_id', auth()->user()->fakultas_id)->orderBy('nama_prodi')->get();
         } else {
-            $prodi = \App\Models\Prodi::orderBy('nama_prodi')->get();
+            $prodi = Prodi::orderBy('nama_prodi')->get();
         }
 
         return view('admin.respon.index', compact('kuesioner', 'fakultas', 'prodi'));
@@ -29,17 +36,17 @@ class AdminResponController extends Controller
         $query = ResponTracer::with(['mahasiswa.prodi.fakultas', 'kuesioner'])->select(['id_respon', 'mahasiswa_id', 'kuesioner_id', 'status', 'tgl_isi'])->orderByDesc('tgl_isi');
 
         if (auth()->user()->role === 'Fakultas') {
-            $facultyProdiIds = \App\Models\Prodi::where('fakultas_id', auth()->user()->fakultas_id)->pluck('id_prodi')->toArray();
-            $nimList = \App\Models\Mahasiswa::whereIn('prodi_id', $facultyProdiIds)->pluck('nim')->toArray();
+            $facultyProdiIds = Prodi::where('fakultas_id', auth()->user()->fakultas_id)->pluck('id_prodi')->toArray();
+            $nimList = Mahasiswa::whereIn('prodi_id', $facultyProdiIds)->pluck('nim')->toArray();
             $query->whereIn('mahasiswa_id', $nimList);
         } elseif ($request->filled('fakultas_id') && $request->fakultas_id !== 'all') {
-            $facultyProdiIds = \App\Models\Prodi::where('fakultas_id', $request->fakultas_id)->pluck('id_prodi')->toArray();
-            $nimList = \App\Models\Mahasiswa::whereIn('prodi_id', $facultyProdiIds)->pluck('nim')->toArray();
+            $facultyProdiIds = Prodi::where('fakultas_id', $request->fakultas_id)->pluck('id_prodi')->toArray();
+            $nimList = Mahasiswa::whereIn('prodi_id', $facultyProdiIds)->pluck('nim')->toArray();
             $query->whereIn('mahasiswa_id', $nimList);
         }
 
         if ($request->filled('prodi_id') && $request->prodi_id !== 'all') {
-            $nimList = \App\Models\Mahasiswa::where('prodi_id', $request->prodi_id)->pluck('nim')->toArray();
+            $nimList = Mahasiswa::where('prodi_id', $request->prodi_id)->pluck('nim')->toArray();
             $query->whereIn('mahasiswa_id', $nimList);
         }
 
@@ -64,10 +71,10 @@ class AdminResponController extends Controller
                 return $row->kuesioner ? $row->kuesioner->judul : '-';
             })
             ->addColumn('tgl_isi_format', function ($row) {
-                return $row->tgl_isi ? \Carbon\Carbon::parse($row->tgl_isi)->translatedFormat('d F Y, H:i') . ' WIB' : '-';
+                return $row->tgl_isi ? Carbon::parse($row->tgl_isi)->translatedFormat('d F Y, H:i') . ' WIB' : '-';
             })
             ->addColumn('action', function ($row) {
-                $showBtn = '<a href="'.route('admin.respon.show', $row->id_respon).'"
+                $showBtn = '<a href="' . route('admin.respon.show', $row->id_respon) . '"
                                 class="btn btn-sm btn-light btn-active-light-info text-center"
                                 data-bs-toggle="tooltip" title="Lihat Detail Jawaban">
                                 <i class="fa fa-eye"></i> Detail
@@ -118,7 +125,7 @@ class AdminResponController extends Controller
         }
 
         $pekerjaan = $respon->pekerjaanAlumni;
-        $pertanyaans = \App\Models\Pertanyaan::whereIn('kode_pertanyaan', ['F5A0', 'F5A1', 'F5A2', 'f5a0', 'f5a1', 'f5a2', 'f18b', 'F18B'])->get();
+        $pertanyaans = Pertanyaan::whereIn('kode_pertanyaan', ['F5A0', 'F5A1', 'F5A2', 'f5a0', 'f5a1', 'f5a2', 'f18b', 'F18B'])->get();
 
         foreach ($pertanyaans as $p) {
             $id = $p->id_pertanyaan;
@@ -127,8 +134,8 @@ class AdminResponController extends Controller
             if ($kode === 'f5a0') {
                 if (!empty($jawabanUser[$id]) && strlen($jawabanUser[$id]) == 2) {
                     $val = $jawabanUser[$id];
-                    $negara = \Illuminate\Support\Facades\Cache::remember("master_negara_{$val}", 86400, function () use ($val) {
-                        return \Illuminate\Support\Facades\DB::table('master_negara')->where('kode_wilayah_negara', $val)->value('negara');
+                    $negara = Cache::remember("master_negara_{$val}", 86400, function () use ($val) {
+                        return DB::table('master_negara')->where('kode_wilayah_negara', $val)->value('negara');
                     });
                     if ($negara) $jawabanUser[$id] = $negara;
                 }
@@ -142,8 +149,8 @@ class AdminResponController extends Controller
                 }
                 if (!empty($jawabanUser[$id]) && preg_match('/^\d+$/', $jawabanUser[$id])) {
                     $val = $jawabanUser[$id];
-                    $prov = \Illuminate\Support\Facades\Cache::remember("master_provinsi_{$val}", 86400, function () use ($val) {
-                        return \Illuminate\Support\Facades\DB::table('master_provinsi')->where('kode_wilayah_provinsi', $val)->value('provinsi');
+                    $prov = Cache::remember("master_provinsi_{$val}", 86400, function () use ($val) {
+                        return DB::table('master_provinsi')->where('kode_wilayah_provinsi', $val)->value('provinsi');
                     });
                     if ($prov) $jawabanUser[$id] = $prov;
                 }
@@ -153,8 +160,8 @@ class AdminResponController extends Controller
                 }
                 if (!empty($jawabanUser[$id]) && preg_match('/^\d+$/', $jawabanUser[$id])) {
                     $val = $jawabanUser[$id];
-                    $kab = \Illuminate\Support\Facades\Cache::remember("master_kab_{$val}", 86400, function () use ($val) {
-                        return \Illuminate\Support\Facades\DB::table('master_kota_kabupaten')->where('kode_wilayah_kota_kabupaten', $val)->value('kota_kabupaten');
+                    $kab = Cache::remember("master_kab_{$val}", 86400, function () use ($val) {
+                        return DB::table('master_kota_kabupaten')->where('kode_wilayah_kota_kabupaten', $val)->value('kota_kabupaten');
                     });
                     if ($kab) $jawabanUser[$id] = $kab;
                 }
@@ -176,4 +183,3 @@ class AdminResponController extends Controller
         return view('admin.respon.show', compact('respon', 'jawabanUser', 'jsonKemdikbud'));
     }
 }
-

@@ -3,10 +3,14 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\Kuesioner;
-use App\Models\TahunAkademik;
 use App\Http\Requests\Admin\KuesionerRequest;
+use App\Models\KategoriPertanyaan;
+use App\Models\Kuesioner;
+use App\Models\Pertanyaan;
+use App\Models\TahunAkademik;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Yajra\DataTables\Facades\DataTables;
 
 class AdminKuesionerController extends Controller
@@ -32,12 +36,12 @@ class AdminKuesionerController extends Controller
             })
             ->addColumn('periode_nama', function ($row) {
                 if (!$row->tgl_mulai || !$row->tgl_selesai) return '-';
-                $mulai = \Carbon\Carbon::parse($row->tgl_mulai)->translatedFormat('d F Y');
-                $selesai = \Carbon\Carbon::parse($row->tgl_selesai)->translatedFormat('d F Y');
+                $mulai = Carbon::parse($row->tgl_mulai)->translatedFormat('d F Y');
+                $selesai = Carbon::parse($row->tgl_selesai)->translatedFormat('d F Y');
                 return $mulai . ' s/d ' . $selesai;
             })
             ->addColumn('action', function ($row) {
-                $showBtn = '<a href="'.route('admin.kuesioner.show', $row->id_kuesioner).'"
+                $showBtn = '<a href="' . route('admin.kuesioner.show', $row->id_kuesioner) . '"
                                 class="btn btn-sm btn-light btn-active-light-info text-center"
                                 data-bs-toggle="tooltip" title="Kelola Pertanyaan" data-bs-title="Kelola Pertanyaan">
                                 <i class="fa fa-list"></i>
@@ -181,7 +185,7 @@ class AdminKuesionerController extends Controller
         ]);
     }
 
-    public function importJson(\Illuminate\Http\Request $request, Kuesioner $kuesioner)
+    public function importJson(Request $request, Kuesioner $kuesioner)
     {
         $request->validate([
             'json_file' => 'required|file',
@@ -195,13 +199,13 @@ class AdminKuesionerController extends Controller
         }
 
         try {
-            \Illuminate\Support\Facades\DB::transaction(function () use ($data, $kuesioner) {
+            DB::transaction(function () use ($data, $kuesioner) {
                 $insertedQuestions = [];
                 $kategoriMap = [];
                 $pertanyaanMap = [];
 
                 foreach ($data as $kat) {
-                    $kategori = \App\Models\KategoriPertanyaan::create([
+                    $kategori = KategoriPertanyaan::create([
                         'kuesioner_id' => $kuesioner->id_kuesioner,
                         'nama_kategori' => $kat['nama_kategori'],
                         'urutan' => $kat['urutan'],
@@ -216,7 +220,7 @@ class AdminKuesionerController extends Controller
 
                     if (isset($kat['pertanyaans']) && is_array($kat['pertanyaans'])) {
                         foreach ($kat['pertanyaans'] as $p) {
-                            $pertanyaan = \App\Models\Pertanyaan::create([
+                            $pertanyaan = Pertanyaan::create([
                                 'kategori_id' => $kategori->id_kategori,
                                 'kode_pertanyaan' => $p['kode_pertanyaan'],
                                 'teks_pertanyaan' => $p['teks_pertanyaan'],
@@ -262,4 +266,3 @@ class AdminKuesionerController extends Controller
         }
     }
 }
-
