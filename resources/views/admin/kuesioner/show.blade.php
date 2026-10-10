@@ -647,6 +647,91 @@
                     btn.find('.indicator-progress').show();
                 });
 
+                $('#form_import_json').on('submit', function(e) {
+                    let fileInput = $('#json_file_import')[0];
+                    if (!fileInput.files || fileInput.files.length === 0) {
+                        e.preventDefault();
+                        Swal.fire("Peringatan!", "Silakan pilih file JSON terlebih dahulu.", "warning");
+                        return false;
+                    }
+
+                    let btn = $(this).find('button[type="submit"]');
+                    btn.attr('data-kt-indicator', 'on');
+                    btn.prop('disabled', true);
+                    btn.find('.indicator-label').hide();
+                    btn.find('.indicator-progress').show();
+                });
+
+                $('#custom_dropzone_json').on('click', function(e) {
+                    if (e.target.id === 'json_file_import') return;
+                    if (e.target.id !== 'btn_remove_file_json' && $(e.target).closest('#btn_remove_file_json').length === 0) {
+                        document.getElementById('json_file_import').click();
+                    }
+                });
+
+                $('#btn_remove_file_json').on('click', function(e) {
+                    e.stopPropagation();
+                    $('#json_file_import').val('');
+                    $('#upload_prompt_json').show();
+                    $('#file_name_display_json').hide();
+                });
+
+                $('#json_file_import').on('change', function(e) {
+                    let file = e.target.files[0];
+                    if (!file) {
+                        $('#upload_prompt_json').show();
+                        $('#file_name_display_json').hide();
+                        return;
+                    }
+
+                    let validExtensions = ['json'];
+                    let fileExtension = file.name.split('.').pop().toLowerCase();
+                    let maxSize = 5 * 1024 * 1024;
+
+                    if (!validExtensions.includes(fileExtension)) {
+                        Swal.fire({
+                            text: "Format file tidak didukung! Harap unggah file JSON (.json)",
+                            icon: "error",
+                            buttonsStyling: false,
+                            confirmButtonText: "Mengerti",
+                            customClass: {
+                                confirmButton: "btn btn-sm btn-danger"
+                            }
+                        });
+                        $('#json_file_import').val('');
+                        $('#upload_prompt_json').show();
+                        $('#file_name_display_json').hide();
+                        return;
+                    }
+
+                    if (file.size > maxSize) {
+                        Swal.fire({
+                            text: "Ukuran file terlalu besar! Maksimal 5MB.",
+                            icon: "error",
+                            buttonsStyling: false,
+                            confirmButtonText: "Mengerti",
+                            customClass: {
+                                confirmButton: "btn btn-sm btn-danger"
+                            }
+                        });
+                        $('#json_file_import').val('');
+                        $('#upload_prompt_json').show();
+                        $('#file_name_display_json').hide();
+                        return;
+                    }
+
+                    let fileSize = (file.size / (1024 * 1024)).toFixed(2) + ' MB';
+                    if (file.size < 1024 * 1024) {
+                        fileSize = (file.size / 1024).toFixed(2) + ' KB';
+                    }
+
+                    $('#file_name_text_json').text(file.name);
+                    $('#file_size_text_json').text(fileSize);
+
+                    $('#upload_prompt_json').hide();
+                    $('#file_name_display_json').show();
+                });
+
                 @if ($message = Session::get('success'))
                     Swal.fire({
                         text: "{{ $message }}",
@@ -685,46 +770,69 @@
 
     @if (auth()->user()->role === 'Admin')
 
-        <div class="modal fade" id="modal_import_json" tabindex="-1" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered mw-500px">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h2 class="fw-bolder">Import Kuesioner (JSON)</h2>
-                        <div class="btn btn-icon btn-sm btn-active-icon-primary" data-bs-dismiss="modal">
-                            <i class="fas fa-times fs-1"></i>
+        <div class="modal fade" id="modal_import_json" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-xl" role="document">
+                <form id="form_import_json" action="{{ route('admin.kuesioner.import-json', $kuesioner->id_kuesioner) }}" method="POST" enctype="multipart/form-data">
+                    @csrf
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Import Kuesioner (JSON)</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
-                    </div>
-                    <form action="{{ route('admin.kuesioner.import-json', $kuesioner->id_kuesioner) }}" method="POST" enctype="multipart/form-data">
-                        @csrf
-                        <div class="modal-body py-10 px-lg-17">
-                            <div class="mb-5 text-center">
-                                <i class="fas fa-file-import text-success fs-3x mb-3"></i>
-                                <div class="text-muted fw-bold fs-5">
-                                    Pilih file .json hasil Export Kuesioner
+                        <div class="modal-body">
+                            <div class="d-flex flex-column mb-7">
+                                <label class="d-flex align-items-center fs-sm-8 fs-lg-6 fw-bolder mb-2 required">
+                                    <span>File JSON</span>
+                                </label>
+
+                                <div class="dropzone dropzone-queue mb-2 text-center p-8 border-dashed border-1 border-gray-300 rounded-3 bg-light position-relative"
+                                    id="custom_dropzone_json" style="cursor: pointer; transition: all 0.3s ease;">
+                                    <input type="file" id="json_file_import" name="json_file"
+                                        accept=".json, application/json"
+                                        class="d-none" required />
+
+                                    <div id="upload_prompt_json">
+                                        <i class="fa-solid fa-file-code fs-3x text-gray-400 mb-3"></i>
+                                        <div class="fs-5 fw-bolder text-gray-900 mb-1">Klik untuk unggah file JSON</div>
+                                        <span class="fs-7 fw-semibold text-gray-500">Format .json (hasil Export Kuesioner)</span>
+                                    </div>
+
+                                    <div id="file_name_display_json" style="display: none;">
+                                        <button type="button"
+                                            class="btn btn-icon btn-sm btn-active-light-danger position-absolute top-0 end-0 m-2"
+                                            id="btn_remove_file_json" title="Hapus file">
+                                            <i class="fa-solid fa-xmark fs-2 text-danger"></i>
+                                        </button>
+                                        <i class="fa-solid fa-file-code fs-3x text-success mb-3"></i>
+                                        <div class="fs-5 fw-bolder text-gray-900 mb-1" id="file_name_text_json">nama_file.json
+                                        </div>
+                                        <span class="fs-7 fw-semibold text-gray-500" id="file_size_text_json">File siap
+                                            diunggah</span>
+                                    </div>
                                 </div>
                             </div>
-                            <div class="fv-row mb-7">
-                                <label class="required fs-6 fw-bold mb-2">File JSON</label>
-                                <input type="file" class="form-control form-control-solid" name="json_file" accept=".json" required />
-                            </div>
-                            <div class="notice d-flex bg-light-warning rounded border-warning border border-dashed p-6">
+                            <div class="notice d-flex bg-light-warning rounded border-warning border border-dashed p-4 p-md-6">
                                 <i class="fas fa-exclamation-triangle fs-2tx text-warning me-4"></i>
                                 <div class="d-flex flex-stack flex-grow-1">
                                     <div class="fw-bold">
-                                        <h4 class="text-gray-900 fw-bolder">Perhatian!</h4>
-                                        <div class="fs-6 text-gray-700">Pastikan Anda tidak mengimpor file ganda ke dalam kuesioner yang sama.</div>
+                                        <h5 class="text-gray-900 fw-bolder">Perhatian!</h5>
+                                        <div class="fs-7 text-gray-700">Pastikan Anda tidak mengimpor file ganda ke dalam kuesioner yang sama.</div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        <div class="modal-footer flex-center">
-                            <button type="reset" class="btn btn-light me-3" data-bs-dismiss="modal">Batal</button>
-                            <button type="submit" class="btn btn-primary">
-                                <span class="indicator-label">Mulai Import</span>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-sm btn-secondary fs-sm-8 fs-lg-6" data-bs-dismiss="modal">Batal</button>
+                            <button type="submit" class="btn btn-sm btn-primary fs-sm-8 fs-lg-6" id="btn_import_json_submit">
+                                <span class="indicator-label"><i class="fas fa-file-import me-2"></i>Mulai Import</span>
+                                <span class="indicator-progress" style="display:none;">
+                                    Tunggu sebentar...
+                                    <span class="spinner-border spinner-border-sm align-middle ms-2"></span>
+                                </span>
                             </button>
                         </div>
-                    </form>
-                </div>
+                    </div>
+                </form>
             </div>
         </div>
     @endif

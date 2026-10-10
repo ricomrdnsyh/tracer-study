@@ -99,8 +99,16 @@ class ClientSSO
             'filter' => $filter,
         ], $additionalPayload);
 
+        $curlOptions = [
+            CURLOPT_IPRESOLVE => CURL_IPRESOLVE_V4,
+            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+            CURLOPT_SSLVERSION => 6,
+            CURLOPT_SSL_CIPHER_LIST => 'DEFAULT@SECLEVEL=1'
+        ];
+
         $response = Http::withHeaders($headers)
             ->withoutVerifying()
+            ->withOptions(['curl' => $curlOptions])
             ->timeout(60)
             ->connectTimeout(15)
             ->post($url . '?page=1', $payload);
@@ -112,6 +120,7 @@ class ClientSSO
 
             $response = Http::withHeaders($headers)
                 ->withoutVerifying()
+                ->withOptions(['curl' => $curlOptions])
                 ->connectTimeout(30)
                 ->timeout(120)
                 ->post($url . '?page=1', $payload);
@@ -133,10 +142,11 @@ class ClientSSO
 
         $pageChunks = array_chunk(range(2, $lastPage), 25);
         foreach ($pageChunks as $chunk) {
-            $responses = Http::pool(function ($pool) use ($headers, $url, $payload, $chunk) {
+            $responses = Http::pool(function ($pool) use ($headers, $url, $payload, $chunk, $curlOptions) {
                 foreach ($chunk as $p) {
                     $pool->withHeaders($headers)
                         ->withoutVerifying()
+                        ->withOptions(['curl' => $curlOptions])
                         ->timeout(60)
                         ->post($url . '?page=' . $p, $payload);
                 }
@@ -167,8 +177,16 @@ class ClientSSO
             'pagination' => 'off',
         ], $additionalPayload);
 
+        $curlOptions = [
+            CURLOPT_IPRESOLVE => CURL_IPRESOLVE_V4,
+            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+            CURLOPT_SSLVERSION => 6,
+            CURLOPT_SSL_CIPHER_LIST => 'DEFAULT@SECLEVEL=1'
+        ];
+
         $response = Http::withHeaders($headers)
             ->withoutVerifying()
+            ->withOptions(['curl' => $curlOptions])
             ->timeout(60)
             ->connectTimeout(10)
             ->post($url, $payload);
@@ -180,6 +198,7 @@ class ClientSSO
 
             $response = Http::withHeaders($headers)
                 ->withoutVerifying()
+                ->withOptions(['curl' => $curlOptions])
                 ->connectTimeout(30)
                 ->timeout(120)
                 ->post($url, $payload);

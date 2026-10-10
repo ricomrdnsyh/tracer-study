@@ -285,7 +285,7 @@ class ResponImportController extends Controller
                 if ($skippedFakultasCount > 0) {
                     return back()->with('error', "Tidak ada data yang diimport. Seluruh data ($skippedFakultasCount mahasiswa) dilewati karena bukan merupakan mahasiswa dari fakultas Anda.");
                 }
-                return back()->with('error', 'Tidak ada data yang berhasil diimport (pastikan NIM terdaftar).');
+                return back()->with('error', 'Tidak ada data yang berhasil diimport (Pastikan Data Mahasiswa Terdaftar di Tabel Mahasiswa Lulusan Tracer Study). Silahkan menghubungi admin!');
             }
 
             if ($skippedFakultasCount > 0) {
@@ -409,4 +409,3 @@ class ResponImportController extends Controller
         ]);
     }
 }
-

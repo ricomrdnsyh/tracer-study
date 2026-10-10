@@ -62,6 +62,10 @@ class AuthSSO
         if (config('services.sso.force_http_1_1', true)) {
             $curlOptions[CURLOPT_HTTP_VERSION] = CURL_HTTP_VERSION_1_1;
         }
+        
+        // Tambahan opsi untuk bypass TLS/Cipher errors (cURL error 35)
+        $curlOptions[CURLOPT_SSLVERSION] = 6; // CURL_SSLVERSION_TLSv1_2
+        $curlOptions[CURLOPT_SSL_CIPHER_LIST] = 'DEFAULT@SECLEVEL=1';
 
         $response = Http::withoutVerifying()
             ->withOptions(['curl' => $curlOptions])

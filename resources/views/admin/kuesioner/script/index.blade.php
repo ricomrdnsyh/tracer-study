@@ -119,6 +119,18 @@
                 }
             });
         @endif
+
+        @if ($errors->any())
+            Swal.fire({
+                text: "{{ $errors->first() }}",
+                icon: "error",
+                buttonsStyling: false,
+                confirmButtonText: "Ok, got it!",
+                customClass: {
+                    confirmButton: "btn btn-sm btn-danger"
+                }
+            });
+        @endif
     });
 
     function confirmDelete(id) {

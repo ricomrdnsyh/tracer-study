@@ -85,48 +85,27 @@
                                                 di bawah ini ke dalam dokumen Word. Sistem otomatis akan mengganti teks ini
                                                 dengan data statistik.</p>
                                             <div class="d-flex flex-wrap gap-2">
-                                                <span
-                                                    class="badge bg-white text-dark fw-bold px-3 py-2 border border-gray-300 shadow-sm"><code
-                                                        class="text-primary">${Dekan}</code></span>
-                                                <span
-                                                    class="badge bg-white text-dark fw-bold px-3 py-2 border border-gray-300 shadow-sm"><code
-                                                        class="text-primary">${Jenjang}</code></span>
-                                                <span
-                                                    class="badge bg-white text-dark fw-bold px-3 py-2 border border-gray-300 shadow-sm"><code
-                                                        class="text-primary">${Kaprodi}</code></span>
-                                                <span
-                                                    class="badge bg-white text-dark fw-bold px-3 py-2 border border-gray-300 shadow-sm"><code
-                                                        class="text-primary">${Responden}</code></span>
-                                                <span
-                                                    class="badge bg-white text-dark fw-bold px-3 py-2 border border-gray-300 shadow-sm"><code
-                                                        class="text-primary">${Persentase}</code></span>
-                                                <span
-                                                    class="badge bg-white text-dark fw-bold px-3 py-2 border border-gray-300 shadow-sm"><code
-                                                        class="text-primary">${Lulusan}</code></span>
-                                                <span
-                                                    class="badge bg-white text-dark fw-bold px-3 py-2 border border-gray-300 shadow-sm"><code
-                                                        class="text-primary">${Bekerja}</code></span>
-                                                <span
-                                                    class="badge bg-white text-dark fw-bold px-3 py-2 border border-gray-300 shadow-sm"><code
-                                                        class="text-primary">${Wiraswasta}</code></span>
-                                                <span
-                                                    class="badge bg-white text-dark fw-bold px-3 py-2 border border-gray-300 shadow-sm"><code
-                                                        class="text-primary">${Melanjutkan Studi}</code></span>
-                                                <span
-                                                    class="badge bg-white text-dark fw-bold px-3 py-2 border border-gray-300 shadow-sm"><code
-                                                        class="text-primary">${Pendapatan Kerja}</code></span>
-                                                <span
-                                                    class="badge bg-white text-dark fw-bold px-3 py-2 border border-gray-300 shadow-sm"><code
-                                                        class="text-primary">${Rata-rata Waktu Tunggu}</code></span>
-                                                <span
-                                                    class="badge bg-white text-dark fw-bold px-3 py-2 border border-gray-300 shadow-sm"><code
-                                                        class="text-primary">${Median Waktu Tunggu}</code></span>
-                                                <span
-                                                    class="badge bg-white text-dark fw-bold px-3 py-2 border border-gray-300 shadow-sm"><code
-                                                        class="text-primary">${Keselarasan Horizontal}</code></span>
-                                                <span
-                                                    class="badge bg-white text-dark fw-bold px-3 py-2 border border-gray-300 shadow-sm"><code
-                                                        class="text-primary">${Keselarasan Vertikal}</code></span>
+                                                @php
+                                                    $validVariables = [
+                                                        'CoverTop', 'CoverBottom', 'Tahun_Lulus', 'Tahun_Cetak', 'Prodi', 'Jenjang', 'Dekan', 'Kaprodi',
+                                                        'Responden', 'Persentase', 'Lulusan', 'Bekerja', 'Wiraswasta', 'Melanjutkan Studi',
+                                                        'Rata-rata Waktu Tunggu', 'Median Waktu Tunggu', 'Keselarasan Horizontal', 'Keselarasan Vertikal',
+                                                        'Pendapatan Kerja', 'Max Kerja', 'Min Kerja', 'Median Kerja',
+                                                        'Pendapatan Wiraswasta', 'Max Wiraswasta', 'Min Wiraswasta', 'Median Wiraswasta',
+                                                        'Perkuliahan', 'Demonstrasi', 'Partisipasi dalam Proyek Riset', 'Magang', 'Praktikum',
+                                                        'Kerja Lapangan', 'Diskusi', 'Responsi', 'Seminar', 'Studio', 'Perancangan', 'Pengembangan',
+                                                        'Tugas Akhir', 'Bela Negara', 'Pertukaran Pelajar', 'Wirausaha', 'Pengabdian', 'Rata-rata',
+                                                        'Etika-1', 'Etika-2', 'Keahlian-1', 'Keahlian-2', 'Bahasa Inggris-1', 'Bahasa Inggris-2',
+                                                        'TI-1', 'TI-2', 'Komunikasi-1', 'Komunikasi-2', 'Kerjasama-1', 'Kerjasama-2',
+                                                        'Pengembangan-1', 'Pengembangan-2', 'Kritis-1', 'Kritis-2', 'Kreativitas-1', 'Kreativitas-2',
+                                                        'Kewirausahaan-1', 'Kewirausahaan-2', 'Adaptasi-1', 'Adaptasi-2'
+                                                    ];
+                                                @endphp
+                                                @foreach ($validVariables as $var)
+                                                    <span class="badge bg-white text-dark fw-bold px-3 py-2 border border-gray-300 shadow-sm">
+                                                        <code class="text-primary">${{ '{' . $var . '}' }}</code>
+                                                    </span>
+                                                @endforeach
                                             </div>
                                         </div>
 

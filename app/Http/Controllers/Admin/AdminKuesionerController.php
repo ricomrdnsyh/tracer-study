@@ -23,6 +23,10 @@ class AdminKuesionerController extends Controller
 
     public function getKuesioner(Request $request)
     {
+        // Otomatis ubah status menjadi Closed jika tanggal selesai sudah lewat
+        Kuesioner::where('status', 'Published')
+            ->whereDate('tgl_selesai', '<', now())
+            ->update(['status' => 'Closed']);
         $query = Kuesioner::with('tahunAkademik')
             ->select(['id_kuesioner', 'akademik_id', 'judul', 'tgl_mulai', 'tgl_selesai', 'status'])
             ->orderByDesc('id_kuesioner');
@@ -205,13 +209,17 @@ class AdminKuesionerController extends Controller
                 $pertanyaanMap = [];
 
                 foreach ($data as $kat) {
-                    $kategori = KategoriPertanyaan::create([
-                        'kuesioner_id' => $kuesioner->id_kuesioner,
-                        'nama_kategori' => $kat['nama_kategori'],
-                        'urutan' => $kat['urutan'],
-                        'syarat_pertanyaan_id' => null,
-                        'syarat_jawaban' => $kat['syarat_jawaban'] ?? null,
-                    ]);
+                    $kategori = KategoriPertanyaan::updateOrCreate(
+                        [
+                            'kuesioner_id' => $kuesioner->id_kuesioner,
+                            'nama_kategori' => $kat['nama_kategori']
+                        ],
+                        [
+                            'urutan' => $kat['urutan'],
+                            'syarat_pertanyaan_id' => null,
+                            'syarat_jawaban' => $kat['syarat_jawaban'] ?? null,
+                        ]
+                    );
 
                     $kategoriMap[] = [
                         'model' => $kategori,
@@ -220,18 +228,32 @@ class AdminKuesionerController extends Controller
 
                     if (isset($kat['pertanyaans']) && is_array($kat['pertanyaans'])) {
                         foreach ($kat['pertanyaans'] as $p) {
-                            $pertanyaan = Pertanyaan::create([
+                            $matchAttr = [
                                 'kategori_id' => $kategori->id_kategori,
-                                'kode_pertanyaan' => $p['kode_pertanyaan'],
-                                'teks_pertanyaan' => $p['teks_pertanyaan'],
-                                'tipe_jawaban' => $p['tipe_jawaban'],
-                                'opsi_jawaban' => $p['opsi_jawaban'] ?? null,
-                                'wajib' => $p['wajib'],
-                                'syarat_pertanyaan_id' => null,
-                                'syarat_jawaban' => $p['syarat_jawaban'] ?? null,
-                            ]);
+                            ];
+                            
+                            if (!empty($p['kode_pertanyaan'])) {
+                                $matchAttr['kode_pertanyaan'] = $p['kode_pertanyaan'];
+                            } else {
+                                $matchAttr['teks_pertanyaan'] = $p['teks_pertanyaan'];
+                            }
 
-                            $insertedQuestions[$pertanyaan->kode_pertanyaan] = $pertanyaan->id_pertanyaan;
+                            $pertanyaan = Pertanyaan::updateOrCreate(
+                                $matchAttr,
+                                [
+                                    'kode_pertanyaan' => $p['kode_pertanyaan'] ?? null,
+                                    'teks_pertanyaan' => $p['teks_pertanyaan'],
+                                    'tipe_jawaban' => $p['tipe_jawaban'],
+                                    'opsi_jawaban' => $p['opsi_jawaban'] ?? null,
+                                    'wajib' => $p['wajib'],
+                                    'syarat_pertanyaan_id' => null,
+                                    'syarat_jawaban' => $p['syarat_jawaban'] ?? null,
+                                ]
+                            );
+
+                            if (!empty($pertanyaan->kode_pertanyaan)) {
+                                $insertedQuestions[$pertanyaan->kode_pertanyaan] = $pertanyaan->id_pertanyaan;
+                            }
 
                             if (!empty($p['syarat_kode_pertanyaan'])) {
                                 $pertanyaanMap[] = [
@@ -260,7 +282,7 @@ class AdminKuesionerController extends Controller
                 }
             });
 
-            return back()->with('success', 'Berhasil mengimpor Kategori dan Pertanyaan dari JSON.');
+            return back()->with('success', 'Berhasil mengimpor dan memperbarui Kategori serta Pertanyaan dari JSON.');
         } catch (\Exception $e) {
             return back()->with('failed', 'Gagal mengimpor data: ' . $e->getMessage());
         }
