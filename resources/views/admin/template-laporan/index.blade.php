@@ -102,7 +102,7 @@
                                                     ];
                                                 @endphp
                                                 @foreach ($validVariables as $var)
-                                                    <span class="badge bg-white text-dark fw-bold px-3 py-2 border border-gray-300 shadow-sm">
+                                                    <span class="badge bg-body text-gray-800 fw-bold px-3 py-2 border border-gray-300 shadow-sm">
                                                         <code class="text-primary">${{ '{' . $var . '}' }}</code>
                                                     </span>
                                                 @endforeach

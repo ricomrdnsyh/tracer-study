@@ -38,7 +38,7 @@
                                                 <i class="fa-solid fa-clipboard-list text-primary me-2"></i>Kuesioner
                                             </label>
                                             <select
-                                                class="form-select form-select-sm form-select-solid fw-bold bg-white border border-gray-300"
+                                                class="form-select form-select-sm form-select-solid fw-bold bg-body border border-gray-300"
                                                 name="kuesioner_id" data-control="select2">
                                                 <option value="all">Semua Kuesioner</option>
                                                 @foreach ($kuesioner as $k)
@@ -52,7 +52,7 @@
                                                 <i class="fa-solid fa-calendar-alt text-success me-2"></i>Tahun Akademik
                                             </label>
                                             <select
-                                                class="form-select form-select-sm form-select-solid fw-bold bg-white border border-gray-300"
+                                                class="form-select form-select-sm form-select-solid fw-bold bg-body border border-gray-300"
                                                 name="akademik_id" data-control="select2">
                                                 <option value="all">Semua Tahun</option>
                                                 @foreach ($tahunAkademik as $t)
@@ -69,7 +69,7 @@
                                                 <i class="fa-solid fa-building text-warning me-2"></i>Fakultas
                                             </label>
                                             <select
-                                                class="form-select form-select-sm form-select-solid fw-bold bg-white border border-gray-300"
+                                                class="form-select form-select-sm form-select-solid fw-bold bg-body border border-gray-300"
                                                 name="fakultas_id" id="laporan_fakultas" data-control="select2">
                                                 <option value="all">Semua Fakultas</option>
                                                 @foreach ($fakultas as $f)
@@ -84,7 +84,7 @@
                                                 <i class="fa-solid fa-graduation-cap text-info me-2"></i>Program Studi
                                             </label>
                                             <select
-                                                class="form-select form-select-sm form-select-solid fw-bold bg-white border border-gray-300"
+                                                class="form-select form-select-sm form-select-solid fw-bold bg-body border border-gray-300"
                                                 name="prodi_id" id="laporan_prodi" data-control="select2">
                                                 <option value="all">Semua Prodi</option>
                                                 @foreach ($prodi as $p)
