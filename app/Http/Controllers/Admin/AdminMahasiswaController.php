@@ -15,11 +15,11 @@ class AdminMahasiswaController extends Controller
     public function index()
     {
         $prodi = Prodi::orderBy('nama_prodi');
-        
+
         if (auth()->user()->role === 'Fakultas') {
             $prodi->where('fakultas_id', auth()->user()->fakultas_id);
         }
-        
+
         $prodi = $prodi->get();
         $tahunAkademik = TahunAkademik::orderByDesc('id_smt')->get();
         return view('admin.mahasiswa.index', compact('prodi', 'tahunAkademik'));
@@ -32,22 +32,21 @@ class AdminMahasiswaController extends Controller
             ->orderByDesc('created_at');
 
         if (auth()->user()->role === 'Fakultas') {
-            $query->whereHas('prodi', function ($q) {
-                $q->where('fakultas_id', auth()->user()->fakultas_id);
-            });
+            $facultyProdiIds = Prodi::where('fakultas_id', auth()->user()->fakultas_id)->pluck('id_prodi')->toArray();
+            $query->whereIn('prodi_id', $facultyProdiIds);
         }
 
-        if ($request->filled('akademik_id')) {
+        if ($request->filled('akademik_id') && $request->akademik_id !== 'all') {
             $query->where('akademik_id', $request->akademik_id);
-        } elseif ($request->filled('tahun_keluar')) {
+        } elseif ($request->filled('tahun_keluar') && $request->tahun_keluar !== 'all') {
             $query->where('akademik_id', $request->tahun_keluar);
         }
 
-        if ($request->filled('prodi_id')) {
+        if ($request->filled('prodi_id') && $request->prodi_id !== 'all') {
             $query->where('prodi_id', $request->prodi_id);
         }
 
-        if ($request->filled('status')) {
+        if ($request->filled('status') && $request->status !== 'all') {
             $query->where('status', $request->status);
         }
 
@@ -114,13 +113,13 @@ class AdminMahasiswaController extends Controller
 
             $newCount = 0;
             $updatedCount = 0;
-            $unchangedCount = 0;
 
-            $existingMahasiswa = Mahasiswa::get()->keyBy('nim');
+            // Pre-load NIM yang ada tanpa menghidrasi semua model ke RAM
+            $existingNims = Mahasiswa::pluck('nim')->flip()->toArray();
             $validProdiIds = Prodi::pluck('id_prodi')->flip()->toArray();
 
-            $newBatch = [];
             $now = now();
+            $upsertBatch = [];
 
             foreach ($data as $item) {
                 if (empty($item['nim'])) continue;
@@ -134,61 +133,51 @@ class AdminMahasiswaController extends Controller
                 $jenisKelamin = !empty($item['jenis_kelamin']) ? strtoupper(trim((string) $item['jenis_kelamin'])) : null;
                 $idJenisKeluar = isset($item['id_jenis_keluar']) ? (int) $item['id_jenis_keluar'] : 1;
 
-                // Pastikan prodi exist di database
                 if ($prodiId && !isset($validProdiIds[$prodiId])) {
                     $prodiId = null;
                 }
 
-                if (!isset($existingMahasiswa[$nim])) {
-                    $newBatch[] = [
-                        'nim'            => $nim,
-                        'nama'           => $nama,
-                        'prodi_id'       => $prodiId,
-                        'email'          => $email,
-                        'no_hp'          => $noHp,
-                        'status'         => 'alumni',
-                        'password'       => password_hash($nim, PASSWORD_BCRYPT, ['cost' => 4]),
-                        'akademik_id'    => $tahunKeluar,
-                        'jenis_kelamin'  => $jenisKelamin,
-                        'id_jenis_keluar'=> $idJenisKeluar,
-                        'created_at'     => $now,
-                        'updated_at'     => $now,
-                    ];
-                    $existingMahasiswa[$nim] = true;
+                if (!isset($existingNims[$nim])) {
                     $newCount++;
-                } else if ($existingMahasiswa[$nim] instanceof Mahasiswa) {
-                    $mahasiswa = $existingMahasiswa[$nim];
-                    $updateData = [
-                        'nama'           => $nama,
-                        'status'         => 'alumni',
-                        'akademik_id'    => $tahunKeluar,
-                        'jenis_kelamin'  => $jenisKelamin,
-                        'id_jenis_keluar'=> $idJenisKeluar,
-                    ];
-                    if ($prodiId) {
-                        $updateData['prodi_id'] = $prodiId;
-                    }
-                    if (!empty($item['email'])) {
-                        $updateData['email'] = $email;
-                    }
-                    if ($noHp) {
-                        $updateData['no_hp'] = $noHp;
-                    }
-
-                    $mahasiswa->fill($updateData);
-
-                    if ($mahasiswa->isDirty()) {
-                        $mahasiswa->save();
-                        $updatedCount++;
-                    } else {
-                        $unchangedCount++;
-                    }
+                    $existingNims[$nim] = true;
+                } else {
+                    $updatedCount++;
                 }
+
+                $upsertBatch[] = [
+                    'nim'             => $nim,
+                    'nama'            => $nama,
+                    'prodi_id'        => $prodiId,
+                    'email'           => $email,
+                    'no_hp'           => $noHp,
+                    'status'          => 'alumni',
+                    'password'        => password_hash($nim, PASSWORD_BCRYPT, ['cost' => 4]),
+                    'akademik_id'     => $tahunKeluar,
+                    'jenis_kelamin'   => $jenisKelamin,
+                    'id_jenis_keluar' => $idJenisKeluar,
+                    'created_at'      => $now,
+                    'updated_at'      => $now,
+                ];
             }
 
-            if (!empty($newBatch)) {
-                foreach (array_chunk($newBatch, 200) as $chunk) {
-                    Mahasiswa::insertOrIgnore($chunk);
+            // Eksekusi bulk upsert dalam chunk 500
+            if (!empty($upsertBatch)) {
+                foreach (array_chunk($upsertBatch, 500) as $chunk) {
+                    Mahasiswa::upsert(
+                        $chunk,
+                        ['nim'],
+                        [
+                            'nama',
+                            'prodi_id',
+                            'email',
+                            'no_hp',
+                            'status',
+                            'akademik_id',
+                            'jenis_kelamin',
+                            'id_jenis_keluar',
+                            'updated_at'
+                        ]
+                    );
                 }
             }
 
@@ -198,13 +187,11 @@ class AdminMahasiswaController extends Controller
                 $taLabelInfo = ' (' . ($taModel ? $taModel->nm_smt : $selectedTahun) . ')';
             }
 
-            $message = "Sinkronisasi Alumni Selesai{$taLabelInfo}. Baru: {$newCount}, Diperbarui: {$updatedCount}, Tetap: {$unchangedCount}.";
+            $message = "Sinkronisasi Alumni Selesai{$taLabelInfo}. Total Diproses: " . count($upsertBatch) . " (Baru: {$newCount}, Diperbarui: {$updatedCount}).";
 
             return response()->json(['success' => true, 'message' => $message]);
         } catch (\Exception $e) {
             return response()->json(['success' => false, 'message' => 'Gagal sinkronisasi: ' . $e->getMessage()], 500);
         }
     }
-
-
 }
