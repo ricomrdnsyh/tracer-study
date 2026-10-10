@@ -10,7 +10,7 @@
 
 
                     <div class="row g-5 g-xl-10">
-                        <!-- Card Kiri: Status -->
+                        
                         <div class="col-xl-4">
                             <div class="card shadow-sm bg-light-primary rounded-4 border border-dashed border-primary">
                                 <div class="card-body p-8 d-flex flex-column justify-content-center text-center h-100">
@@ -44,7 +44,7 @@
                             </div>
                         </div>
 
-                        <!-- Card Kanan: Upload -->
+                        
                         <div class="col-xl-8">
                             <div class="card shadow-sm rounded-4 border border-dashed border-dark">
                                 <div class="card-header border-0 pt-8 px-8">
@@ -62,7 +62,7 @@
                                         enctype="multipart/form-data" id="upload_template_form">
                                         @csrf
                                         <div class="mb-8">
-                                            <!-- Custom File Input -->
+                                            
                                             <div class="border border-dashed border-primary rounded-4 p-8 text-center bg-light-primary hover-elevate-up transition"
                                                 style="cursor: pointer;"
                                                 onclick="document.getElementById('template_file').click()">

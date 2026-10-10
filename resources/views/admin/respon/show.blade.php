@@ -99,10 +99,10 @@
             <div id="kt_app_content" class="app-content flex-column-fluid mt-7">
                 <div id="kt_app_content_container" class="app-container container-fluid">
 
-                    <!-- Header Card: Border Dashed Primary dengan Corak & Aksen -->
+                    
                     <div
                         class="card shadow-sm border border-dashed border-primary rounded mb-7 overflow-hidden position-relative">
-                        <!-- Top Toolbar / Navigation -->
+                        
                         <div
                             class="d-flex flex-wrap justify-content-between align-items-center px-6 px-lg-8 py-4 border-bottom border-gray-200 bg-light-primary bg-opacity-40 rounded-top">
                             <div class="d-flex align-items-center gap-3 my-1">
@@ -133,9 +133,9 @@
                             </div>
                         </div>
 
-                        <!-- Card Body: Kuesioner Info & Profil Responden dengan Corak -->
+                        
                         <div class="card-body p-6 p-lg-8 header-corak-container">
-                            <!-- Subtle ambient watermark icons & glow -->
+                            
                             <div class="position-absolute end-0 bottom-0 pointer-events-none"
                                 style="transform: translate(15%, 20%) rotate(-15deg); opacity: 0.04;">
                                 <i class="fas fa-graduation-cap text-primary" style="font-size: 18rem;"></i>
@@ -146,7 +146,7 @@
 
                             <div class="header-responsive-grid position-relative z-index-1">
 
-                                <!-- 1. Identitas Kuesioner (Judul & Badge) -->
+                                
                                 <div class="grid-title">
                                     <div class="d-flex align-items-center gap-2 mb-3">
                                         <span
@@ -168,23 +168,23 @@
                                     </h1>
                                 </div>
 
-                                <!-- 2. Kartu Profil Alumni Responden -->
+                                
                                 <div class="grid-profile">
                                     <div
                                         class="card border border-gray-300 rounded-3 shadow-sm position-relative overflow-hidden">
-                                        <!-- Top Accent line -->
+                                        
                                         <div class="position-absolute top-0 start-0 w-100"
                                             style="height: 3px; background: linear-gradient(90deg, #009ef7, #50cd89);">
                                         </div>
 
-                                        <!-- Watermark di dalam kartu responden -->
+                                        
                                         <div class="position-absolute end-0 bottom-0 pointer-events-none me-3 mb-1"
                                             style="opacity: 0.04;">
                                             <i class="fas fa-user-graduate text-primary" style="font-size: 5.5rem;"></i>
                                         </div>
 
                                         <div class="card-body p-5 position-relative z-index-1">
-                                            <!-- Card Header -->
+                                            
                                             <div
                                                 class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom border-gray-100">
                                                 <div class="d-flex align-items-center gap-2">
@@ -198,16 +198,16 @@
                                                 </span>
                                             </div>
 
-                                            <!-- Main Profile Info -->
+                                            
                                             <div class="d-flex align-items-center gap-4 mb-4">
-                                                <!-- Avatar Initials -->
+                                                
                                                 <div class="symbol symbol-55px symbol-circle flex-shrink-0 shadow-sm">
                                                     <div class="symbol-label fw-black bg-primary text-white fs-2">
                                                         {{ strtoupper(substr($respon->mahasiswa->nama ?? 'A', 0, 1)) }}
                                                     </div>
                                                 </div>
 
-                                                <!-- Name & NIM -->
+                                                
                                                 <div class="d-flex flex-column flex-grow-1 overflow-hidden">
                                                     <h3 class="text-gray-900 fw-bolder fs-5 mb-1 text-truncate"
                                                         title="{{ $respon->mahasiswa->nama ?? 'Mahasiswa' }}">
@@ -226,7 +226,7 @@
                                                 </div>
                                             </div>
 
-                                            <!-- Academic & Contact Details -->
+                                            
                                             <div class="pt-3 border-top border-gray-100 d-flex flex-column gap-2">
                                                 <div class="d-flex align-items-center text-gray-700 fs-7 overflow-hidden">
                                                     <i class="fas fa-university text-primary fs-6 text-center me-2 flex-shrink-0" style="width: 18px;"></i>
@@ -268,7 +268,7 @@
                                     </div>
                                 </div>
 
-                                <!-- 3. Quick Stats Grid (Tanggal Isi & Waktu) -->
+                                
                                 <div class="grid-stats">
                                     <div class="row g-3">
                                         <div class="col-12 col-sm-6">
@@ -312,7 +312,7 @@
                         </div>
                     </div>
 
-                    <!-- Main Answers Card -->
+                    
                     <div class="card shadow-sm border border-dashed border-dark rounded mb-7">
                         <div
                             class="card-header border-bottom py-5 px-6 px-lg-8 d-flex align-items-center justify-content-between rounded-top">

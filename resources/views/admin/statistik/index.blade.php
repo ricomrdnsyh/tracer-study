@@ -412,7 +412,7 @@
             <div id="kt_app_content" class="app-content flex-column-fluid mt-7">
                 <div id="kt_app_content_container" class="app-container container-fluid">
 
-                    <!-- Header Section -->
+                    
                     <div class="d-flex flex-wrap align-items-center justify-content-between gap-4 mb-4">
                         <div>
                             <div class="d-flex align-items-center gap-2">
@@ -432,7 +432,7 @@
                         </div>
                     </div>
 
-                    <!-- Print Metadata Header (Export PDF only) -->
+                    
                     <div class="d-none d-print-block mb-4 p-3 border border-dashed border-gray-400 rounded-3 bg-light">
                         <div class="d-flex justify-content-between align-items-center fs-8 text-gray-700">
                             <div><i class="fa-solid fa-file-lines text-primary me-1"></i><strong>Dokumen:</strong> Laporan
@@ -442,7 +442,7 @@
                         </div>
                     </div>
 
-                    <!-- Filter Card -->
+                    
                     <div class="card shadow-sm border border-dashed border-gray-400 mb-8 filter-container"
                         style="border-radius: 1.25rem;">
                         <div class="card-body p-6">
@@ -458,7 +458,7 @@
                             </div>
 
                             <div class="row g-4 align-items-end">
-                                <!-- Filter Kuesioner -->
+                                
                                 <div class="col-xl-2 col-lg-3 col-md-6 col-sm-12">
                                     <label class="form-label fw-bold fs-7 mb-2 text-gray-700">Kuesioner Tracer:</label>
                                     <select id="filter_kuesioner" class="form-select form-select-sm" data-control="select2"
@@ -470,7 +470,7 @@
                                     </select>
                                 </div>
 
-                                <!-- Filter Tahun Akademik Kelulusan -->
+                                
                                 <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12">
                                     <label class="form-label fw-bold fs-7 mb-2 text-gray-700">Tahun Kelulusan:</label>
                                     <select id="filter_akademik" class="form-select form-select-sm" data-control="select2"
@@ -483,7 +483,7 @@
                                     </select>
                                 </div>
 
-                                <!-- Filter Fakultas -->
+                                
                                 @if($isFakultas)
                                     <input type="hidden" id="filter_fakultas" value="{{ $userFakultasId }}">
                                 @else
@@ -501,7 +501,7 @@
                                 </div>
                                 @endif
 
-                                <!-- Filter Program Studi -->
+                                
                                 <div class="{{ $isFakultas ? 'col-xl-5 col-lg-6' : 'col-xl-2 col-lg-3' }} col-md-6 col-sm-12">
                                     <label class="form-label fw-bold fs-7 mb-2 text-gray-700">Program Studi:</label>
                                     <select id="filter_prodi" class="form-select form-select-sm" data-control="select2"
@@ -515,7 +515,7 @@
                                     </select>
                                 </div>
 
-                                <!-- Tombol Terapkan Filter -->
+                                
                                 <div class="col-xl-2 col-lg-12 col-md-12 col-sm-12 d-flex justify-content-xl-end">
                                     <button type="button" class="btn btn-sm btn-primary fw-bold w-100"
                                         id="btn_apply_filter">
@@ -532,7 +532,7 @@
                         </div>
                     </div>
 
-                    <!-- Empty State -->
+                    
                     <div id="empty_filter_state"
                         class="card text-center py-20 my-10 rounded-4 border border-dashed border-gray-400 shadow-sm d-flex flex-column justify-content-center align-items-center" style="min-height: 350px;">
                         <i class="fa-solid fa-chart-pie text-muted mb-6" style="font-size: 5rem;"></i>
@@ -540,17 +540,17 @@
                         <p class="text-gray-500 fs-5 mb-0">Silakan sesuaikan filter di atas untuk memuat data statistik tracer study.</p>
                     </div>
 
-                    <!-- Statistics Container (Hidden by default) -->
+                    
                     <div id="statistics_container" style="display: none;">
-                        <!-- Global Loading Overlay -->
+                        
                         <div class="position-relative">
                             <div class="loading-overlay" id="kpi_loading">
                                 <div class="spinner-border text-primary" role="status"></div>
                             </div>
 
-                            <!-- KPI Summary Cards Row -->
+                            
                             <div class="row g-4 g-xl-5 mb-8 kpi-row-container">
-                                <!-- Card 1: Total Alumni Target -->
+                                
                                 <div class="col-xl col-md-6 col-12">
                                     <div class="card stat-card-modern p-5 h-100 border-primary bg-light-primary">
                                         <div class="d-flex align-items-center justify-content-between mb-3">
@@ -569,7 +569,7 @@
                                     </div>
                                 </div>
 
-                                <!-- Card 2: Total Responden -->
+                                
                                 <div class="col-xl col-md-6 col-12">
                                     <div class="card stat-card-modern p-5 h-100 border-success bg-light-success">
                                         <div class="d-flex align-items-center justify-content-between mb-3">
@@ -588,7 +588,7 @@
                                     </div>
                                 </div>
 
-                                <!-- Card 3: Response Rate -->
+                                
                                 <div class="col-xl col-md-6 col-12">
                                     <div class="card stat-card-modern p-5 h-100 border-info bg-light-info">
                                         <div class="d-flex align-items-center justify-content-between mb-3">
@@ -610,7 +610,7 @@
                                     </div>
                                 </div>
 
-                                <!-- Card 4: Keselarasan Kerja Relevan -->
+                                
                                 <div class="col-xl col-md-6 col-12">
                                     <div class="card stat-card-modern p-5 h-100 border-warning bg-light-warning">
                                         <div class="d-flex align-items-center justify-content-between mb-3">
@@ -628,7 +628,7 @@
                                     </div>
                                 </div>
 
-                                <!-- Card 5: Rata-rata Waktu Tunggu -->
+                                
                                 <div class="col-xl col-md-6 col-12">
                                     <div class="card stat-card-modern p-5 h-100 border-dark bg-light">
                                         <div class="d-flex align-items-center justify-content-between mb-3">
@@ -648,7 +648,7 @@
                                 </div>
                             </div>
 
-                            <!-- 2. [F8] Jelaskan status Anda saat ini? (Kemdiktisaintek Hal 4) -->
+                            
                             <div class="card kemdikti-card mb-8 shadow-sm">
                                 <div
                                     class="card-header border-0 pt-6 pb-2 d-flex align-items-center justify-content-between">
@@ -709,7 +709,7 @@
                                 </div>
                             </div>
 
-                            <!-- 3. Take home pay — rentang & rata-rata (F505) (Kemdiktisaintek Hal 2) -->
+                            
                             <div class="card kemdikti-card mb-8 shadow-sm">
                                 <div
                                     class="card-header border-0 pt-6 pb-2 d-flex align-items-center justify-content-between">
@@ -775,7 +775,7 @@
                                 </div>
                             </div>
 
-                            <!-- 4. [F1201] Sumber Dana dalam Pembiayaan Kuliah (Kemdiktisaintek Hal 3) -->
+                            
                             <div class="card kemdikti-card mb-8 shadow-sm">
                                 <div
                                     class="card-header border-0 pt-6 pb-2 d-flex align-items-center justify-content-between">
@@ -837,7 +837,7 @@
                                 </div>
                             </div>
 
-                            <!-- 5. [F1101] Jenis Instansi / Perusahaan Tempat Bekerja (Kemdiktisaintek Hal 5) -->
+                            
                             <div class="card kemdikti-card mb-8 shadow-sm">
                                 <div
                                     class="card-header border-0 pt-6 pb-2 d-flex align-items-center justify-content-between">
@@ -902,9 +902,9 @@
                                 </div>
                             </div>
 
-                            <!-- 6 & 7. Masa Tunggu Kerja (F502 Bekerja) & Masa Tunggu Mulai Wiraswasta (F502 Wiraswasta) (Kemdiktisaintek Hal 6 & 7) -->
+                            
                             <div class="row g-6 mb-8">
-                                <!-- Col 1: Mendapatkan Pekerjaan (F502, Filter: F8 = 1) -->
+                                
                                 <div class="col-xl-6 col-lg-12">
                                     <div class="card kemdikti-card waktu-tunggu-card shadow-sm mb-4 h-100">
                                         <div
@@ -970,7 +970,7 @@
                                     </div>
                                 </div>
 
-                                <!-- Col 2: Memulai Wiraswasta (F502, Filter: F8 = 3) -->
+                                
                                 <div class="col-xl-6 col-lg-12">
                                     <div class="card kemdikti-card waktu-tunggu-card shadow-sm mb-4 h-100">
                                         <div
@@ -1039,7 +1039,7 @@
 
 
 
-                            <!-- 10. [F4] Bagaimana anda mencari pekerjaan tersebut? (Kemdiktisaintek Hal 22 & 23) -->
+                            
                             <div class="card kemdikti-card mb-8 shadow-sm">
                                 <div
                                     class="card-header border-0 pt-6 pb-2 d-flex align-items-center justify-content-between">
@@ -1116,7 +1116,7 @@
                                 </div>
                             </div>
 
-                            <!-- Cakupan Skala Tempat Kerja (F5D) & Sebaran Wilayah Tempat Bekerja (Provinsi) -->
+                            
                             <div class="row g-6 mb-8 skala-provinsi-row">
                                 <div class="col-xl-5 col-lg-12">
                                     <div class="card shadow-sm border border-dashed border-gray-400 chart-box h-100"
@@ -1154,7 +1154,7 @@
                                 </div>
                             </div>
 
-                            <!-- 11. Kompetensi Dikuasai Saat Lulus (F17A) & Diperlukan Dalam Pekerjaan (F17B) (Kemdiktisaintek Hal 7 - 21) -->
+                            
                             <div class="card kemdikti-card kemdikti-card-allow-break mb-8 shadow-sm">
                                 <div
                                     class="card-header border-0 pt-6 pb-2 d-flex align-items-center justify-content-between">
@@ -1181,7 +1181,7 @@
                                         </div>
                                     </div>
 
-                                    <!-- Dual Gap Analysis Overview Chart -->
+                                    
                                     <div class="mb-8" style="page-break-inside: avoid; break-inside: avoid;">
                                         <h5 class="fw-bolder text-gray-800 mb-3 d-flex align-items-center gap-2">
                                             <i class="fa-solid fa-chart-column text-primary"></i> Perbandingan Skor
@@ -1193,7 +1193,7 @@
 
                                     <hr class="text-gray-300 my-6 d-print-none">
 
-                                    <!-- Interactive Aspect Tabs (SCREEN ONLY) -->
+                                    
                                     <div
                                         class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2 d-print-none">
                                         <h5 class="fw-bolder text-gray-800 mb-0">Rincian Per Aspek Kompetensi:</h5>
@@ -1235,9 +1235,9 @@
                                         </div>
                                     </div>
 
-                                    <!-- Dual Cards per Aspect (SCREEN ONLY) -->
+                                    
                                     <div class="row g-6 d-print-none" id="aspect_dual_cards">
-                                        <!-- Left: Saat Lulus (F17A) -->
+                                        
                                         <div class="col-xl-6 col-lg-12">
                                             <div class="card border rounded-3 p-5 bg-light h-100">
                                                 <div class="d-flex align-items-center justify-content-between mb-3">
@@ -1272,7 +1272,7 @@
                                             </div>
                                         </div>
 
-                                        <!-- Right: Diperlukan Kerja (F17B) -->
+                                        
                                         <div class="col-xl-6 col-lg-12">
                                             <div class="card border rounded-3 p-5 bg-light h-100">
                                                 <div class="d-flex align-items-center justify-content-between mb-3">
@@ -1308,7 +1308,7 @@
                                         </div>
                                     </div>
 
-                                    <!-- ALL 11 ASPECTS UNROLLED (PRINT / PDF EXPORT ONLY) -->
+                                    
                                     <div class="d-none d-print-block mt-4" id="kompetensi_print_all">
                                         <div class="border-bottom pb-2 mb-4">
                                             <h5 class="fw-bolder text-gray-900 mb-1">
@@ -1467,9 +1467,9 @@
 
 
 
-                            <!-- 12. Keselarasan Horizontal (F14) & Keselarasan Vertikal (F15) (Kemdiktisaintek Hal 24 & 25) -->
+                            
                             <div class="row g-6 mb-8">
-                                <!-- Keselarasan Horizontal (F14) -->
+                                
                                 <div class="col-xl-6 col-lg-12">
                                     <div class="card kemdikti-card shadow-sm mb-4 h-100">
                                         <div
@@ -1535,7 +1535,7 @@
                                     </div>
                                 </div>
 
-                                <!-- Keselarasan Vertikal (F15) -->
+                                
                                 <div class="col-xl-6 col-lg-12">
                                     <div class="card kemdikti-card shadow-sm mb-4 h-100">
                                         <div
@@ -1602,7 +1602,7 @@
                                 </div>
                             </div>
 
-                            <!-- 13. Rekapitulasi Program Studi Table -->
+                            
                             <div class="card shadow-sm border border-dashed border-gray-400 mb-8"
                                 style="border-radius: 1.25rem;">
                                 <div class="card-header border-0 pt-6">
@@ -1703,8 +1703,8 @@
                                 </div>
                             </div>
 
-                        </div> <!-- End Global Loading Overlay Container -->
-                    </div> <!-- End Statistics Container -->
+                        </div> 
+                    </div> 
 
                 </div>
             </div>

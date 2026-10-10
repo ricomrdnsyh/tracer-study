@@ -20,7 +20,7 @@
 
                     <div class="card shadow-sm border border-dashed border-primary rounded text-center mb-5">
                         <div class="card-body p-10 p-lg-20">
-                            <!-- Icon Container -->
+                            
                             <div class="mb-10 d-flex justify-content-center">
                                 <div class="symbol symbol-150px symbol-circle shadow-sm">
                                     <div class="symbol-label bg-light-primary d-flex align-items-center justify-content-center">
@@ -29,14 +29,14 @@
                                 </div>
                             </div>
                             
-                            <!-- Text -->
+                            
                             <h1 class="text-gray-900 fw-bolder mb-5" style="font-size: 2.5rem;">Tracer Study</h1>
                             
                             <div class="text-muted fs-4 fw-semibold mb-10 mx-auto" style="max-width: 600px; line-height: 1.8;">
                                 {{ $message }}
                             </div>
 
-                            <!-- Button -->
+                            
                             <div class="d-flex justify-content-center">
                                 <a href="{{ route('mahasiswa.dashboard') }}" class="btn btn-primary btn-lg px-8 fw-bold shadow-sm">
                                     <i class="fas fa-home me-2"></i> Kembali ke Dashboard

@@ -3,28 +3,25 @@
 use App\Http\Controllers\Admin\AdminFakultasController;
 use App\Http\Controllers\Admin\AdminKategoriPertanyaanController;
 use App\Http\Controllers\Admin\AdminKuesionerController;
+use App\Http\Controllers\Admin\AdminLaporanController;
 use App\Http\Controllers\Admin\AdminMahasiswaController;
-
 use App\Http\Controllers\Admin\AdminPertanyaanController;
+use App\Http\Controllers\Admin\AdminPerusahaanController;
 use App\Http\Controllers\Admin\AdminProdiController;
 use App\Http\Controllers\Admin\AdminResponController;
-use App\Http\Controllers\Admin\AdminUserController;
-use App\Http\Controllers\Admin\AdminPerusahaanController;
-use App\Http\Controllers\Admin\AdminTahunAkademikController;
 use App\Http\Controllers\Admin\AdminStatistikController;
+use App\Http\Controllers\Admin\AdminTahunAkademikController;
+use App\Http\Controllers\Admin\AdminTemplateLaporanController;
+use App\Http\Controllers\Admin\AdminUserController;
+use App\Http\Controllers\Admin\AdminWilayahController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboard;
+use App\Http\Controllers\Admin\ResponImportController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Fakultas\DashboardController as FakultasDashboard;
 use App\Http\Controllers\Mahasiswa\DashboardController as MahasiswaDashboard;
 use App\Http\Controllers\Mahasiswa\TracerController;
 use Illuminate\Support\Facades\Route;
 use Rap2hpoutre\LaravelLogViewer\LogViewerController;
-
-
-
-
-
-
 
 Route::get('/', function () {
     return redirect()->route('login');
@@ -59,11 +56,9 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:Admin,Fakultas
     Route::match(['get', 'post'], '/prodi/sync', [AdminProdiController::class, 'sync'])->name('prodi.sync');
     Route::resource('prodi', AdminProdiController::class)->only(['index', 'show', 'update']);
 
-
     Route::get('/mahasiswa/data', [AdminMahasiswaController::class, 'getMahasiswa'])->name('mahasiswa.data');
     Route::match(['get', 'post'], '/mahasiswa/sync', [AdminMahasiswaController::class, 'sync'])->name('mahasiswa.sync');
     Route::resource('mahasiswa', AdminMahasiswaController::class)->only(['index', 'show']);
-
 
     Route::get('/perusahaan/data', [AdminPerusahaanController::class, 'getPerusahaan'])->name('perusahaan.data');
     Route::resource('perusahaan', AdminPerusahaanController::class)->only(['index', 'show']);
@@ -73,27 +68,27 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:Admin,Fakultas
     Route::post('/kuesioner/{kuesioner}/import-json', [AdminKuesionerController::class, 'importJson'])->name('kuesioner.import-json');
     Route::resource('kuesioner', AdminKuesionerController::class);
 
-    Route::get('/wilayah', [\App\Http\Controllers\Admin\AdminWilayahController::class, 'index'])->name('wilayah.index');
-    Route::get('/wilayah/negara', [\App\Http\Controllers\Admin\AdminWilayahController::class, 'getNegara'])->name('wilayah.negara');
-    Route::get('/wilayah/provinsi', [\App\Http\Controllers\Admin\AdminWilayahController::class, 'getProvinsi'])->name('wilayah.provinsi');
-    Route::get('/wilayah/kabupaten', [\App\Http\Controllers\Admin\AdminWilayahController::class, 'getKabupaten'])->name('wilayah.kabupaten');
-    Route::post('/wilayah/import', [\App\Http\Controllers\Admin\AdminWilayahController::class, 'import'])->name('wilayah.import');
+    Route::get('/wilayah', [AdminWilayahController::class, 'index'])->name('wilayah.index');
+    Route::get('/wilayah/negara', [AdminWilayahController::class, 'getNegara'])->name('wilayah.negara');
+    Route::get('/wilayah/provinsi', [AdminWilayahController::class, 'getProvinsi'])->name('wilayah.provinsi');
+    Route::get('/wilayah/kabupaten', [AdminWilayahController::class, 'getKabupaten'])->name('wilayah.kabupaten');
+    Route::post('/wilayah/import', [AdminWilayahController::class, 'import'])->name('wilayah.import');
 
-    Route::get('/respon/template', [\App\Http\Controllers\Admin\ResponImportController::class, 'template'])->name('respon.template');
-    Route::post('/respon/import', [\App\Http\Controllers\Admin\ResponImportController::class, 'import'])->name('respon.import');
-    Route::get('/respon/export', [\App\Http\Controllers\Admin\ResponImportController::class, 'export'])->name('respon.export');
+    Route::get('/respon/template', [ResponImportController::class, 'template'])->name('respon.template');
+    Route::post('/respon/import', [ResponImportController::class, 'import'])->name('respon.import');
+    Route::get('/respon/export', [ResponImportController::class, 'export'])->name('respon.export');
     Route::get('/respon/data', [AdminResponController::class, 'getRespon'])->name('respon.data');
     Route::resource('respon', AdminResponController::class)->only(['index', 'show']);
 
     Route::get('/statistik', [AdminStatistikController::class, 'index'])->name('statistik.index');
     Route::get('/statistik/data', [AdminStatistikController::class, 'getData'])->name('statistik.data');
 
-    Route::get('/laporan', [App\Http\Controllers\Admin\AdminLaporanController::class, 'index'])->name('laporan.index');
+    Route::get('/laporan', [AdminLaporanController::class, 'index'])->name('laporan.index');
     Route::get('/laporan/export', [AdminStatistikController::class, 'exportLaporanWord'])->name('laporan.export');
 
-    Route::get('/template-laporan', [App\Http\Controllers\Admin\AdminTemplateLaporanController::class, 'index'])->name('template-laporan.index');
-    Route::get('/template-laporan/download', [App\Http\Controllers\Admin\AdminTemplateLaporanController::class, 'downloadCurrent'])->name('template-laporan.download');
-    Route::post('/template-laporan/upload', [App\Http\Controllers\Admin\AdminTemplateLaporanController::class, 'upload'])->name('template-laporan.upload');
+    Route::get('/template-laporan', [AdminTemplateLaporanController::class, 'index'])->name('template-laporan.index');
+    Route::get('/template-laporan/download', [AdminTemplateLaporanController::class, 'downloadCurrent'])->name('template-laporan.download');
+    Route::post('/template-laporan/upload', [AdminTemplateLaporanController::class, 'upload'])->name('template-laporan.upload');
 
     Route::resource('kategori', AdminKategoriPertanyaanController::class)->except(['index', 'show']);
     Route::resource('pertanyaan', AdminPertanyaanController::class)->except(['index', 'show']);

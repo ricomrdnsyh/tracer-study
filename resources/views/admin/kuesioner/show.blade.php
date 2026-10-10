@@ -211,7 +211,7 @@
             </div>
 
             @if (auth()->user()->role === 'Admin')
-                <!-- Modal Kategori -->
+                
                 <div class="modal fade" id="modal_add_kategori" data-bs-backdrop="static" data-bs-keyboard="false"
                     tabindex="-1" aria-hidden="true">
                     <div class="modal-dialog modal-xl" role="document">
@@ -292,7 +292,7 @@
                 </div>
         </div>
 
-        <!-- Modal Edit Kategori -->
+        
         <div class="modal fade" id="modal_edit_kategori" data-bs-backdrop="static" data-bs-keyboard="false"
             tabindex="-1" aria-hidden="true">
             <div class="modal-dialog modal-xl" role="document">
@@ -366,7 +366,7 @@
         </div>
     </div>
 
-    <!-- Modal Pertanyaan -->
+    
     <div class="modal fade" id="modal_pertanyaan" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
         aria-hidden="true">
         <div class="modal-dialog modal-xl" role="document">
@@ -686,7 +686,7 @@
     @endif
 
     @if (auth()->user()->role === 'Admin')
-        <!-- Modal Import JSON -->
+        
         <div class="modal fade" id="modal_import_json" tabindex="-1" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered mw-500px">
                 <div class="modal-content">

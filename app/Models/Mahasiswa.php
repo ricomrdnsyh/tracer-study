@@ -44,11 +44,6 @@ class Mahasiswa extends Authenticatable
         return $this->belongsTo(TahunAkademik::class, 'akademik_id', 'id_smt');
     }
 
-    public function tahunAkademikKeluar()
-    {
-        return $this->tahunAkademik();
-    }
-
     /**
      * Get the attributes that should be cast.
      *
