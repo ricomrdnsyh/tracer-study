@@ -15,7 +15,7 @@
                 $('#show_no_hp').val(response.no_hp ? response.no_hp : '-');
                 $('#show_prodi').val(response.prodi ? response.prodi.nama_prodi : '-');
                 $('#show_fakultas').val(response.prodi && response.prodi.fakultas ? response.prodi.fakultas.nama_fakultas : '-');
-                
+
                 let gender = '-';
                 if (response.jenis_kelamin === 'L') gender = 'Laki-laki (L)';
                 else if (response.jenis_kelamin === 'P') gender = 'Perempuan (P)';
@@ -52,3 +52,4 @@
         $('#show_tahun_keluar').val('');
     });
 </script>
+

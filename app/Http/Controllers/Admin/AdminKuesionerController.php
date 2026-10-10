@@ -173,7 +173,7 @@ class AdminKuesionerController extends Controller
         }
 
         $filename = 'kuesioner-export-' . date('Y-m-d') . '.json';
-        
+
         return response()->streamDownload(function () use ($exportData) {
             echo json_encode($exportData, JSON_PRETTY_PRINT);
         }, $filename, [
@@ -200,13 +200,12 @@ class AdminKuesionerController extends Controller
                 $kategoriMap = [];
                 $pertanyaanMap = [];
 
-                // Phase 1: Insert Categories and Questions
                 foreach ($data as $kat) {
                     $kategori = \App\Models\KategoriPertanyaan::create([
                         'kuesioner_id' => $kuesioner->id_kuesioner,
                         'nama_kategori' => $kat['nama_kategori'],
                         'urutan' => $kat['urutan'],
-                        'syarat_pertanyaan_id' => null, // Will resolve in Phase 2
+                        'syarat_pertanyaan_id' => null,
                         'syarat_jawaban' => $kat['syarat_jawaban'] ?? null,
                     ]);
 
@@ -224,7 +223,7 @@ class AdminKuesionerController extends Controller
                                 'tipe_jawaban' => $p['tipe_jawaban'],
                                 'opsi_jawaban' => $p['opsi_jawaban'] ?? null,
                                 'wajib' => $p['wajib'],
-                                'syarat_pertanyaan_id' => null, // Will resolve in Phase 2
+                                'syarat_pertanyaan_id' => null,
                                 'syarat_jawaban' => $p['syarat_jawaban'] ?? null,
                             ]);
 
@@ -240,7 +239,6 @@ class AdminKuesionerController extends Controller
                     }
                 }
 
-                // Phase 2: Resolve Conditions (Pertanyaan)
                 foreach ($pertanyaanMap as $pMap) {
                     if (isset($insertedQuestions[$pMap['syarat_kode']])) {
                         $pMap['model']->update([
@@ -249,7 +247,6 @@ class AdminKuesionerController extends Controller
                     }
                 }
 
-                // Phase 2: Resolve Conditions (Kategori)
                 foreach ($kategoriMap as $kMap) {
                     if ($kMap['syarat_kode'] && isset($insertedQuestions[$kMap['syarat_kode']])) {
                         $kMap['model']->update([
@@ -265,3 +262,4 @@ class AdminKuesionerController extends Controller
         }
     }
 }
+

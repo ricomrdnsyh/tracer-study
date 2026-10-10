@@ -81,9 +81,6 @@
             box-shadow: 0 4px 12px rgba(91, 103, 236, 0.35);
         }
 
-        /* ==========================================
-                   PRINT / EXPORT PDF STYLING (A4 STANDARDS)
-                   ========================================== */
         @page {
             size: A4 portrait;
             margin: 8mm 10mm 10mm 10mm;
@@ -96,7 +93,6 @@
                 box-sizing: border-box !important;
             }
 
-            /* 1. Hide UI Controls, Sidebar, Headers & Buttons */
             #kt_app_sidebar,
             #kt_app_sidebar_toggle,
             #kt_app_header,
@@ -114,7 +110,6 @@
                 display: none !important;
             }
 
-            /* 2. Display Print Only Elements */
             .d-print-block {
                 display: block !important;
             }
@@ -123,7 +118,6 @@
                 display: flex !important;
             }
 
-            /* 3. Reset Layout Structure & Margins */
             html,
             body {
                 background: #ffffff !important;
@@ -159,7 +153,6 @@
                 min-height: 0 !important;
             }
 
-            /* 4. Reset Grid & Columns in Print (Avoid Flexbox pagination bugs) */
             .row:not(.kpi-row-container) {
                 display: block !important;
                 margin: 0 0 10px 0 !important;
@@ -179,7 +172,6 @@
                 min-height: 0 !important;
             }
 
-            /* 5. KPI Summary Cards (Compact 5-column Row) */
             .kpi-row-container {
                 display: flex !important;
                 flex-direction: row !important;
@@ -232,7 +224,6 @@
                 font-size: 0.62rem !important;
             }
 
-            /* 6. Spacing Tightening (Fix "space terlalu jauh") */
             .mb-8,
             .my-8 {
                 margin-bottom: 10px !important;
@@ -274,7 +265,6 @@
                 padding: 6px 10px !important;
             }
 
-            /* 7. Cards & Containers (Page Break Control) */
             .card,
             .kemdikti-card,
             .chart-box {
@@ -309,7 +299,6 @@
                 min-height: 0 !important;
             }
 
-            /* Dedicated card avoidance for compact cards */
             .kompetensi-aspect-print-card,
             .waktu-tunggu-card {
                 page-break-inside: avoid !important;
@@ -324,7 +313,6 @@
                 display: block !important;
             }
 
-            /* 8. ApexCharts Sizing & Scaling in Print (Zero Extra Space) */
             div[id^="chart_"] {
                 min-height: 0 !important;
                 height: auto !important;
@@ -350,7 +338,6 @@
                 margin: 0 auto !important;
             }
 
-            /* 9. Tables in Print */
             .table {
                 font-size: 9.5px !important;
                 width: 100% !important;
@@ -384,7 +371,6 @@
                 print-color-adjust: exact !important;
             }
 
-            /* Dark mode overrides when printing */
             [data-bs-theme="dark"] body,
             [data-bs-theme="dark"] .card,
             [data-bs-theme="dark"] .kemdikti-card,
@@ -412,7 +398,6 @@
             <div id="kt_app_content" class="app-content flex-column-fluid mt-7">
                 <div id="kt_app_content_container" class="app-container container-fluid">
 
-                    
                     <div class="d-flex flex-wrap align-items-center justify-content-between gap-4 mb-4">
                         <div>
                             <div class="d-flex align-items-center gap-2">
@@ -432,7 +417,6 @@
                         </div>
                     </div>
 
-                    
                     <div class="d-none d-print-block mb-4 p-3 border border-dashed border-gray-400 rounded-3 bg-light">
                         <div class="d-flex justify-content-between align-items-center fs-8 text-gray-700">
                             <div><i class="fa-solid fa-file-lines text-primary me-1"></i><strong>Dokumen:</strong> Laporan
@@ -442,7 +426,6 @@
                         </div>
                     </div>
 
-                    
                     <div class="card shadow-sm border border-dashed border-gray-400 mb-8 filter-container"
                         style="border-radius: 1.25rem;">
                         <div class="card-body p-6">
@@ -458,7 +441,7 @@
                             </div>
 
                             <div class="row g-4 align-items-end">
-                                
+
                                 <div class="col-xl-2 col-lg-3 col-md-6 col-sm-12">
                                     <label class="form-label fw-bold fs-7 mb-2 text-gray-700">Kuesioner Tracer:</label>
                                     <select id="filter_kuesioner" class="form-select form-select-sm" data-control="select2"
@@ -470,7 +453,6 @@
                                     </select>
                                 </div>
 
-                                
                                 <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12">
                                     <label class="form-label fw-bold fs-7 mb-2 text-gray-700">Tahun Kelulusan:</label>
                                     <select id="filter_akademik" class="form-select form-select-sm" data-control="select2"
@@ -483,7 +465,6 @@
                                     </select>
                                 </div>
 
-                                
                                 @if($isFakultas)
                                     <input type="hidden" id="filter_fakultas" value="{{ $userFakultasId }}">
                                 @else
@@ -501,7 +482,6 @@
                                 </div>
                                 @endif
 
-                                
                                 <div class="{{ $isFakultas ? 'col-xl-5 col-lg-6' : 'col-xl-2 col-lg-3' }} col-md-6 col-sm-12">
                                     <label class="form-label fw-bold fs-7 mb-2 text-gray-700">Program Studi:</label>
                                     <select id="filter_prodi" class="form-select form-select-sm" data-control="select2"
@@ -515,7 +495,6 @@
                                     </select>
                                 </div>
 
-                                
                                 <div class="col-xl-2 col-lg-12 col-md-12 col-sm-12 d-flex justify-content-xl-end">
                                     <button type="button" class="btn btn-sm btn-primary fw-bold w-100"
                                         id="btn_apply_filter">
@@ -532,7 +511,6 @@
                         </div>
                     </div>
 
-                    
                     <div id="empty_filter_state"
                         class="card text-center py-20 my-10 rounded-4 border border-dashed border-gray-400 shadow-sm d-flex flex-column justify-content-center align-items-center" style="min-height: 350px;">
                         <i class="fa-solid fa-chart-pie text-muted mb-6" style="font-size: 5rem;"></i>
@@ -540,17 +518,15 @@
                         <p class="text-gray-500 fs-5 mb-0">Silakan sesuaikan filter di atas untuk memuat data statistik tracer study.</p>
                     </div>
 
-                    
                     <div id="statistics_container" style="display: none;">
-                        
+
                         <div class="position-relative">
                             <div class="loading-overlay" id="kpi_loading">
                                 <div class="spinner-border text-primary" role="status"></div>
                             </div>
 
-                            
                             <div class="row g-4 g-xl-5 mb-8 kpi-row-container">
-                                
+
                                 <div class="col-xl col-md-6 col-12">
                                     <div class="card stat-card-modern p-5 h-100 border-primary bg-light-primary">
                                         <div class="d-flex align-items-center justify-content-between mb-3">
@@ -569,7 +545,6 @@
                                     </div>
                                 </div>
 
-                                
                                 <div class="col-xl col-md-6 col-12">
                                     <div class="card stat-card-modern p-5 h-100 border-success bg-light-success">
                                         <div class="d-flex align-items-center justify-content-between mb-3">
@@ -588,7 +563,6 @@
                                     </div>
                                 </div>
 
-                                
                                 <div class="col-xl col-md-6 col-12">
                                     <div class="card stat-card-modern p-5 h-100 border-info bg-light-info">
                                         <div class="d-flex align-items-center justify-content-between mb-3">
@@ -610,7 +584,6 @@
                                     </div>
                                 </div>
 
-                                
                                 <div class="col-xl col-md-6 col-12">
                                     <div class="card stat-card-modern p-5 h-100 border-warning bg-light-warning">
                                         <div class="d-flex align-items-center justify-content-between mb-3">
@@ -628,7 +601,6 @@
                                     </div>
                                 </div>
 
-                                
                                 <div class="col-xl col-md-6 col-12">
                                     <div class="card stat-card-modern p-5 h-100 border-dark bg-light">
                                         <div class="d-flex align-items-center justify-content-between mb-3">
@@ -648,7 +620,6 @@
                                 </div>
                             </div>
 
-                            
                             <div class="card kemdikti-card mb-8 shadow-sm">
                                 <div
                                     class="card-header border-0 pt-6 pb-2 d-flex align-items-center justify-content-between">
@@ -705,11 +676,9 @@
                                         </table>
                                     </div>
 
-
                                 </div>
                             </div>
 
-                            
                             <div class="card kemdikti-card mb-8 shadow-sm">
                                 <div
                                     class="card-header border-0 pt-6 pb-2 d-flex align-items-center justify-content-between">
@@ -771,11 +740,9 @@
                                         </table>
                                     </div>
 
-
                                 </div>
                             </div>
 
-                            
                             <div class="card kemdikti-card mb-8 shadow-sm">
                                 <div
                                     class="card-header border-0 pt-6 pb-2 d-flex align-items-center justify-content-between">
@@ -833,11 +800,9 @@
                                         </table>
                                     </div>
 
-
                                 </div>
                             </div>
 
-                            
                             <div class="card kemdikti-card mb-8 shadow-sm">
                                 <div
                                     class="card-header border-0 pt-6 pb-2 d-flex align-items-center justify-content-between">
@@ -898,13 +863,11 @@
                                         </table>
                                     </div>
 
-
                                 </div>
                             </div>
 
-                            
                             <div class="row g-6 mb-8">
-                                
+
                                 <div class="col-xl-6 col-lg-12">
                                     <div class="card kemdikti-card waktu-tunggu-card shadow-sm mb-4 h-100">
                                         <div
@@ -970,7 +933,6 @@
                                     </div>
                                 </div>
 
-                                
                                 <div class="col-xl-6 col-lg-12">
                                     <div class="card kemdikti-card waktu-tunggu-card shadow-sm mb-4 h-100">
                                         <div
@@ -1037,9 +999,6 @@
                                 </div>
                             </div>
 
-
-
-                            
                             <div class="card kemdikti-card mb-8 shadow-sm">
                                 <div
                                     class="card-header border-0 pt-6 pb-2 d-flex align-items-center justify-content-between">
@@ -1112,11 +1071,9 @@
                                         </table>
                                     </div>
 
-
                                 </div>
                             </div>
 
-                            
                             <div class="row g-6 mb-8 skala-provinsi-row">
                                 <div class="col-xl-5 col-lg-12">
                                     <div class="card shadow-sm border border-dashed border-gray-400 chart-box h-100"
@@ -1154,7 +1111,6 @@
                                 </div>
                             </div>
 
-                            
                             <div class="card kemdikti-card kemdikti-card-allow-break mb-8 shadow-sm">
                                 <div
                                     class="card-header border-0 pt-6 pb-2 d-flex align-items-center justify-content-between">
@@ -1181,7 +1137,6 @@
                                         </div>
                                     </div>
 
-                                    
                                     <div class="mb-8" style="page-break-inside: avoid; break-inside: avoid;">
                                         <h5 class="fw-bolder text-gray-800 mb-3 d-flex align-items-center gap-2">
                                             <i class="fa-solid fa-chart-column text-primary"></i> Perbandingan Skor
@@ -1193,7 +1148,6 @@
 
                                     <hr class="text-gray-300 my-6 d-print-none">
 
-                                    
                                     <div
                                         class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2 d-print-none">
                                         <h5 class="fw-bolder text-gray-800 mb-0">Rincian Per Aspek Kompetensi:</h5>
@@ -1235,9 +1189,8 @@
                                         </div>
                                     </div>
 
-                                    
                                     <div class="row g-6 d-print-none" id="aspect_dual_cards">
-                                        
+
                                         <div class="col-xl-6 col-lg-12">
                                             <div class="card border rounded-3 p-5 bg-light h-100">
                                                 <div class="d-flex align-items-center justify-content-between mb-3">
@@ -1272,7 +1225,6 @@
                                             </div>
                                         </div>
 
-                                        
                                         <div class="col-xl-6 col-lg-12">
                                             <div class="card border rounded-3 p-5 bg-light h-100">
                                                 <div class="d-flex align-items-center justify-content-between mb-3">
@@ -1308,7 +1260,6 @@
                                         </div>
                                     </div>
 
-                                    
                                     <div class="d-none d-print-block mt-4" id="kompetensi_print_all">
                                         <div class="border-bottom pb-2 mb-4">
                                             <h5 class="fw-bolder text-gray-900 mb-1">
@@ -1461,15 +1412,11 @@
                                         </div>
                                     </div>
 
-
                                 </div>
                             </div>
 
-
-
-                            
                             <div class="row g-6 mb-8">
-                                
+
                                 <div class="col-xl-6 col-lg-12">
                                     <div class="card kemdikti-card shadow-sm mb-4 h-100">
                                         <div
@@ -1535,7 +1482,6 @@
                                     </div>
                                 </div>
 
-                                
                                 <div class="col-xl-6 col-lg-12">
                                     <div class="card kemdikti-card shadow-sm mb-4 h-100">
                                         <div
@@ -1602,7 +1548,6 @@
                                 </div>
                             </div>
 
-                            
                             <div class="card shadow-sm border border-dashed border-gray-400 mb-8"
                                 style="border-radius: 1.25rem;">
                                 <div class="card-header border-0 pt-6">
@@ -1717,3 +1662,4 @@
 @section('js')
     @include('admin.statistik.script')
 @endsection
+

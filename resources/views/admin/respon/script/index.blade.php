@@ -227,7 +227,7 @@
 
             let validExtensions = ['xlsx', 'xls'];
             let fileExtension = file.name.split('.').pop().toLowerCase();
-            let maxSize = 5 * 1024 * 1024; // 5MB
+            let maxSize = 5 * 1024 * 1024;
 
             if (!validExtensions.includes(fileExtension)) {
                 Swal.fire({
@@ -322,3 +322,4 @@
         });
     });
 </script>
+

@@ -2,7 +2,6 @@
 
 namespace App\Services;
 
-
 use App\Models\Fakultas;
 use App\Models\JawabanDetail;
 use App\Models\Kuesioner;
@@ -20,36 +19,36 @@ class LaporanExportService
 {
     public function exportWord($statsData, $filters, $templatePath)
     {
-        // Gunakan template kustom hasil upload
+
         $templateProcessor = new TemplateProcessor($templatePath);
-        
+
         $totalLulusan = $statsData['kpi']['total_alumni'] ?? 0;
         $totalResponden = $statsData['kpi']['total_responden'] ?? 0;
         $responseRate = $statsData['kpi']['response_rate'] ?? '0%';
-        
+
         $coverTop = 'UNUJA';
         $coverBottom = 'UNUJA';
         $prodiName = 'UNUJA';
         $jenjangName = 'PT';
         $namaDekan = '-';
         $namaKaprodi = '-';
-        
+
         $user = auth()->user();
         $isFakultas = $user && $user->role === 'Fakultas';
         $userFakultasId = $isFakultas ? $user->fakultas_id : null;
-        
+
         $fakultasId = $isFakultas ? $userFakultasId : ($filters['fakultas_id'] ?? null);
-        
+
         if (isset($filters['prodi_id']) && $filters['prodi_id'] !== 'all' && $filters['prodi_id'] !== '') {
             $prodiObj = Prodi::with('fakultas')->find($filters['prodi_id']);
             if ($prodiObj) {
                 $coverTop = strtoupper($prodiObj->nama_prodi);
-                
+
                 $fakultasName = $prodiObj->fakultas->nama_fakultas ?? '';
                 if ($fakultasName && stripos($fakultasName, 'Fakultas') === false) {
                     $fakultasName = 'Fakultas ' . $fakultasName;
                 }
-                
+
                 $coverBottom = strtoupper($fakultasName ?: 'UNUJA');
                 $prodiName = $prodiObj->nama_prodi;
                 $jenjangName = $prodiObj->jenjang ?? '-';
@@ -63,7 +62,7 @@ class LaporanExportService
                 if (stripos($fakultasName, 'Fakultas') === false) {
                     $fakultasName = 'Fakultas ' . $fakultasName;
                 }
-                
+
                 $coverTop = strtoupper($fakultasName);
                 $coverBottom = strtoupper($fakultasName);
                 $prodiName = $fakultasName;
@@ -71,32 +70,30 @@ class LaporanExportService
                 $namaDekan = $fakultasObj->nama_dekan ?? '-';
             }
         }
-        
-        // Tahun Lulus Dinamis
+
         $lulusanTahun = 'SEMUA LULUSAN';
         if (isset($filters['akademik_id']) && $filters['akademik_id'] !== 'all' && $filters['akademik_id'] !== '') {
             $tahunAkademikObj = \App\Models\TahunAkademik::find($filters['akademik_id']);
             if ($tahunAkademikObj) {
-                // Ekstrak tahun berdasarkan Ganjil/Genap
-                // Contoh: "2024/2025 Ganjil" -> 2024, "2024/2025 Genap" -> 2025
+
                 if (preg_match('/^(\d{4})\/(\d{4})\s+(.*)$/i', trim($tahunAkademikObj->nm_smt), $matches)) {
                     $tahun1 = $matches[1];
                     $tahun2 = $matches[2];
                     $semester = strtolower(trim($matches[3]));
-                    
+
                     if ($semester === 'genap' || $semester === 'pendek') {
                         $lulusanTahun = 'LULUSAN ' . $tahun2;
                     } else {
-                        // Ganjil
+
                         $lulusanTahun = 'LULUSAN ' . $tahun1;
                     }
                 } else {
-                    // Fallback
+
                     $lulusanTahun = 'LULUSAN ' . $tahunAkademikObj->nm_smt;
                 }
             }
         }
-        
+
         $bekerja = 0;
         $wiraswasta = 0;
         $studi = 0;
@@ -111,7 +108,7 @@ class LaporanExportService
                         $studi += $row['jumlah'];
                     }
                 } else {
-                    // Fallback jika tidak ada value
+
                     if (stripos($row['label'], 'Bekerja (full time') !== false) {
                         $bekerja += $row['jumlah'];
                     } elseif (stripos($row['label'], 'Wiraswasta') !== false) {
@@ -122,10 +119,10 @@ class LaporanExportService
                 }
             }
         }
-        
+
         $avgWaktuTunggu = $statsData['waktu_tunggu_bekerja']['rata_rata'] ?? '0 bulan';
         $pendapatan = $statsData['take_home_pay']['rata_rata'] ?? '0';
-        
+
         $maxKerja = $statsData['take_home_pay']['max'] ?? 'Rp 0';
         $minKerja = $statsData['take_home_pay']['min'] ?? 'Rp 0';
         $medianKerja = $statsData['take_home_pay']['median'] ?? 'Rp 0';
@@ -134,7 +131,7 @@ class LaporanExportService
         $maxWiraswasta = $statsData['take_home_pay_wiraswasta']['max'] ?? 'Rp 0';
         $minWiraswasta = $statsData['take_home_pay_wiraswasta']['min'] ?? 'Rp 0';
         $medianWiraswasta = $statsData['take_home_pay_wiraswasta']['median'] ?? 'Rp 0';
-        
+
         $pembelajaran = $statsData['aspek_pembelajaran']['aspek'] ?? [];
         $perkuliahan = isset($pembelajaran['perkuliahan']) ? number_format($pembelajaran['perkuliahan']['rata_rata'], 2, ',', '.') : '0,00';
         $demonstrasi = isset($pembelajaran['demonstrasi']) ? number_format($pembelajaran['demonstrasi']['rata_rata'], 2, ',', '.') : '0,00';
@@ -154,8 +151,7 @@ class LaporanExportService
         $wirausaha = isset($pembelajaran['wirausaha']) ? number_format($pembelajaran['wirausaha']['rata_rata'], 2, ',', '.') : '0,00';
         $pengabdian = isset($pembelajaran['pengabdian']) ? number_format($pembelajaran['pengabdian']['rata_rata'], 2, ',', '.') : '0,00';
         $rataRataPembelajaran = isset($statsData['aspek_pembelajaran']['rata_rata_semua']) ? number_format($statsData['aspek_pembelajaran']['rata_rata_semua'], 2, ',', '.') : '0,00';
-        
-        // KOMPETENSI (11 Aspek)
+
         $komp = $statsData['kompetensi']['details'] ?? [];
         $etika1 = isset($komp['etika']['a']) ? number_format($komp['etika']['a']['avg_score'], 2, ',', '.') : '0,00';
         $etika2 = isset($komp['etika']['b']) ? number_format($komp['etika']['b']['avg_score'], 2, ',', '.') : '0,00';
@@ -179,7 +175,7 @@ class LaporanExportService
         $kewirausahaan2 = isset($komp['kewirausahaan']['b']) ? number_format($komp['kewirausahaan']['b']['avg_score'], 2, ',', '.') : '0,00';
         $adaptasi1 = isset($komp['adaptasi']['a']) ? number_format($komp['adaptasi']['a']['avg_score'], 2, ',', '.') : '0,00';
         $adaptasi2 = isset($komp['adaptasi']['b']) ? number_format($komp['adaptasi']['b']['avg_score'], 2, ',', '.') : '0,00';
-        
+
         $keselarasanHorizontal = '0%';
         if (isset($statsData['keselarasan_horizontal']['table'])) {
             foreach ($statsData['keselarasan_horizontal']['table'] as $row) {
@@ -189,7 +185,7 @@ class LaporanExportService
                 }
             }
         }
-        
+
         $keselarasanVertikal = '0%';
         if (isset($statsData['keselarasan_vertikal']['table'])) {
             foreach ($statsData['keselarasan_vertikal']['table'] as $row) {
@@ -222,12 +218,12 @@ class LaporanExportService
         $templateProcessor->setValue('Max Kerja', $maxKerja);
         $templateProcessor->setValue('Min Kerja', $minKerja);
         $templateProcessor->setValue('Median Kerja', $medianKerja);
-        
+
         $templateProcessor->setValue('Pendapatan Wiraswasta', $pendapatanWiraswasta);
         $templateProcessor->setValue('Max Wiraswasta', $maxWiraswasta);
         $templateProcessor->setValue('Min Wiraswasta', $minWiraswasta);
         $templateProcessor->setValue('Median Wiraswasta', $medianWiraswasta);
-        
+
         $templateProcessor->setValue('Perkuliahan', $perkuliahan);
         $templateProcessor->setValue('Demonstrasi', $demonstrasi);
         $templateProcessor->setValue('Partisipasi dalam Proyek Riset', $proyekRiset);
@@ -246,7 +242,7 @@ class LaporanExportService
         $templateProcessor->setValue('Wirausaha', $wirausaha);
         $templateProcessor->setValue('Pengabdian', $pengabdian);
         $templateProcessor->setValue('Rata-rata', $rataRataPembelajaran);
-        
+
         $templateProcessor->setValue('Etika-1', $etika1);
         $templateProcessor->setValue('Etika-2', $etika2);
         $templateProcessor->setValue('Keahlian-1', $keahlian1);
@@ -269,12 +265,13 @@ class LaporanExportService
         $templateProcessor->setValue('Kewirausahaan-2', $kewirausahaan2);
         $templateProcessor->setValue('Adaptasi-1', $adaptasi1);
         $templateProcessor->setValue('Adaptasi-2', $adaptasi2);
-        
+
         $fileName = 'Laporan_Tracer_Study_' . date('Ymd_His') . '.docx';
         $tempFile = tempnam(sys_get_temp_dir(), 'PHPWord');
         $templateProcessor->saveAs($tempFile);
-        
+
         return ['path' => $tempFile, 'name' => $fileName];
     }
 
 }
+

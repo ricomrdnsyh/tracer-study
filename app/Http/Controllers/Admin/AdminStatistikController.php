@@ -27,7 +27,7 @@ class AdminStatistikController extends Controller
     {
         $kuesionerList = Kuesioner::orderByDesc('id_kuesioner')->get();
         $tahunAkademikList = TahunAkademik::orderByDesc('id_smt')->get();
-        
+
         $user = auth()->user();
         $isFakultas = $user && $user->role === 'Fakultas';
         $userFakultasId = $isFakultas ? $user->fakultas_id : null;
@@ -39,8 +39,6 @@ class AdminStatistikController extends Controller
             $fakultasList = Fakultas::orderBy('nama_fakultas')->get();
             $prodiList = Prodi::orderBy('nama_prodi')->get();
         }
-
-        
 
         $statsData = $this->statistikService->buildStatisticsData($request);
 
@@ -68,8 +66,7 @@ class AdminStatistikController extends Controller
     public function exportLaporanWord(Request $request)
     {
         $statsData = $this->statistikService->buildStatisticsData($request);
-        
-        // Gunakan template kustom hasil upload
+
         if (Storage::exists('templates/laporan_prodi.docx')) {
             $templatePath = Storage::path('templates/laporan_prodi.docx');
         } else {
@@ -77,7 +74,8 @@ class AdminStatistikController extends Controller
         }
 
         $file = $this->laporanExportService->exportWord($statsData, $request->all(), $templatePath);
-        
+
         return response()->download($file['path'], $file['name'])->deleteFileAfterSend(true);
     }
 }
+

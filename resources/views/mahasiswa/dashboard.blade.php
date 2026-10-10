@@ -53,7 +53,6 @@
             color: #ffffff;
         }
 
-        /* HERO SECTION */
         .dash-hero {
             background: linear-gradient(135deg, #006AE6 0%, #004CCC 100%);
             border-radius: 28px;
@@ -127,7 +126,6 @@
             box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
         }
 
-        /* CARDS */
         .glass-card {
             background: #ffffff;
             border-radius: 24px;
@@ -142,7 +140,6 @@
             border-color: #d0d5dd;
         }
 
-        /* INFO CHIPS */
         .info-chip {
             display: flex;
             align-items: center;
@@ -167,7 +164,6 @@
             transform: scale(1.05);
         }
 
-        /* STATUS BANNER */
         .status-banner {
             position: relative;
             overflow: hidden;
@@ -231,7 +227,6 @@
             }
         }
 
-        /* PROGRESS BAR */
         .progress-track {
             background: var(--border-color);
             height: 8px;
@@ -264,7 +259,6 @@
             }
         }
 
-        /* STEPS */
         .step-wrapper {
             position: relative;
             padding: 2.5rem 2rem;
@@ -304,7 +298,6 @@
             border: 2px solid white;
         }
 
-        /* QUICK LINKS */
         .quick-link {
             padding: 1.75rem;
             display: flex;
@@ -326,7 +319,6 @@
             transform: translateX(4px);
         }
 
-        /* TYPOGRAPHY HELPER */
         .text-main {
             color: var(--text-main);
         }
@@ -378,17 +370,15 @@
                                     : 'Selamat Malam'));
                 @endphp
 
-                
                 <div class="dash-hero" style="margin-bottom: -3rem; padding-bottom: 5rem;">
                     <div class="dash-hero-pattern"></div>
 
                     <svg class="hero-illus d-none d-lg-block" width="380" height="380" viewBox="0 0 380 380"
                         fill="none" xmlns="http://www.w3.org/2000/svg">
-                        
+
                         <circle cx="190" cy="190" r="140" fill="white" fill-opacity="0.05" />
                         <circle cx="190" cy="190" r="100" fill="white" fill-opacity="0.1" />
 
-                        
                         <g transform="translate(50, 70) rotate(-12)">
                             <rect x="0" y="0" width="130" height="170" rx="16" fill="white"
                                 fill-opacity="0.95" style="filter: drop-shadow(0 12px 24px rgba(0,0,0,0.15));" />
@@ -405,7 +395,6 @@
                                 fill-opacity="0.15" />
                         </g>
 
-                        
                         <g transform="translate(180, 30) rotate(10)">
                             <path d="M75 25 L145 55 L75 85 L5 55 Z" fill="white" fill-opacity="0.98"
                                 style="filter: drop-shadow(0 15px 25px rgba(0,0,0,0.12));" />
@@ -414,7 +403,6 @@
                             <circle cx="135" cy="105" r="8" fill="white" />
                         </g>
 
-                        
                         <g transform="translate(190, 170) rotate(-6)">
                             <rect x="0" y="0" width="150" height="120" rx="16" fill="white"
                                 fill-opacity="0.95" style="filter: drop-shadow(0 20px 30px rgba(0,0,0,0.15));" />
@@ -430,7 +418,6 @@
                             <circle cx="114" cy="10" r="5" fill="#f79009" />
                         </g>
 
-                        
                         <path d="M40 220 L46 238 L64 244 L46 250 L40 268 L34 250 L16 244 L34 238 Z" fill="white"
                             fill-opacity="0.9" />
                         <path d="M320 80 L324 92 L336 96 L324 100 L320 112 L316 100 L304 96 L316 92 Z" fill="white"
@@ -494,7 +481,6 @@
                     </div>
                 </div>
 
-                
                 <div class="card glass-card position-relative z-index-2 mx-auto mb-10"
                     style="width: 96%; max-width: 1200px; padding: 0.5rem; box-shadow: 0 16px 32px rgba(0, 106, 230, 0.08);">
                     <div class="row g-0">
@@ -544,18 +530,15 @@
                     </div>
                 </div>
 
-                
                 <div class="card glass-card status-banner mb-10 {{ $sudahMengisi ? 'status-done' : 'status-pending' }}">
                     <div
                         class="p-5 p-md-6 d-flex flex-column flex-md-row align-items-start align-items-md-center gap-4 gap-md-6 w-100">
 
-                        
                         <div class="d-flex align-items-center gap-4 w-100 w-md-auto">
                             <div class="status-icon flex-shrink-0">
                                 <i class="fas {{ $sudahMengisi ? 'fa-check-double' : 'fa-hourglass-half' }}"></i>
                             </div>
 
-                            
                             <h3 class="fw-bolder text-main m-0 fs-3 d-md-none">
                                 @if ($sudahMengisi)
                                     Data Tersimpan
@@ -568,7 +551,7 @@
                         </div>
 
                         <div class="flex-grow-1 text-start">
-                            
+
                             <h3 class="fw-bolder text-main mb-2 fs-2 d-none d-md-block">
                                 @if ($sudahMengisi)
                                     Luar biasa! Data Anda telah tersimpan.
@@ -632,13 +615,11 @@
                     </div>
                 </div>
 
-                
                 <div class="d-flex align-items-center mb-6">
                     <h2 class="fw-bolder text-main m-0 fs-2">Panduan Pengisian</h2>
                     <div class="ms-4 flex-grow-1" style="height: 1px; background: var(--border-color);"></div>
                 </div>
 
-                
                 <div class="row g-5 mb-10">
                     @php
                         $langkah = [
@@ -668,7 +649,6 @@
                             <div class="card shadow-sm border border-dashed border-{{ $step['color'] }} bg-light-{{ $step['color'] }} h-100 p-6 p-md-8 position-relative overflow-hidden hover-elevate-up d-flex flex-column"
                                 style="z-index: 1; border-radius: 24px;">
 
-                                
                                 <div class="position-absolute"
                                     style="bottom: -20px; right: 0px; font-size: 8rem; font-weight: 900; color: var(--text-muted); opacity: 0.05; line-height: 1; z-index: -1;">
                                     0{{ $i + 1 }}
@@ -697,7 +677,6 @@
                                 </p>
                             </div>
 
-                            
                             @if ($i < count($langkah) - 1)
                                 <div class="position-absolute d-none d-lg-flex align-items-center justify-content-center bg-white"
                                     style="top: 50%; right: -25px; transform: translateY(-50%); width: 50px; height: 50px; border-radius: 50%; z-index: 10; box-shadow: 0 8px 20px rgba(0,0,0,0.08); border: 1px solid var(--border-color);">
@@ -714,3 +693,4 @@
         @include('layouts.footer')
     </div>
 @endsection
+

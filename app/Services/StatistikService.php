@@ -26,13 +26,11 @@ class StatistikService
         $fakultasId = $isFakultas ? $user->fakultas_id : $request->input('fakultas_id');
         $prodiId = $request->input('prodi_id');
 
-        // Normalisasi parameter 'all' atau string kosong menjadi null
         $kuesionerId = ($kuesionerId && $kuesionerId !== 'all') ? (int) $kuesionerId : null;
         $akademikId = ($akademikId && $akademikId !== 'all') ? (string) $akademikId : null;
         $fakultasId = ($fakultasId && $fakultasId !== 'all') ? (int) $fakultasId : null;
         $prodiId = ($prodiId && $prodiId !== 'all') ? (int) $prodiId : null;
 
-        // 1. Query Target Mahasiswa (Populasi Alumni)
         $mahasiswaQuery = Mahasiswa::query();
         if ($akademikId) {
             $mahasiswaQuery->where('akademik_id', $akademikId);
@@ -50,7 +48,6 @@ class StatistikService
         }
         $totalAlumni = $mahasiswaQuery->count();
 
-        // 2. Query Respon Tracer (Status Selesai)
         $responQuery = ResponTracer::query()->where('status', 'Selesai');
         if ($kuesionerId) {
             $responQuery->where('kuesioner_id', $kuesionerId);
@@ -70,7 +67,6 @@ class StatistikService
 
         $nowFormatted = Carbon::now()->translatedFormat('F j, Y \a\t H:i:s \G\M\T+7');
 
-        // Status Pelaporan (Kemdiktisaintek Hal 1)
         $draftCount = ResponTracer::where('status', 'Draft')
             ->when($kuesionerId, fn($q) => $q->where('kuesioner_id', $kuesionerId))
             ->count();
@@ -92,16 +88,13 @@ class StatistikService
             return $this->getEmptyStatisticsData($totalAlumni, $statusPelaporanData, $fakultasId, $prodiId, $akademikId, $kuesionerId, $nowFormatted);
         }
 
-        // BATCH QUERY 1: Ambil semua jawaban pertanyaan utama dalam 1 query terpadu
         $coreCodes = ['F8', 'F505', 'F1201', 'F1101', 'F502', 'F14', 'F15', 'F4', 'F5D'];
         $coreAnswers = $this->fetchJawabanByCodes($responIds, $coreCodes);
 
-        // 3. Status Aktivitas (F8) - Kemdiktisaintek Hal 4
         $statusAktivitasData = $this->buildStatusAktivitasData($coreAnswers->get('F8', collect()), $nowFormatted);
         $responF8Map = $statusAktivitasData['_responF8Map'] ?? [];
         unset($statusAktivitasData['_responF8Map']);
 
-        // Filter subsets responden ID berdasarkan F8
         $bekerjaResponIds = array_keys(array_filter($responF8Map, fn($v) => $v === 1));
         $wiraswastaResponIds = array_keys(array_filter($responF8Map, fn($v) => $v === 3));
         $cariKerjaResponIds = array_keys(array_filter($responF8Map, fn($v) => in_array($v, [1, 5])));
@@ -110,55 +103,40 @@ class StatistikService
         $wiraswastaSet = array_flip($wiraswastaResponIds);
         $cariKerjaSet = array_flip($cariKerjaResponIds);
 
-        // 4. Take Home Pay (F505) - Kemdiktisaintek Hal 2
         $f505Collection = $coreAnswers->get('F505', collect());
         $takeHomePayData = $this->buildTakeHomePayData($f505Collection, $nowFormatted);
 
-        // 4b. Take Home Pay Khusus Wiraswasta (F505, Filter F8 = 3)
         $f505Wiraswasta = $f505Collection->filter(fn($d) => isset($wiraswastaSet[$d->respon_id]));
         $takeHomePayWiraswastaData = $this->buildTakeHomePayData($f505Wiraswasta, $nowFormatted);
 
-        // 5. Sumber Dana Pembiayaan Kuliah (F1201) - Kemdiktisaintek Hal 3
         $sumberDanaData = $this->buildSumberDanaData($coreAnswers->get('F1201', collect()), $nowFormatted);
 
-        // 6. Jenis Instansi Tempat Bekerja (F1101, Filter F8 = 1) - Kemdiktisaintek Hal 5
         $f1101Bekerja = $coreAnswers->get('F1101', collect())->filter(fn($d) => isset($bekerjaSet[$d->respon_id]));
         $jenisInstansiData = $this->buildJenisInstansiData($f1101Bekerja, $nowFormatted);
 
-        // 7. Waktu Tunggu Bekerja (F502, Filter F8 = 1, id_pertanyaan = 2) - Kemdiktisaintek Hal 6
         $f502Bekerja = $coreAnswers->get('F502', collect())->filter(fn($d) => isset($bekerjaSet[$d->respon_id]) && (int)$d->id_pertanyaan === 2);
         $waktuTungguBekerjaData = $this->calcWaktuTungguIntervals($f502Bekerja->pluck('jawaban_text'), $nowFormatted);
 
-        // 8. Waktu Tunggu Mulai Wiraswasta (F502, Filter F8 = 3, id_pertanyaan = 25) - Kemdiktisaintek Hal 7
         $f502Wiraswasta = $coreAnswers->get('F502', collect())->filter(fn($d) => isset($wiraswastaSet[$d->respon_id]) && (int)$d->id_pertanyaan === 25);
         $waktuTungguWiraswastaData = $this->calcWaktuTungguIntervals($f502Wiraswasta->pluck('jawaban_text'), $nowFormatted);
 
-        // 9. Keselarasan Horizontal (F14, Filter F8 = 1) - Kemdiktisaintek Hal 24
         $f14Bekerja = $coreAnswers->get('F14', collect())->filter(fn($d) => isset($bekerjaSet[$d->respon_id]));
         $keselarasanHorizontalData = $this->buildKeselarasanHorizontalData($f14Bekerja->pluck('jawaban_text'), $nowFormatted);
 
-        // 10. Keselarasan Vertikal (F15, Filter F8 = 1) - Kemdiktisaintek Hal 25
         $f15Bekerja = $coreAnswers->get('F15', collect())->filter(fn($d) => isset($bekerjaSet[$d->respon_id]));
         $keselarasanVertikalData = $this->buildKeselarasanVertikalData($f15Bekerja->pluck('jawaban_text'), $nowFormatted);
 
-        // 11. Metode Pencarian Kerja (F4, Filter F8 = 1, 5) - Kemdiktisaintek Hal 22-23
         $f4CariKerja = $coreAnswers->get('F4', collect())->filter(fn($d) => isset($cariKerjaSet[$d->respon_id]));
         $metodeCariKerjaData = $this->buildMetodeCariKerjaData($f4CariKerja, $nowFormatted);
 
-        // 12. Kompetensi Alumni (F17A Saat Lulus & F17B Diperlukan Kerja) - Kemdiktisaintek Hal 7-21
-        // BATCH QUERY 2: Ambil seluruh 22 kompetensi dalam 1 query agregasi
         $kompetensiData = $this->buildKompetensiDataOptimized($responIds, $nowFormatted);
 
-        // 13. Skala Cakupan Tempat Kerja (F5D)
         $skalaData = $this->buildSkalaKerjaData($coreAnswers->get('F5D', collect())->pluck('jawaban_text'));
 
-        // 14. Sebaran Provinsi Tempat Bekerja
         $sebaranProvinsiData = $this->buildSebaranProvinsiData($responIds);
 
-        // 15. Aspek Pembelajaran (F2) - BATCH QUERY 3: Ambil 17 aspek dalam 1 query agregasi
         $aspekPembelajaranData = $this->buildAspekPembelajaranDataOptimized($responIds, $nowFormatted);
 
-        // KPI Metrik
         $avgWaktuTungguNumeric = $waktuTungguBekerjaData['rata_rata_numeric'] ?? 0;
         $keselarasanRate = $keselarasanHorizontalData['table'][0]['pct_numeric'] ?? 0;
 
@@ -189,16 +167,12 @@ class StatistikService
         ];
     }
 
-    /**
-     * Helper untuk mengambil jawaban beberapa kode pertanyaan secara efisien dalam batch
-     */
     private function fetchJawabanByCodes(array $responIds, array $codes)
     {
         if (empty($responIds) || empty($codes)) {
             return collect();
         }
 
-        // Chunk $responIds jika melebihi 2000 untuk mencegah batas paket MySQL
         $results = collect();
         foreach (array_chunk($responIds, 2000) as $chunk) {
             $rows = DB::table('jawaban_detail')
@@ -728,9 +702,6 @@ class StatistikService
         ];
     }
 
-    /**
-     * BATCH AGGREGATED KOMPETENSI (1 Query menggantikan 22 Query)
-     */
     private function buildKompetensiDataOptimized(array $responIds, string $nowFormatted)
     {
         $aspects = [
@@ -761,7 +732,6 @@ class StatistikService
             $allCodes[] = $info['kode_b'];
         }
 
-        // Ambil semua data jawaban untuk 22 kode dalam batch
         $groupedAnswers = collect();
         if (!empty($responIds)) {
             foreach (array_chunk($responIds, 2000) as $chunk) {
@@ -890,7 +860,6 @@ class StatistikService
             $provinsiList = $provinsiList->merge($rows);
         }
 
-        // Gabungkan total per provinsi jika multi-chunk
         $aggregated = $provinsiList->groupBy('provinsi')->map->sum('total')->sortDesc()->take(8);
 
         return [
@@ -899,9 +868,6 @@ class StatistikService
         ];
     }
 
-    /**
-     * BATCH AGGREGATED ASPEK PEMBELAJARAN (1 Query menggantikan 17 Query)
-     */
     private function buildAspekPembelajaranDataOptimized(array $responIds, string $nowFormatted)
     {
         $aspects = [
@@ -987,9 +953,6 @@ class StatistikService
         ];
     }
 
-    /**
-     * BATCH OPTIMIZED REKAP PRODI (4 Query menggantikan 100+ Query loop)
-     */
     private function getRekapProdiOptimized($fakultasId, $prodiId, $akademikId, $kuesionerId)
     {
         $prodisQuery = Prodi::with('fakultas');
@@ -1006,7 +969,6 @@ class StatistikService
 
         $prodiIds = $prodis->pluck('id_prodi')->toArray();
 
-        // Query 1: Target mahasiswa per prodi
         $targetCounts = Mahasiswa::whereIn('prodi_id', $prodiIds)
             ->when($akademikId, fn($q) => $q->where('akademik_id', $akademikId))
             ->groupBy('prodi_id')
@@ -1014,7 +976,6 @@ class StatistikService
             ->pluck('total', 'prodi_id')
             ->toArray();
 
-        // Query 2: Responden per prodi
         $respondenCounts = ResponTracer::join('mahasiswa', 'respon_tracer.mahasiswa_id', '=', 'mahasiswa.nim')
             ->where('respon_tracer.status', 'Selesai')
             ->whereIn('mahasiswa.prodi_id', $prodiIds)
@@ -1025,7 +986,6 @@ class StatistikService
             ->pluck('total', 'prodi_id')
             ->toArray();
 
-        // Query 3: F8 Aktivitas per prodi
         $f8Rows = DB::table('jawaban_detail')
             ->join('pertanyaan', 'jawaban_detail.pertanyaan_id', '=', 'pertanyaan.id_pertanyaan')
             ->join('respon_tracer', 'jawaban_detail.respon_id', '=', 'respon_tracer.id_respon')
@@ -1051,7 +1011,6 @@ class StatistikService
             elseif (str_contains($al, 'mencari pekerjaan')) $f8ByProdi[$pid]['mencari']++;
         }
 
-        // Query 4: F14 Relevansi per prodi
         $f14Rows = DB::table('jawaban_detail')
             ->join('pertanyaan', 'jawaban_detail.pertanyaan_id', '=', 'pertanyaan.id_pertanyaan')
             ->join('respon_tracer', 'jawaban_detail.respon_id', '=', 'respon_tracer.id_respon')
@@ -1285,3 +1244,4 @@ class StatistikService
         ];
     }
 }
+

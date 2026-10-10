@@ -211,7 +211,7 @@
             </div>
 
             @if (auth()->user()->role === 'Admin')
-                
+
                 <div class="modal fade" id="modal_add_kategori" data-bs-backdrop="static" data-bs-keyboard="false"
                     tabindex="-1" aria-hidden="true">
                     <div class="modal-dialog modal-xl" role="document">
@@ -292,7 +292,6 @@
                 </div>
         </div>
 
-        
         <div class="modal fade" id="modal_edit_kategori" data-bs-backdrop="static" data-bs-keyboard="false"
             tabindex="-1" aria-hidden="true">
             <div class="modal-dialog modal-xl" role="document">
@@ -366,7 +365,6 @@
         </div>
     </div>
 
-    
     <div class="modal fade" id="modal_pertanyaan" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
         aria-hidden="true">
         <div class="modal-dialog modal-xl" role="document">
@@ -493,7 +491,7 @@
     @if (auth()->user()->role === 'Admin')
         <script>
             $(document).ready(function() {
-                // Auto-populate opsi jawaban based on selected syarat_pertanyaan_id
+
                 $('select[name="syarat_pertanyaan_id"]').on('change', function() {
                     var $selectedOption = $(this).find(':selected');
                     var targetSelect = $(this).closest('form').find('select[name="syarat_jawaban[]"]');
@@ -577,7 +575,7 @@
                     $('#tipe_jawaban').val($(this).data('tipe')).trigger('change');
 
                     var opsi = $(this).data('opsi');
-                    // Replace literally escaped \n with actual newlines
+
                     if (opsi) opsi = opsi.replace(/\\n/g, '\n');
                     $('#opsi_jawaban').val(opsi);
 
@@ -686,7 +684,7 @@
     @endif
 
     @if (auth()->user()->role === 'Admin')
-        
+
         <div class="modal fade" id="modal_import_json" tabindex="-1" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered mw-500px">
                 <div class="modal-content">
@@ -731,3 +729,4 @@
         </div>
     @endif
 @endsection
+

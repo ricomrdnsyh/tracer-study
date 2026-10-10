@@ -10,7 +10,6 @@
                     <div class="card shadow-sm rounded-4 border border-dashed border-dark overflow-hidden">
                         <div class="card-body p-10 p-lg-15">
 
-                            
                             <div class="text-center mb-12">
                                 <div class="mb-5">
                                     <span class="symbol symbol-100px">
@@ -27,14 +26,13 @@
 
                             <form id="form-export-laporan" action="{{ route('admin.laporan.export') }}" method="GET" target="_blank">
 
-                                
                                 <div class="bg-light rounded-4 p-8 mb-10 border border-gray-200">
                                     <h4 class="text-gray-800 fw-bold mb-6 d-flex align-items-center">
                                         <i class="fa-solid fa-sliders text-muted me-2"></i> Parameter Filter
                                     </h4>
 
                                     <div class="row g-6">
-                                        
+
                                         <div class="col-md-6">
                                             <label class="form-label fw-bold text-gray-700 fs-7 mb-2">
                                                 <i class="fa-solid fa-clipboard-list text-primary me-2"></i>Kuesioner
@@ -49,7 +47,6 @@
                                             </select>
                                         </div>
 
-                                        
                                         <div class="col-md-6">
                                             <label class="form-label fw-bold text-gray-700 fs-7 mb-2">
                                                 <i class="fa-solid fa-calendar-alt text-success me-2"></i>Tahun Akademik
@@ -64,7 +61,6 @@
                                             </select>
                                         </div>
 
-                                        
                                         @if($isFakultas)
                                             <input type="hidden" name="fakultas_id" id="laporan_fakultas" value="{{ $userFakultasId }}">
                                         @else
@@ -83,7 +79,6 @@
                                         </div>
                                         @endif
 
-                                        
                                         <div class="{{ $isFakultas ? 'col-md-12' : 'col-md-6' }}">
                                             <label class="form-label fw-bold text-gray-700 fs-7 mb-2">
                                                 <i class="fa-solid fa-graduation-cap text-info me-2"></i>Program Studi
@@ -102,7 +97,6 @@
                                     </div>
                                 </div>
 
-                                
                                 <div class="d-flex justify-content-center">
                                     <button type="submit"
                                         class="btn btn-primary fw-bold px-8 py-3 w-100 shadow-sm hover-elevate-up">
@@ -114,7 +108,7 @@
                     </div>
                 </div>
             </div>
-            
+
             @include('layouts.footer')
         </div>
     </div>
@@ -124,7 +118,7 @@
     <script>
         $(document).ready(function() {
             var $prodiSelect = $('#laporan_prodi');
-            // Simpan semua opsi asli ke variabel untuk filter
+
             var originalProdiOptions = $prodiSelect.find('option').clone();
 
             function toggleProdi() {
@@ -137,7 +131,6 @@
                 } else {
                     $prodiSelect.prop('disabled', false);
 
-                    // Bersihkan lalu masukkan hanya prodi yang sesuai fakultas
                     $prodiSelect.empty();
                     originalProdiOptions.each(function() {
                         var val = $(this).val();
@@ -152,7 +145,6 @@
                 }
             }
 
-            // Inisialisasi state awal
             toggleProdi();
 
             $('#laporan_fakultas').on('change', function() {
@@ -161,7 +153,7 @@
 
             $('#form-export-laporan').on('submit', function(e) {
                 var hasTemplate = {{ $hasCustomTemplate ? 'true' : 'false' }};
-                
+
                 if (!hasTemplate) {
                     e.preventDefault();
                     Swal.fire({
@@ -179,3 +171,4 @@
         });
     </script>
 @endsection
+

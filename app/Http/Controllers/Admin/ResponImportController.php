@@ -29,7 +29,6 @@ class ResponImportController extends Controller
         $sheet = $spreadsheet->getActiveSheet();
         $sheet->setTitle('Template Import');
 
-        // Header
         $headers = ['NIM'];
 
         $uniqueHeaders = [];
@@ -72,7 +71,6 @@ class ResponImportController extends Controller
 
         $kuesioner = Kuesioner::with('kategoriPertanyaans.pertanyaans')->findOrFail($request->kuesioner_id);
 
-        // Map kode_pertanyaan -> array of id_pertanyaan
         $mapPertanyaan = [];
         foreach ($kuesioner->kategoriPertanyaans as $kategori) {
             foreach ($kategori->pertanyaans as $pertanyaan) {
@@ -108,7 +106,6 @@ class ResponImportController extends Controller
                 return back()->with('error', 'Kolom NIM tidak ditemukan di baris pertama Excel.');
             }
 
-            // 1. Kumpulkan semua NIM dari baris Excel
             $allNims = [];
             $dataRows = array_slice($rows, 1);
             foreach ($dataRows as $row) {
@@ -123,10 +120,8 @@ class ResponImportController extends Controller
                 return back()->with('error', 'Tidak ada data NIM yang valid di dalam file Excel.');
             }
 
-            // Pre-load master mahasiswa yang cocok dalam 1 query
             $mahasiswaMap = Mahasiswa::with('prodi')->whereIn('nim', $allNims)->get()->keyBy('nim');
 
-            // Pre-load kamus wilayah untuk lookup cepat tanpa query di loop
             $provinsiDict = DB::table('master_provinsi')->pluck('provinsi', 'kode_wilayah_provinsi')->toArray();
             $kabupatenDict = DB::table('master_kota_kabupaten')->pluck('kota_kabupaten', 'kode_wilayah_kota_kabupaten')->toArray();
 
@@ -137,7 +132,6 @@ class ResponImportController extends Controller
             $notFoundCount = 0;
             $now = Carbon::now();
 
-            // 2. Proses baris dalam chunk 200 untuk performa tinggi & hemat memori
             foreach (array_chunk($dataRows, 200) as $chunk) {
                 $chunkValidData = [];
                 $chunkNims = [];
@@ -168,7 +162,6 @@ class ResponImportController extends Controller
 
                 if (empty($chunkValidData)) continue;
 
-                // Ambil atau buat ResponTracer untuk NIM di chunk ini
                 $existingRespons = ResponTracer::where('kuesioner_id', $kuesioner->id_kuesioner)
                     ->whereIn('mahasiswa_id', $chunkNims)
                     ->get()
@@ -197,7 +190,6 @@ class ResponImportController extends Controller
 
                 $activeResponIds = array_values($responIdMap);
 
-                // Bersihkan jawaban detail & pekerjaan alumni lama untuk responden di chunk ini
                 JawabanDetail::whereIn('respon_id', $activeResponIds)->delete();
                 PekerjaanAlumni::whereIn('respon_id', $activeResponIds)->delete();
 
@@ -212,7 +204,6 @@ class ResponImportController extends Controller
 
                     $importedCount++;
 
-                    // Jawaban detail batching
                     foreach ($headers as $index => $headerKode) {
                         if ($index === $nimIndex) continue;
 
@@ -234,7 +225,6 @@ class ResponImportController extends Controller
                         }
                     }
 
-                    // Pekerjaan alumni parsing
                     $nama = null;
                     $jenis_instansi = null;
                     $kode_provinsi = null;
@@ -278,7 +268,6 @@ class ResponImportController extends Controller
                     }
                 }
 
-                // Bulk insert dalam chunk
                 if (!empty($batchJawaban)) {
                     foreach (array_chunk($batchJawaban, 500) as $subJawaban) {
                         JawabanDetail::insert($subJawaban);
@@ -341,7 +330,6 @@ class ResponImportController extends Controller
         $sheet = $spreadsheet->getActiveSheet();
         $sheet->setTitle('Data Export Respon');
 
-        // Setup Headers
         $headers = ['NIM', 'Nama Mahasiswa', 'Status', 'Tanggal Isi'];
 
         $pertanyaanKeys = [];
@@ -367,7 +355,6 @@ class ResponImportController extends Controller
             $col++;
         }
 
-        // Setup Data Rows menggunakan chunking agar aman dari memory limit
         $rowNum = 2;
         $query->chunk(250, function ($respons) use ($sheet, &$rowNum, $uniqueHeaders, $pertanyaanKeys) {
             foreach ($respons as $respon) {
@@ -376,7 +363,6 @@ class ResponImportController extends Controller
                 $sheet->setCellValue('C' . $rowNum, $respon->status);
                 $sheet->setCellValue('D' . $rowNum, $respon->tgl_isi ? Carbon::parse($respon->tgl_isi)->format('Y-m-d H:i') : '');
 
-                // Map jawaban ke array ber-index ID pertanyaan
                 $jawabanMap = [];
                 foreach ($respon->jawabanDetails as $detail) {
                     $jawaban = $detail->jawaban_text;
@@ -423,3 +409,4 @@ class ResponImportController extends Controller
         ]);
     }
 }
+

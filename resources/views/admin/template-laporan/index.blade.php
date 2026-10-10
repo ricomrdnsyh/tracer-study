@@ -8,9 +8,8 @@
             <div id="kt_app_content" class="app-content flex-column-fluid mt-7">
                 <div id="kt_app_content_container" class="app-container container-fluid">
 
-
                     <div class="row g-5 g-xl-10">
-                        
+
                         <div class="col-xl-4">
                             <div class="card shadow-sm bg-light-primary rounded-4 border border-dashed border-primary">
                                 <div class="card-body p-8 d-flex flex-column justify-content-center text-center h-100">
@@ -44,7 +43,6 @@
                             </div>
                         </div>
 
-                        
                         <div class="col-xl-8">
                             <div class="card shadow-sm rounded-4 border border-dashed border-dark">
                                 <div class="card-header border-0 pt-8 px-8">
@@ -62,7 +60,7 @@
                                         enctype="multipart/form-data" id="upload_template_form">
                                         @csrf
                                         <div class="mb-8">
-                                            
+
                                             <div class="border border-dashed border-primary rounded-4 p-8 text-center bg-light-primary hover-elevate-up transition"
                                                 style="cursor: pointer;"
                                                 onclick="document.getElementById('template_file').click()">
@@ -147,7 +145,7 @@
 
                 </div>
             </div>
-            
+
             @include('layouts.footer')
         </div>
     </div>
@@ -156,7 +154,7 @@
 @section('js')
 <script>
     $(document).ready(function() {
-        // SweetAlert Flash Messages
+
         @if(session('success'))
             Swal.fire({
                 text: "{{ session('success') }}",
@@ -193,7 +191,6 @@
             });
         @endif
 
-        // Form Submit Validation & Processing
         $('#upload_template_form').on('submit', function(e) {
             var fileInput = document.getElementById('template_file');
             var filePath = fileInput.value;
@@ -229,7 +226,6 @@
                 return false;
             }
 
-            // Show Processing Indicator
             var btn = document.querySelector("#btn_submit_template");
             btn.setAttribute("data-kt-indicator", "on");
             setTimeout(function() {
@@ -239,3 +235,4 @@
     });
 </script>
 @endsection
+

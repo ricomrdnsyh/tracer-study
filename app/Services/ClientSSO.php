@@ -131,7 +131,6 @@ class ClientSSO
             return $items;
         }
 
-        // Ambil halaman sisanya secara paralel menggunakan Http::pool (chunk 25 halaman per batch)
         $pageChunks = array_chunk(range(2, $lastPage), 25);
         foreach ($pageChunks as $chunk) {
             $responses = Http::pool(function ($pool) use ($headers, $url, $payload, $chunk) {
@@ -168,7 +167,6 @@ class ClientSSO
             'pagination' => 'off',
         ], $additionalPayload);
 
-        /** @var Response $response */
         $response = Http::withHeaders($headers)
             ->withoutVerifying()
             ->timeout(60)
@@ -180,7 +178,6 @@ class ClientSSO
             $url = $auth['data_url'];
             $headers = $auth['headers'];
 
-            /** @var Response $response */
             $response = Http::withHeaders($headers)
                 ->withoutVerifying()
                 ->connectTimeout(30)
@@ -193,3 +190,4 @@ class ClientSSO
         return $response->json('data') ?? [];
     }
 }
+

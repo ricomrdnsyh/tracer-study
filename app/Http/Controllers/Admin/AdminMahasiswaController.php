@@ -114,7 +114,6 @@ class AdminMahasiswaController extends Controller
             $newCount = 0;
             $updatedCount = 0;
 
-            // Pre-load NIM yang ada tanpa menghidrasi semua model ke RAM
             $existingNims = Mahasiswa::pluck('nim')->flip()->toArray();
             $validProdiIds = Prodi::pluck('id_prodi')->flip()->toArray();
 
@@ -160,7 +159,6 @@ class AdminMahasiswaController extends Controller
                 ];
             }
 
-            // Eksekusi bulk upsert dalam chunk 500
             if (!empty($upsertBatch)) {
                 foreach (array_chunk($upsertBatch, 500) as $chunk) {
                     Mahasiswa::upsert(
@@ -195,3 +193,4 @@ class AdminMahasiswaController extends Controller
         }
     }
 }
+

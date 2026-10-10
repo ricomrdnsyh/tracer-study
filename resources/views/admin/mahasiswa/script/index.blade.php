@@ -99,11 +99,11 @@
                     data: 'status',
                     name: 'status',
                     render: function(data) {
-                        let badgeClass = 'badge-success'; // aktif
+                        let badgeClass = 'badge-success';
                         if (data === 'alumni') badgeClass = 'badge-primary';
                         else if (data === 'cuti') badgeClass = 'badge-warning';
                         else if (data === 'keluar') badgeClass = 'badge-danger';
-                        
+
                         return '<span class="badge ' + badgeClass + ' text-capitalize">' + data + '</span>';
                     }
                 },
@@ -214,3 +214,4 @@
         });
     });
 </script>
+

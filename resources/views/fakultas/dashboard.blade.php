@@ -4,7 +4,7 @@
 
 @section('css')
     <style>
-        /* Modern Premium Animations */
+
         @keyframes fadeInUp {
             from {
                 opacity: 0;
@@ -56,7 +56,6 @@
             animation-delay: 500ms;
         }
 
-        /* Premium Greeting Card with Glassmorphism */
         .dashboard-greeting {
             background: linear-gradient(120deg, #1A1A2E 0%, #16213E 50%, #0F3460 100%);
             border-radius: 1.25rem;
@@ -103,7 +102,6 @@
             }
         }
 
-        /* Simple Glassmorphism Select2 */
         .select2-glass-simple .select2-container--bootstrap5 .select2-selection--single {
             background: transparent !important;
             border: none !important;
@@ -111,7 +109,7 @@
             box-shadow: none !important;
             height: auto;
             pointer-events: none;
-            /* Let the pill handle the click */
+
         }
 
         .select2-glass-simple .select2-container--bootstrap5 .select2-selection--single .select2-selection__rendered {
@@ -123,7 +121,7 @@
 
         .select2-glass-simple .select2-container--bootstrap5 .select2-selection--single .select2-selection__arrow {
             display: none !important;
-            /* Hide default arrow */
+
         }
 
         .filter-pill:hover {
@@ -161,7 +159,6 @@
             animation: pulseGlow 2s infinite;
         }
 
-        /* Stat Cards Enhancements */
         .stat-card {
             border: none;
             border-radius: 1rem;
@@ -203,7 +200,6 @@
             transform: scale(1.1);
         }
 
-        /* Glowing icon backgrounds */
         .icon-glow-primary {
             box-shadow: 0 0 15px rgba(0, 158, 247, 0.3);
         }
@@ -220,7 +216,6 @@
             box-shadow: 0 0 15px rgba(255, 199, 0, 0.3);
         }
 
-        /* Chart Cards */
         .chart-card {
             border: none;
             border-radius: 1rem;
@@ -263,7 +258,6 @@
             -webkit-text-fill-color: transparent;
         }
 
-        /* Table Enhancements */
         .table-row-dashed tr {
             border-bottom: 1px dashed #e4e6ef !important;
             transition: background-color 0.2s ease;
@@ -277,7 +271,6 @@
             border-bottom: none !important;
         }
 
-        /* Custom Hover Effect for Pintasan Cepat Buttons */
         .pintasan-btn {
             transition: all 0.3s ease;
         }
@@ -315,7 +308,6 @@
             color: var(--bs-success) !important;
         }
 
-        /* Dark Mode adjustments for Pintasan Cepat Hover */
         [data-bs-theme="dark"] .pintasan-btn.pintasan-primary:hover {
             background-color: rgba(0, 158, 247, 0.15) !important;
             border-color: rgba(0, 158, 247, 0.4) !important;
@@ -680,3 +672,4 @@
         })();
     </script>
 @endsection
+

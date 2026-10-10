@@ -197,7 +197,6 @@
         </div>
     </div>
 
-    
     <div class="modal fade" id="importModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
         aria-hidden="true">
         <div class="modal-dialog modal-xl" role="document">
@@ -280,7 +279,6 @@
         </div>
     </div>
 
-    
     <div class="modal fade" id="templateModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
         aria-hidden="true">
         <div class="modal-dialog modal-xl" role="document">
@@ -320,7 +318,6 @@
         </div>
     </div>
 
-    
     <div class="modal fade" id="exportModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
         aria-hidden="true">
         <div class="modal-dialog modal-xl" role="document">
@@ -404,3 +401,4 @@
 
     @include('admin.respon.script.index')
 @endsection
+

@@ -2,10 +2,8 @@
     (function() {
         "use strict";
 
-        // Initial Stats Data from Blade
         var statsData = @json($statsData);
 
-        // Chart References
         var chartStatusF8 = null;
         var chartTakeHomePay = null;
         var chartSumberDana = null;
@@ -23,7 +21,6 @@
 
         var activeAspect = 'etika';
 
-        // Palette
         var colorPrimary = '#009ef7';
         var colorSuccess = '#50cd89';
         var colorInfo = '#7239ea';
@@ -38,11 +35,6 @@
             });
         }
 
-        // ==========================================
-        // 1. CHART INITIALIZERS
-        // ==========================================
-
-        // [F8] Donut Status Aktivitas (Kemdikti Hal 4)
         function initChartStatusF8(data) {
             var el = document.getElementById('chart_status_f8');
             if (!el) return;
@@ -116,7 +108,6 @@
             chartStatusF8.render();
         }
 
-        // [F505] Take Home Pay (Kemdikti Hal 2)
         function initChartTakeHomePay(data) {
             var el = document.getElementById('chart_take_home_pay');
             if (!el) return;
@@ -189,7 +180,6 @@
             chartTakeHomePay.render();
         }
 
-        // [F1201] Sumber Dana (Kemdikti Hal 3)
         function initChartSumberDana(data) {
             var el = document.getElementById('chart_sumber_dana');
             if (!el) return;
@@ -263,7 +253,6 @@
             chartSumberDana.render();
         }
 
-        // [F1101] Jenis Instansi (Kemdikti Hal 5)
         function initChartInstansi(data) {
             var el = document.getElementById('chart_jenis_instansi');
             if (!el) return;
@@ -337,7 +326,6 @@
             chartInstansi.render();
         }
 
-        // [F502] Waktu Tunggu Bekerja (Kemdikti Hal 6)
         function initChartWaktuTungguBekerja(data) {
             var el = document.getElementById('chart_waktu_tunggu_bekerja');
             if (!el) return;
@@ -403,7 +391,6 @@
             chartWaktuTungguBekerja.render();
         }
 
-        // [F502] Waktu Tunggu Wiraswasta (Kemdikti Hal 7)
         function initChartWaktuTungguWiraswasta(data) {
             var el = document.getElementById('chart_waktu_tunggu_wiraswasta');
             if (!el) return;
@@ -469,7 +456,6 @@
             chartWaktuTungguWiraswasta.render();
         }
 
-        // [F14] Keselarasan Horizontal (Kemdikti Hal 24)
         function initChartKeselarasanHorizontal(data) {
             var el = document.getElementById('chart_keselarasan_horizontal');
             if (!el) return;
@@ -532,7 +518,6 @@
             chartKeselarasanHorizontal.render();
         }
 
-        // [F15] Keselarasan Vertikal (Kemdikti Hal 25)
         function initChartKeselarasanVertikal(data) {
             var el = document.getElementById('chart_keselarasan_vertikal');
             if (!el) return;
@@ -595,7 +580,6 @@
             chartKeselarasanVertikal.render();
         }
 
-        // [F4] Metode Mencari Kerja (Kemdikti Hal 22-23)
         function initChartMetodeCariKerja(data) {
             var el = document.getElementById('chart_metode_cari_kerja');
             if (!el) return;
@@ -667,7 +651,6 @@
             chartMetodeCariKerja.render();
         }
 
-        // [F17A & F17B] Kompetensi Overview Gap Analysis (Kemdikti Hal 7-21)
         function initChartKompetensiOverview(summary) {
             var el = document.getElementById('chart_kompetensi_overview');
             if (!el) return;
@@ -764,7 +747,6 @@
             chartKompetensiOverview.render();
         }
 
-        // Detail Child Aspect Charts (F17A & F17B)
         function renderAspectCharts(aspectKey, kompetensiData) {
             if (!kompetensiData || !kompetensiData.details || !kompetensiData.details[aspectKey]) return;
 
@@ -772,7 +754,6 @@
             var a = d.a;
             var b = d.b;
 
-            // Update Labels & Totals
             $('#aspect_label_a').text(a.label);
             $('#aspect_code_a').text(a.kode + ' - Saat Lulus');
             $('#aspect_total_a').text(Number(a.total_responden || 0).toLocaleString('id-ID'));
@@ -781,7 +762,6 @@
             $('#aspect_code_b').text(b.kode + ' - Diperlukan Pekerjaan');
             $('#aspect_total_b').text(Number(b.total_responden || 0).toLocaleString('id-ID'));
 
-            // Render Table A
             var $tbodyA = $('#tbody_aspect_a');
             $tbodyA.empty();
             if (a.table && a.table.length) {
@@ -795,7 +775,6 @@
                 });
             }
 
-            // Render Table B
             var $tbodyB = $('#tbody_aspect_b');
             $tbodyB.empty();
             if (b.table && b.table.length) {
@@ -809,7 +788,6 @@
                 });
             }
 
-            // Horizontal Bar Options Template
             var colorsA = ['#64748b', '#06b6d4', '#f59e0b', '#22c55e', '#5b67ec'];
             var colorsB = ['#64748b', '#06b6d4', '#f59e0b', '#f97316', '#ef4444'];
 
@@ -914,7 +892,6 @@
             }
         }
 
-        // Skala Kerja (F5D)
         function initChartSkala(data) {
             var el = document.getElementById('chart_skala_kerja');
             if (!el) return;
@@ -956,7 +933,6 @@
             chartSkala.render();
         }
 
-        // Sebaran Provinsi
         function initChartProvinsi(data) {
             var el = document.getElementById('chart_sebaran_provinsi');
             if (!el) return;
@@ -1009,16 +985,11 @@
             chartProvinsi.render();
         }
 
-        // ==========================================
-        // 2. TABLE UPDATERS
-        // ==========================================
-
         function updateTableF8(data) {
             if (!data) return;
             $('#f8_total_responden').text(Number(data.total_responden || 0).toLocaleString('id-ID'));
             $('#f8_table_total_count').text(Number(data.total_responden || 0).toLocaleString('id-ID') +
                 ' responden');
-
 
             var $tbody = $('#tbody_f8');
             $tbody.empty();
@@ -1049,7 +1020,6 @@
             $('#f505_table_total_count').text(Number(data.total_responden || 0).toLocaleString('id-ID') +
                 ' responden');
 
-
             var $tbody = $('#tbody_f505');
             $tbody.empty();
             if (data.table && data.table.length) {
@@ -1075,7 +1045,6 @@
             $('#f1201_total_responden').text(Number(data.total_responden || 0).toLocaleString('id-ID'));
             $('#f1201_table_total_count').text(Number(data.total_responden || 0).toLocaleString('id-ID') +
                 ' responden');
-
 
             var $tbody = $('#tbody_f1201');
             $tbody.empty();
@@ -1104,7 +1073,6 @@
             $('#f1101_total_responden').text(Number(data.total_responden || 0).toLocaleString('id-ID'));
             $('#f1101_table_total_count').text(Number(data.total_responden || 0).toLocaleString('id-ID') +
                 ' responden');
-
 
             var $tbody = $('#tbody_f1101');
             $tbody.empty();
@@ -1222,7 +1190,6 @@
             if (!data) return;
             $('#f4_total_responden').text(Number(data.total_responden || 0).toLocaleString('id-ID'));
 
-
             var $tbody = $('#tbody_f4');
             $tbody.empty();
             var sumChoice = 0;
@@ -1307,7 +1274,6 @@
             });
         }
 
-        // Update All 11 Competency Aspects for Print / PDF Export
         function updatePrintKompetensi(kompetensi) {
             if (!kompetensi || !kompetensi.details) return;
 
@@ -1473,7 +1439,6 @@
             $('#kompetensi_print_list').html(html);
         }
 
-        // Setup SVG ViewBox on charts to allow responsive vector scaling
         function ensureViewBoxes() {
             document.querySelectorAll('.apexcharts-canvas').forEach(function(canvas) {
                 var svg = canvas.querySelector('svg.apexcharts-svg');
@@ -1493,11 +1458,9 @@
             });
         }
 
-        // Prepare All ApexCharts for Clean Print / PDF Export (zero extra whitespace, no overlap)
         function preparePrintLayout() {
             ensureViewBoxes();
 
-            // Reset container heights so print engine flows naturally
             document.querySelectorAll('div[id^="chart_"]').forEach(function(container) {
                 container.style.minHeight = '0px';
                 container.style.height = 'auto';
@@ -1517,7 +1480,6 @@
             });
         }
 
-        // Restore screen layout when print preview dialog closes
         function restoreScreenLayout() {
             document.querySelectorAll('div[id^="chart_"]').forEach(function(container) {
                 container.style.minHeight = '';
@@ -1537,10 +1499,6 @@
 
             window.dispatchEvent(new Event('resize'));
         }
-
-        // ==========================================
-        // 3. AJAX DATA FETCH & RE-RENDER
-        // ==========================================
 
         function fetchStatisticsData() {
             var $loading = $('#kpi_loading');
@@ -1564,16 +1522,14 @@
 
                     $('#empty_filter_state').addClass('d-none');
                     $('#statistics_container').fadeIn(function() {
-                        // Ensure charts resize correctly after unhiding
+
                         window.dispatchEvent(new Event('resize'));
                     });
 
                     statsData = res;
 
-                    // 1. KPI Summary Cards
                     updateKpiCards(res.kpi);
 
-                    // 2. [F8] Status Aktivitas
                     if (chartStatusF8 && res.status_aktivitas) {
                         var emptyStatus = isSeriesEmpty(res.status_aktivitas.series);
                         chartStatusF8.updateOptions({
@@ -1601,7 +1557,6 @@
                         updateTableF8(res.status_aktivitas);
                     }
 
-                    // 3. [F505] Take Home Pay
                     if (chartTakeHomePay && res.take_home_pay) {
                         chartTakeHomePay.updateOptions({
                             series: [{
@@ -1614,7 +1569,6 @@
                         updateTableF505(res.take_home_pay);
                     }
 
-                    // 4. [F1201] Sumber Dana
                     if (chartSumberDana && res.sumber_dana) {
                         chartSumberDana.updateOptions({
                             series: [{
@@ -1627,7 +1581,6 @@
                         updateTableF1201(res.sumber_dana);
                     }
 
-                    // 5. [F1101] Jenis Instansi
                     if (chartInstansi && res.jenis_instansi) {
                         chartInstansi.updateOptions({
                             series: [{
@@ -1640,7 +1593,6 @@
                         updateTableF1101(res.jenis_instansi);
                     }
 
-                    // 6. [F502] Waktu Tunggu Bekerja
                     if (chartWaktuTungguBekerja && res.waktu_tunggu_bekerja) {
                         chartWaktuTungguBekerja.updateOptions({
                             series: [{
@@ -1653,7 +1605,6 @@
                         updateTableF502Bekerja(res.waktu_tunggu_bekerja);
                     }
 
-                    // 7. [F502] Waktu Tunggu Wiraswasta
                     if (chartWaktuTungguWiraswasta && res.waktu_tunggu_wiraswasta) {
                         chartWaktuTungguWiraswasta.updateOptions({
                             series: [{
@@ -1666,7 +1617,6 @@
                         updateTableF502Wiraswasta(res.waktu_tunggu_wiraswasta);
                     }
 
-                    // 8. [F14] Keselarasan Horizontal
                     if (chartKeselarasanHorizontal && res.keselarasan_horizontal) {
                         var emptyH = isSeriesEmpty(res.keselarasan_horizontal.series);
                         chartKeselarasanHorizontal.updateOptions({
@@ -1694,7 +1644,6 @@
                         updateTableF14(res.keselarasan_horizontal);
                     }
 
-                    // 9. [F15] Keselarasan Vertikal
                     if (chartKeselarasanVertikal && res.keselarasan_vertikal) {
                         var emptyV = isSeriesEmpty(res.keselarasan_vertikal.series);
                         chartKeselarasanVertikal.updateOptions({
@@ -1722,7 +1671,6 @@
                         updateTableF15(res.keselarasan_vertikal);
                     }
 
-                    // 10. [F4] Metode Cari Kerja
                     if (chartMetodeCariKerja && res.metode_mencari_kerja) {
                         chartMetodeCariKerja.updateOptions({
                             series: [{
@@ -1735,7 +1683,6 @@
                         updateTableF4(res.metode_mencari_kerja);
                     }
 
-                    // 11. [F17A & F17B] Kompetensi
                     if (chartKompetensiOverview && res.kompetensi && res.kompetensi.summary) {
                         chartKompetensiOverview.updateOptions({
                             series: [{
@@ -1760,7 +1707,6 @@
 
                     }
 
-                    // 12. Skala & Provinsi
                     if (chartSkala && res.skala_kerja) {
                         var emptySkala = isSeriesEmpty(res.skala_kerja.series);
                         chartSkala.updateOptions({
@@ -1787,10 +1733,8 @@
                         });
                     }
 
-                    // 13. Rekap Prodi Table
                     updateTableRekap(res.rekap_prodi);
 
-                    // Ensure ApexCharts viewBox is refreshed
                     setTimeout(ensureViewBoxes, 300);
                 },
                 error: function() {
@@ -1807,11 +1751,8 @@
             });
         }
 
-        // ==========================================
-        // 4. DOCUMENT READY & EVENT BINDINGS
-        // ==========================================
         $(document).ready(function() {
-            // Render Initial Charts
+
             initChartStatusF8(statsData.status_aktivitas);
             initChartTakeHomePay(statsData.take_home_pay);
             initChartSumberDana(statsData.sumber_dana);
@@ -1830,7 +1771,6 @@
             initChartSkala(statsData.skala_kerja);
             initChartProvinsi(statsData.sebaran_provinsi);
 
-            // Aspect Tabs Click
             $(document).on('click', '.btn-aspect', function(e) {
                 e.preventDefault();
                 $('.btn-aspect').removeClass('active');
@@ -1839,7 +1779,6 @@
                 renderAspectCharts(activeAspect, statsData.kompetensi);
             });
 
-            // Filter Event Listeners
             $('#btn_apply_filter').on('click', function(e) {
                 e.preventDefault();
                 var $btn = $(this);
@@ -1851,14 +1790,12 @@
                 fetchStatisticsData();
             });
 
-            // Cascading Prodi Filter based on Fakultas
             var $prodiSelect = $('#filter_prodi');
             var originalProdiOptions = $prodiSelect.find('option').clone();
 
             function toggleProdiStatistik() {
                 var selectedFakultas = $('#filter_fakultas').val();
 
-                // Bersihkan lalu masukkan opsi yang relevan
                 $prodiSelect.empty();
                 originalProdiOptions.each(function() {
                     var val = $(this).val();
@@ -1869,11 +1806,9 @@
                     }
                 });
 
-                // Pilih 'all' secara default setelah difilter
                 $prodiSelect.val('all').trigger('change.select2');
             }
 
-            // Inisialisasi awal jika ada hidden input (Role Fakultas)
             if ($('#filter_fakultas').length && $('#filter_fakultas').is(':hidden')) {
                 toggleProdiStatistik();
             }
@@ -1882,7 +1817,6 @@
                 toggleProdiStatistik();
             });
 
-            // Reset Filter Button
             $('#btn_reset_filter').on('click', function(e) {
                 e.preventDefault();
                 $('#filter_kuesioner').val('all').trigger('change.select2');
@@ -1896,13 +1830,11 @@
                 fetchStatisticsData();
             });
 
-            // Refresh Button
             $('#btn_refresh_stats').on('click', function() {
                 fetchStatisticsData();
                 toastr.success('Data statistik berhasil diperbarui');
             });
 
-            // Bind Print / Export PDF Button
             $('#btn_print_pdf').on('click', function(e) {
                 e.preventDefault();
                 preparePrintLayout();
@@ -1914,10 +1846,8 @@
             window.addEventListener('beforeprint', preparePrintLayout);
             window.addEventListener('afterprint', restoreScreenLayout);
 
-            // Initial viewBox setup after initial charts load
             setTimeout(ensureViewBoxes, 600);
 
-            // Live Search for Rekap Prodi Table
             $('#search_rekap_prodi').on('keyup', function() {
                 var keyword = $(this).val().toLowerCase();
                 $('#tbody_rekap_prodi tr').filter(function() {
@@ -1927,3 +1857,4 @@
         });
     })();
 </script>
+

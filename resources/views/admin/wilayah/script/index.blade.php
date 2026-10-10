@@ -231,7 +231,6 @@
             btn.prop('disabled', true);
         });
 
-        // Custom File Upload Logic
         $('#custom_dropzone').on('click', function(e) {
             if (e.target.id === 'file_import') return;
             if (e.target.id !== 'btn_remove_file' && $(e.target).closest('#btn_remove_file').length ===
@@ -257,7 +256,7 @@
 
             let validExtensions = ['xlsx', 'xls'];
             let fileExtension = file.name.split('.').pop().toLowerCase();
-            let maxSize = 5 * 1024 * 1024; // 5MB
+            let maxSize = 5 * 1024 * 1024;
 
             if (!validExtensions.includes(fileExtension)) {
                 Swal.fire({
@@ -303,9 +302,9 @@
             $('#file_name_display').show();
         });
 
-        // Fix DataTables Responsive in hidden Bootstrap tabs
         $('a[data-bs-toggle="tab"]').on('shown.bs.tab', function(e) {
             $.fn.dataTable.tables({ visible: true, api: true }).columns.adjust().responsive.recalc();
         });
     });
 </script>
+

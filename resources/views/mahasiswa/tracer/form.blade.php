@@ -64,10 +64,9 @@
                                                     @php
                                                         $answer = $jawabanUser[$pertanyaan->id_pertanyaan] ?? null;
                                                         $lbl = $jawabanLabel[$pertanyaan->id_pertanyaan] ?? '';
-                                                        
-                                                        // Default "Indonesia" untuk pertanyaan Negara (F5A0) jika belum ada jawaban
+
                                                         if (strtolower($pertanyaan->kode_pertanyaan) === 'f5a0' && empty($answer)) {
-                                                            $answer = 'ID'; // Kode negara untuk Indonesia pada API Kemdikbud
+                                                            $answer = 'ID';
                                                             $lbl = 'Indonesia';
                                                         }
                                                     @endphp
@@ -238,7 +237,7 @@
     </style>
     <script>
         $(document).ready(function() {
-            // Init flatpickr
+
             if ($.fn.flatpickr) {
                 $('.datepicker-input').flatpickr({
                     dateFormat: "Y-m-d",
@@ -248,7 +247,7 @@
                     dateFormat: "Y-m-d",
                 });
             } else {
-                $('.datepicker-input').attr('type', 'date'); // Fallback
+                $('.datepicker-input').attr('type', 'date');
             }
 
             function getQuestionValue(id) {
@@ -312,7 +311,7 @@
             }
 
             function evaluateSkipLogic() {
-                // Reset state
+
                 $('.kategori-container').removeClass('skip-hidden');
                 $('.pertanyaan-container').removeClass('skip-hidden');
                 $('form input:not([type="hidden"]), form select, form textarea').prop('disabled', false);
@@ -343,10 +342,8 @@
 
             }
 
-            // Init skip logic
             evaluateSkipLogic();
 
-            // Run on change
             $('form').on('change input', 'input, select, textarea', function() {
                 evaluateSkipLogic();
             });
@@ -392,3 +389,4 @@
         });
     </script>
 @endsection
+

@@ -50,7 +50,6 @@ class AuthController extends Controller
             'password' => $request->password,
         ];
 
-        // 1. Attempt login for Admin/Fakultas (User model)
         if (Auth::guard('web')->attempt($credentials)) {
             $request->session()->regenerate();
             $user = Auth::guard('web')->user();
@@ -60,12 +59,10 @@ class AuthController extends Controller
             } elseif ($user->role === 'Fakultas') {
                 return redirect()->route('fakultas.dashboard');
             }
-            
+
             return redirect('/');
         }
 
-        // 2. Attempt login for Mahasiswa (Mahasiswa model)
-        // Mahasiswa uses NIM, which we receive as 'username' from the form
         $mahasiswaCredentials = [
             'nim' => $request->username,
             'password' => $request->password,
@@ -76,7 +73,6 @@ class AuthController extends Controller
             return redirect()->route('mahasiswa.dashboard');
         }
 
-        // Authentication failed
         return back()->withErrors([
             'username' => 'Username/NIM atau Password salah.',
         ])->onlyInput('username');
@@ -96,3 +92,4 @@ class AuthController extends Controller
         return redirect('/login');
     }
 }
+

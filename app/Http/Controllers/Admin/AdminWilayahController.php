@@ -68,9 +68,8 @@ class AdminWilayahController extends Controller
                 return back()->with('error', 'File Excel kosong atau tidak memiliki data.');
             }
 
-            // Read Headers
             $headers = array_map('strtolower', array_map('trim', $rows[0]));
-            
+
             $inserted = 0;
             $updated = 0;
             $skipped = 0;
@@ -82,7 +81,7 @@ class AdminWilayahController extends Controller
 
                 foreach (array_slice($rows, 1) as $row) {
                     if (empty($row[$idxKode]) || empty($row[$idxProv])) continue;
-                    
+
                     $existing = DB::table('master_kota_kabupaten')->where('kode_wilayah_kota_kabupaten', $row[$idxKode])->first();
                     if ($existing) {
                         if ($existing->kode_wilayah_provinsi != $row[$idxProv] || $existing->kota_kabupaten != $row[$idxNama]) {
@@ -107,7 +106,7 @@ class AdminWilayahController extends Controller
                     }
                 }
                 return back()->with('success', "Berhasil mengimpor data Kabupaten/Kota. Data baru: $inserted, Data diperbarui: $updated, Data tetap: $skipped.");
-            
+
             } elseif (in_array('kode_wilayah_provinsi', $headers) && in_array('kode_wilayah_negara', $headers) && in_array('provinsi', $headers)) {
                 $idxKode = array_search('kode_wilayah_provinsi', $headers);
                 $idxNegara = array_search('kode_wilayah_negara', $headers);
@@ -115,7 +114,7 @@ class AdminWilayahController extends Controller
 
                 foreach (array_slice($rows, 1) as $row) {
                     if (empty($row[$idxKode]) || empty($row[$idxNegara])) continue;
-                    
+
                     $existing = DB::table('master_provinsi')->where('kode_wilayah_provinsi', $row[$idxKode])->first();
                     if ($existing) {
                         if ($existing->kode_wilayah_negara != $row[$idxNegara] || $existing->provinsi != $row[$idxNama]) {
@@ -140,14 +139,14 @@ class AdminWilayahController extends Controller
                     }
                 }
                 return back()->with('success', "Berhasil mengimpor data Provinsi. Data baru: $inserted, Data diperbarui: $updated, Data tetap: $skipped.");
-            
+
             } elseif (in_array('kode_wilayah_negara', $headers) && in_array('negara', $headers)) {
                 $idxKode = array_search('kode_wilayah_negara', $headers);
                 $idxNama = array_search('negara', $headers);
 
                 foreach (array_slice($rows, 1) as $row) {
                     if (empty($row[$idxKode])) continue;
-                    
+
                     $existing = DB::table('master_negara')->where('kode_wilayah_negara', $row[$idxKode])->first();
                     if ($existing) {
                         if ($existing->negara != $row[$idxNama]) {
@@ -170,7 +169,7 @@ class AdminWilayahController extends Controller
                     }
                 }
                 return back()->with('success', "Berhasil mengimpor data Negara. Data baru: $inserted, Data diperbarui: $updated, Data tetap: $skipped.");
-            
+
             } else {
                 return back()->with('error', 'Format header Excel tidak dikenali. Pastikan nama kolom sesuai format (misal: kode_wilayah_negara, negara).');
             }
@@ -180,3 +179,4 @@ class AdminWilayahController extends Controller
         }
     }
 }
+

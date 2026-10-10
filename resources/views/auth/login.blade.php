@@ -168,7 +168,6 @@
             }
         }
 
-        /* SweetAlert customization */
         .swal2-popup {
             font-family: 'Poppins', sans-serif;
         }
@@ -272,3 +271,4 @@
 </body>
 
 </html>
+

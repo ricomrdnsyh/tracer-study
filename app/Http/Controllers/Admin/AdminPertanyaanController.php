@@ -16,7 +16,7 @@ class AdminPertanyaanController extends Controller
 
         if (in_array($request->tipe_jawaban, ['radio', 'checkbox', 'select']) && $request->opsi_jawaban) {
             $opsi = array_map('trim', explode("\n", $request->opsi_jawaban));
-            $opsi = array_filter($opsi); // remove empty strings
+            $opsi = array_filter($opsi);
             $data['opsi_jawaban'] = array_values($opsi);
         } else {
             $data['opsi_jawaban'] = null;
@@ -52,7 +52,6 @@ class AdminPertanyaanController extends Controller
 
         $pertanyaan = Pertanyaan::findOrFail($id);
 
-        // Delete related jawaban detail first to prevent foreign key constraint error
         JawabanDetail::where('pertanyaan_id', $id)->delete();
 
         $pertanyaan->delete();
@@ -60,3 +59,4 @@ class AdminPertanyaanController extends Controller
         return redirect()->back()->with('success', 'Pertanyaan berhasil dihapus.');
     }
 }
+

@@ -1,7 +1,7 @@
 <script>
     $(document).on('click', '.btn-show', function() {
         let id = $(this).data('id');
-        let url = '/admin/users/' + id + '/edit'; // Using edit endpoint to get json
+        let url = '/admin/users/' + id + '/edit';
 
         $.ajax({
             url: url,
@@ -35,3 +35,4 @@
         $('#show_fakultas').val('');
     });
 </script>
+

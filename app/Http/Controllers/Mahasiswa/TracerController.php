@@ -79,17 +79,15 @@ class TracerController extends Controller
                     }
                 }
             }
-            
-            // Loop through all Wilayah and PT/Prodi questions to ensure labels are filled for editing
+
             $pertanyaans = \App\Models\Pertanyaan::whereIn('kode_pertanyaan', ['F5A0', 'F5A1', 'F5A2', 'f5a0', 'f5a1', 'f5a2', 'f18b', 'f18c', 'F18B', 'F18C'])->get();
             foreach ($pertanyaans as $p) {
                 $id = $p->id_pertanyaan;
                 $kode = strtolower($p->kode_pertanyaan);
-                
-                // If it's a Wilayah field and it has an answer but NO label, fetch it from DB!
+
                 if (!empty($jawabanUser[$id]) && empty($jawabanLabel[$id])) {
                     if ($kode === 'f5a0') {
-                        if (strlen($jawabanUser[$id]) == 2) { // Kode Negara ID
+                        if (strlen($jawabanUser[$id]) == 2) {
                             $val = $jawabanUser[$id];
                             $negara = Cache::remember("master_negara_{$val}", 86400, function () use ($val) {
                                 return DB::table('master_negara')->where('kode_wilayah_negara', $val)->value('negara');
@@ -97,7 +95,7 @@ class TracerController extends Controller
                             if ($negara) $jawabanLabel[$id] = $negara;
                         }
                     } elseif ($kode === 'f5a1') {
-                        if (preg_match('/^\d+$/', $jawabanUser[$id])) { // Kode Provinsi
+                        if (preg_match('/^\d+$/', $jawabanUser[$id])) {
                             $val = $jawabanUser[$id];
                             $prov = Cache::remember("master_provinsi_{$val}", 86400, function () use ($val) {
                                 return DB::table('master_provinsi')->where('kode_wilayah_provinsi', $val)->value('provinsi');
@@ -105,7 +103,7 @@ class TracerController extends Controller
                             if ($prov) $jawabanLabel[$id] = $prov;
                         }
                     } elseif ($kode === 'f5a2') {
-                        if (preg_match('/^\d+$/', $jawabanUser[$id])) { // Kode Kabupaten
+                        if (preg_match('/^\d+$/', $jawabanUser[$id])) {
                             $val = $jawabanUser[$id];
                             $kab = Cache::remember("master_kab_{$val}", 86400, function () use ($val) {
                                 return DB::table('master_kota_kabupaten')->where('kode_wilayah_kota_kabupaten', $val)->value('kota_kabupaten');
@@ -114,7 +112,6 @@ class TracerController extends Controller
                         }
                     }
 
-                    // Fallback for imported raw text
                     if (empty($jawabanLabel[$id])) {
                         $jawabanLabel[$id] = is_array($jawabanUser[$id]) ? implode(', ', $jawabanUser[$id]) : $jawabanUser[$id];
                     }
@@ -131,14 +128,13 @@ class TracerController extends Controller
 
         $request->validate([
             'kuesioner_id' => 'required|exists:kuesioner,id_kuesioner',
-            // Kita bisa menambahkan validasi dinamis berdasarkan pertanyaan yang wajib,
-            // tapi akan lebih mudah jika ditangani di frontend.
+
         ]);
 
         DB::beginTransaction();
 
         try {
-            // 1. Simpan atau Update ResponTracer
+
             $respon = ResponTracer::updateOrCreate(
                 [
                     'kuesioner_id' => $request->kuesioner_id,
@@ -150,16 +146,14 @@ class TracerController extends Controller
                 ]
             );
 
-            // Hapus jawaban lama jika ada
             JawabanDetail::where('respon_id', $respon->id_respon)->delete();
 
-            // 2. Simpan JawabanDetail baru
             $jawabanData = [];
             if ($request->has('jawaban') && is_array($request->jawaban)) {
                 foreach ($request->jawaban as $pertanyaan_id => $jawaban) {
                     $isRemoteSelect = isset($request->jawaban_label[$pertanyaan_id]);
                     $jsonValue = is_array($jawaban) ? json_encode($jawaban) : ($isRemoteSelect ? json_encode(['label' => $request->jawaban_label[$pertanyaan_id]]) : null);
-                    
+
                     $jawabanData[] = [
                         'respon_id' => $respon->id_respon,
                         'pertanyaan_id' => $pertanyaan_id,
@@ -174,7 +168,6 @@ class TracerController extends Controller
                 JawabanDetail::insert($jawabanData);
             }
 
-            // 3. Simpan PekerjaanAlumni berdasarkan jawaban form
             $pertanyaans = \App\Models\Pertanyaan::whereIn('kode_pertanyaan', ['F5B', 'F1101', 'F5A1', 'F5A2', 'f5b', 'f1101', 'f5a1', 'f5a2'])->get();
 
             $nama = null;
@@ -243,19 +236,18 @@ class TracerController extends Controller
     {
         $type = trim($request->query('type', ''));
         $keyword = trim($request->query('keyword', $request->query('q', '')));
-        
+
         $allowedTypes = ['negara', 'provinsi', 'kabupaten', 'pt', 'prodi'];
         if (! in_array($type, $allowedTypes, true)) {
             return response()->json([]);
         }
-        
+
         \Illuminate\Support\Facades\Log::info("Tracer Lookup Hit:", $request->all());
 
-        // Hanya wajibkan keyword jika tipe adalah PT atau Prodi (karena API external berat)
         if ($keyword === '' && in_array($type, ['pt', 'prodi'])) {
             return response()->json([]);
         }
-        
+
         $cacheKey = "tracer_lookup_{$type}_" . md5($keyword . $request->query('kode_negara', '') . $request->query('kode_provinsi', '') . $request->query('kode_pt', ''));
         if ($request->has('refresh')) {
             Cache::forget($cacheKey);
@@ -303,7 +295,7 @@ class TracerController extends Controller
                         }
                         break;
                     case 'prodi':
-                        $kodePt = $request->query('kode_pt', ''); // This will now receive the UUID of the PT
+                        $kodePt = $request->query('kode_pt', '');
                         if ($kodePt) {
                             $response = Http::timeout(10)->withoutVerifying()->get("{$baseApi}/perguruan-tinggi/{$kodePt}/program-studi", ['search' => $keyword, 'per_page' => 100]);
                             if ($response && $response->successful()) {
@@ -312,7 +304,7 @@ class TracerController extends Controller
                         }
                         break;
                 }
-                
+
                 if ($response) {
                     Log::info("Tracer API Response ({$type}): Status " . $response->status() . " Body: " . substr($response->body(), 0, 1000));
                 }
@@ -328,7 +320,7 @@ class TracerController extends Controller
                             'kabupaten' => ['id' => $item['kode_wilayah_kota_kabupaten'] ?? $item['id_wil'] ?? $item['kode_kab'] ?? '', 'text' => $item['kota_kabupaten'] ?? $item['nm_wil'] ?? ''],
                             'pt' => ['id' => $item['id_sp'] ?? '', 'text' => $item['nama_pt'] ?? ''],
                             'prodi' => [
-                                'id' => $item['id_sms'] ?? '', 
+                                'id' => $item['id_sms'] ?? '',
                                 'text' => isset($item['nama_prodi']) ? $item['nama_prodi'] . (isset($item['nm_jenj_didik']) ? ' (' . $item['nm_jenj_didik'] . ')' : '') : ''
                             ],
                             default => null,
@@ -350,3 +342,4 @@ class TracerController extends Controller
         return response()->json($results ?? []);
     }
 }
+

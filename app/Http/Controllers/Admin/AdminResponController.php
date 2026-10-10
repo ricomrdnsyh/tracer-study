@@ -14,7 +14,7 @@ class AdminResponController extends Controller
     {
         $kuesioner = Kuesioner::orderByDesc('id_kuesioner')->get();
         $fakultas = \App\Models\Fakultas::orderBy('nama_fakultas')->get();
-        
+
         if (auth()->user()->role === 'Fakultas') {
             $prodi = \App\Models\Prodi::where('fakultas_id', auth()->user()->fakultas_id)->orderBy('nama_prodi')->get();
         } else {
@@ -96,11 +96,10 @@ class AdminResponController extends Controller
 
         $respon = $query->findOrFail($id);
 
-        // Map jawaban user for easy access
         $jawabanUser = [];
         foreach ($respon->jawabanDetails as $detail) {
             $pertanyaan = $detail->pertanyaan;
-            
+
             if ($detail->jawaban_json) {
                 $decoded = is_string($detail->jawaban_json) ? json_decode($detail->jawaban_json, true) : $detail->jawaban_json;
                 if (is_array($decoded) && isset($decoded['label'])) {
@@ -120,13 +119,13 @@ class AdminResponController extends Controller
 
         $pekerjaan = $respon->pekerjaanAlumni;
         $pertanyaans = \App\Models\Pertanyaan::whereIn('kode_pertanyaan', ['F5A0', 'F5A1', 'F5A2', 'f5a0', 'f5a1', 'f5a2', 'f18b', 'F18B'])->get();
-        
+
         foreach ($pertanyaans as $p) {
             $id = $p->id_pertanyaan;
             $kode = strtolower($p->kode_pertanyaan);
-            
+
             if ($kode === 'f5a0') {
-                if (!empty($jawabanUser[$id]) && strlen($jawabanUser[$id]) == 2) { // Kode Negara ID
+                if (!empty($jawabanUser[$id]) && strlen($jawabanUser[$id]) == 2) {
                     $val = $jawabanUser[$id];
                     $negara = \Illuminate\Support\Facades\Cache::remember("master_negara_{$val}", 86400, function () use ($val) {
                         return \Illuminate\Support\Facades\DB::table('master_negara')->where('kode_wilayah_negara', $val)->value('negara');
@@ -141,7 +140,7 @@ class AdminResponController extends Controller
                 if (empty($jawabanUser[$id]) && $pekerjaan) {
                     $jawabanUser[$id] = $pekerjaan->provinsi ?? $pekerjaan->kode_provinsi;
                 }
-                if (!empty($jawabanUser[$id]) && preg_match('/^\d+$/', $jawabanUser[$id])) { // Kode Provinsi
+                if (!empty($jawabanUser[$id]) && preg_match('/^\d+$/', $jawabanUser[$id])) {
                     $val = $jawabanUser[$id];
                     $prov = \Illuminate\Support\Facades\Cache::remember("master_provinsi_{$val}", 86400, function () use ($val) {
                         return \Illuminate\Support\Facades\DB::table('master_provinsi')->where('kode_wilayah_provinsi', $val)->value('provinsi');
@@ -152,7 +151,7 @@ class AdminResponController extends Controller
                 if (empty($jawabanUser[$id]) && $pekerjaan) {
                     $jawabanUser[$id] = $pekerjaan->kabupaten ?? $pekerjaan->kode_kabupaten;
                 }
-                if (!empty($jawabanUser[$id]) && preg_match('/^\d+$/', $jawabanUser[$id])) { // Kode Kabupaten
+                if (!empty($jawabanUser[$id]) && preg_match('/^\d+$/', $jawabanUser[$id])) {
                     $val = $jawabanUser[$id];
                     $kab = \Illuminate\Support\Facades\Cache::remember("master_kab_{$val}", 86400, function () use ($val) {
                         return \Illuminate\Support\Facades\DB::table('master_kota_kabupaten')->where('kode_wilayah_kota_kabupaten', $val)->value('kota_kabupaten');
@@ -162,7 +161,6 @@ class AdminResponController extends Controller
             }
         }
 
-        // Generate JSON Kemdikbud format
         $jsonKemdikbud = [];
         foreach ($respon->kuesioner->kategoriPertanyaans as $kategori) {
             foreach ($kategori->pertanyaans as $pertanyaan) {
@@ -178,3 +176,4 @@ class AdminResponController extends Controller
         return view('admin.respon.show', compact('respon', 'jawabanUser', 'jsonKemdikbud'));
     }
 }
+

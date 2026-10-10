@@ -83,7 +83,7 @@
                         if (data === 'Admin') badgeClass = 'badge-success';
                         else if (data === 'Pimpinan') badgeClass = 'badge-info';
                         else if (data === 'Fakultas') badgeClass = 'badge-warning';
-                        
+
                         return '<span class="badge ' + badgeClass + '">' + data + '</span>';
                     }
                 },
@@ -167,3 +167,4 @@
         })
     }
 </script>
+
