@@ -4,10 +4,6 @@
 
 <h1 align="center">Tracer Study Universitas Nurul Jadid (UNUJA)</h1>
 
-<p align="center">
-  <b>Sistem Pelacakan Jejak Alumni & Rekapitulasi Data Lulusan Standar Kemendikbudristek (IKU 1)</b>
-</p>
-
 ---
 
 ## 📌 Ringkasan Aplikasi
@@ -18,11 +14,11 @@
 
 ## 👥 Pengguna & Hak Akses
 
-| Peran | Tanggung Jawab Utama |
-| :--- | :--- |
-| **Admin** | Mengelola kuesioner, sinkronisasi data alumni/pegawai dari SIM-PT, import/export data, memantau statistik universitas, dan mencetak laporan tracer. |
-| **Fakultas** | Memantau daftar mahasiswa, respon alumni, analisis statistik, serta mengunduh laporan tracer khusus fakultas/prodi yang dibawahi. |
-| **Mahasiswa / Alumni** | Mengakses kuesioner melalui portal `/isi-kuesioner`, mengisi survei tracer study, dan memperbarui riwayat pekerjaan. |
+| Peran                  | Tanggung Jawab Utama                                                                                                                                |
+| :--------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Admin**              | Mengelola kuesioner, sinkronisasi data alumni/pegawai dari SIM-PT, import/export data, memantau statistik universitas, dan mencetak laporan tracer. |
+| **Fakultas**           | Memantau daftar mahasiswa, respon alumni, analisis statistik, serta mengunduh laporan tracer khusus fakultas/prodi yang dibawahi.                   |
+| **Mahasiswa / Alumni** | Mengakses kuesioner melalui portal `/isi-kuesioner`, mengisi survei tracer study, dan memperbarui riwayat pekerjaan.                                |
 
 ---
 
@@ -38,8 +34,9 @@ flowchart TD
 ```
 
 ### Tahapan Alur:
+
 1. **Sinkronisasi Data**: Admin menarik data master (Fakultas, Prodi, Tahun Akademik, dan Alumni) dari API SIM-PT UNUJA secara satu-klik.
-2. **Pengelolaan Kuesioner**: Admin membuat atau mengaktifkan kuesioner tracer study dengan aturan alur pertanyaan bercabang (*skip logic*).
+2. **Pengelolaan Kuesioner**: Admin membuat atau mengaktifkan kuesioner tracer study dengan aturan alur pertanyaan bercabang (_skip logic_).
 3. **Pengisian oleh Alumni**: Alumni masuk melalui `/isi-kuesioner` menggunakan NIM, lalu menjawab pertanyaan sesuai status (Bekerja, Wiraswasta, Lanjut Studi, atau Mencari Kerja).
 4. **Pengolahan Data & Statistik**: Sistem secara otomatis mengolah jawaban responden ke dalam indikator IKU 1 (Rata-rata masa tunggu kerja `F502`, keselarasan vertikal/horizontal `F14` & `F15`, sebaran instansi, dll.).
 5. **Cetak Laporan**: Admin dan Fakultas dapat mencetak dokumen laporan rekapitulasi tracer study berformat Microsoft Word (`.docx`) berdasarkan kuesioner, fakultas, atau prodi pilihan.
@@ -48,34 +45,11 @@ flowchart TD
 
 ## 🧩 Modul & Fitur Utama
 
-- **Kuesioner Dinamis**: Pengaturan pertanyaan bersyarat (*conditional skip logic*) dan fitur export/import kuesioner (JSON).
+- **Kuesioner Dinamis**: Pengaturan pertanyaan bersyarat (_conditional skip logic_) dan fitur export/import kuesioner (JSON).
 - **Integrasi SSO SIM-PT**: Tarik otomatis data master mahasiswa/alumni dan akun pengguna dari portal SIM-PT UNUJA.
 - **Responden & Data Alumni**: Filter data mahasiswa (Fakultas, Prodi, Tahun Akademik), monitoring isian, dan batch import/export Excel.
-- **Statistik & Dashboard IKU 1**: Grafik interaktif capaian waktu tunggu kerja Belmawa, distribusi pekerjaan, pendapatan, keselarasan, dan sebaran wilayah.
+- **Statistik & Dashboard**: Grafik interaktif capaian waktu tunggu kerja Belmawa, distribusi pekerjaan, pendapatan, keselarasan, dan sebaran wilayah.
 - **Cetak Laporan Word**: Pembuatan dokumen rekapitulasi otomatis ke format `.docx` menggunakan template master dengan notifikasi SweetAlert.
-
----
-
-## 🚀 Panduan Menjalankan Singkat
-
-```bash
-# 1. Instalasi dependensi
-composer install
-
-# 2. Konfigurasi file environment
-cp .env.example .env
-php artisan key:generate
-
-# 3. Migrasi database & seeder
-php artisan migrate --seed
-
-# 4. Jalankan aplikasi
-php artisan serve
-```
-
-Akses portal:
-- **Admin / Fakultas**: `http://127.0.0.1:8000/login`
-- **Alumni**: `http://127.0.0.1:8000/isi-kuesioner`
 
 ---
 
