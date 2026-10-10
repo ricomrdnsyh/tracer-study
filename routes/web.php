@@ -27,8 +27,9 @@ Route::get('/', function () {
     return redirect()->route('login');
 });
 
-Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
-Route::post('/login', [AuthController::class, 'login'])->name('login.post');
+Route::redirect('/login', '/login-admin');
+Route::get('/login-admin', [AuthController::class, 'showLoginForm'])->name('login');
+Route::post('/login-admin', [AuthController::class, 'login'])->name('login.post');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 // Public route for Tracer Login

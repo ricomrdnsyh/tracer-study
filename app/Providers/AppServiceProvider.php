@@ -19,6 +19,14 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        app('url')->resolveMissingNamedRoutesUsing(function ($name, $parameters, $absolute) {
+            if ($name === 'login-admin') {
+                return route('login', $parameters, $absolute);
+            }
+            if ($name === 'login-admin.post') {
+                return route('login.post', $parameters, $absolute);
+            }
+            return null;
+        });
     }
 }
