@@ -35,4 +35,16 @@ return [
         ],
     ],
 
+    'sso' => [
+        'api_url'        => env('SSO_API_URL', 'https://sso.unuja.ac.id'),
+        'public_url'     => env('SSO_PUBLIC_URL', 'https://sso.unuja.ac.id'),
+        'authorize_url'  => env('SSO_AUTHORIZE_URL', 'https://sso.unuja.ac.id/portal/data/authorize'),
+        'data_url'       => env('SSO_DATA_URL', 'https://sso.unuja.ac.id/portal/data/data'),
+        'me_url'         => env('SSO_ME_URL'),
+        'x_token'        => env('SSO_X_TOKEN'),
+        'dev_id'         => env('SSO_DEV_ID'),
+        'force_ipv4'     => filter_var(env('SSO_FORCE_IPV4', true), FILTER_VALIDATE_BOOLEAN),
+        'force_http_1_1' => filter_var(env('SSO_FORCE_HTTP_1_1', true), FILTER_VALIDATE_BOOLEAN),
+    ],
+
 ];

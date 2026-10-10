@@ -20,10 +20,10 @@ class AuthSSO
 
     public function __construct()
     {
-        $this->authUrl = (string) env('SSO_AUTHORIZE_URL');
-        $this->newBase = (string) env('SSO_DATA_URL');
-        $this->XToken = (string) env('SSO_X_TOKEN');
-        $this->devId = (string) env('SSO_DEV_ID');
+        $this->authUrl = (string) (config('services.sso.authorize_url') ?: env('SSO_AUTHORIZE_URL'));
+        $this->newBase = (string) (config('services.sso.data_url') ?: env('SSO_DATA_URL'));
+        $this->XToken = (string) (config('services.sso.x_token') ?: env('SSO_X_TOKEN'));
+        $this->devId = (string) (config('services.sso.dev_id') ?: env('SSO_DEV_ID'));
     }
 
     public function getAuth(): array
@@ -55,11 +55,11 @@ class AuthSSO
 
         $curlOptions = [];
 
-        if (filter_var(env('SSO_FORCE_IPV4', true), FILTER_VALIDATE_BOOLEAN)) {
+        if (config('services.sso.force_ipv4', true)) {
             $curlOptions[CURLOPT_IPRESOLVE] = CURL_IPRESOLVE_V4;
         }
 
-        if (filter_var(env('SSO_FORCE_HTTP_1_1', true), FILTER_VALIDATE_BOOLEAN)) {
+        if (config('services.sso.force_http_1_1', true)) {
             $curlOptions[CURLOPT_HTTP_VERSION] = CURL_HTTP_VERSION_1_1;
         }
 
