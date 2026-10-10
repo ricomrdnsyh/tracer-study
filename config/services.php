@@ -36,10 +36,10 @@ return [
     ],
 
     'sso' => [
-        'api_url'        => env('SSO_API_URL', 'https://sso.unuja.ac.id'),
-        'public_url'     => env('SSO_PUBLIC_URL', 'https://sso.unuja.ac.id'),
-        'authorize_url'  => env('SSO_AUTHORIZE_URL', 'https://sso.unuja.ac.id/portal/data/authorize'),
-        'data_url'       => env('SSO_DATA_URL', 'https://sso.unuja.ac.id/portal/data/data'),
+        'api_url'        => env('SSO_API_URL'),
+        'public_url'     => env('SSO_PUBLIC_URL'),
+        'authorize_url'  => env('SSO_AUTHORIZE_URL'),
+        'data_url'       => env('SSO_DATA_URL'),
         'me_url'         => env('SSO_ME_URL'),
         'x_token'        => env('SSO_X_TOKEN'),
         'dev_id'         => env('SSO_DEV_ID'),
