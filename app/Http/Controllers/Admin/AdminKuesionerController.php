@@ -126,12 +126,16 @@ class AdminKuesionerController extends Controller
     {
         $kuesioner->load(['kategoriPertanyaans.pertanyaans']);
 
+        $pertanyaanMap = $kuesioner->kategoriPertanyaans
+            ->flatMap(fn($k) => $k->pertanyaans)
+            ->keyBy('id_pertanyaan');
+
         $exportData = [];
 
         foreach ($kuesioner->kategoriPertanyaans as $kategori) {
             $kategoriSyaratKode = null;
             if ($kategori->syarat_pertanyaan_id) {
-                $syarat = \App\Models\Pertanyaan::find($kategori->syarat_pertanyaan_id);
+                $syarat = $pertanyaanMap->get($kategori->syarat_pertanyaan_id) ?? \App\Models\Pertanyaan::find($kategori->syarat_pertanyaan_id);
                 if ($syarat) {
                     $kategoriSyaratKode = $syarat->kode_pertanyaan;
                 }
@@ -148,7 +152,7 @@ class AdminKuesionerController extends Controller
             foreach ($kategori->pertanyaans as $pertanyaan) {
                 $pertanyaanSyaratKode = null;
                 if ($pertanyaan->syarat_pertanyaan_id) {
-                    $syarat = \App\Models\Pertanyaan::find($pertanyaan->syarat_pertanyaan_id);
+                    $syarat = $pertanyaanMap->get($pertanyaan->syarat_pertanyaan_id) ?? \App\Models\Pertanyaan::find($pertanyaan->syarat_pertanyaan_id);
                     if ($syarat) {
                         $pertanyaanSyaratKode = $syarat->kode_pertanyaan;
                     }

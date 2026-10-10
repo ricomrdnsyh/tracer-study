@@ -90,18 +90,27 @@ class TracerController extends Controller
                 if (!empty($jawabanUser[$id]) && empty($jawabanLabel[$id])) {
                     if ($kode === 'f5a0') {
                         if (strlen($jawabanUser[$id]) == 2) { // Kode Negara ID
-                            $negara = \Illuminate\Support\Facades\DB::table('master_negara')->where('kode_wilayah_negara', $jawabanUser[$id])->first();
-                            if ($negara) $jawabanLabel[$id] = $negara->negara;
+                            $val = $jawabanUser[$id];
+                            $negara = Cache::remember("master_negara_{$val}", 86400, function () use ($val) {
+                                return DB::table('master_negara')->where('kode_wilayah_negara', $val)->value('negara');
+                            });
+                            if ($negara) $jawabanLabel[$id] = $negara;
                         }
                     } elseif ($kode === 'f5a1') {
                         if (preg_match('/^\d+$/', $jawabanUser[$id])) { // Kode Provinsi
-                            $prov = \Illuminate\Support\Facades\DB::table('master_provinsi')->where('kode_wilayah_provinsi', $jawabanUser[$id])->first();
-                            if ($prov) $jawabanLabel[$id] = $prov->provinsi;
+                            $val = $jawabanUser[$id];
+                            $prov = Cache::remember("master_provinsi_{$val}", 86400, function () use ($val) {
+                                return DB::table('master_provinsi')->where('kode_wilayah_provinsi', $val)->value('provinsi');
+                            });
+                            if ($prov) $jawabanLabel[$id] = $prov;
                         }
                     } elseif ($kode === 'f5a2') {
                         if (preg_match('/^\d+$/', $jawabanUser[$id])) { // Kode Kabupaten
-                            $kab = \Illuminate\Support\Facades\DB::table('master_kota_kabupaten')->where('kode_wilayah_kota_kabupaten', $jawabanUser[$id])->first();
-                            if ($kab) $jawabanLabel[$id] = $kab->kota_kabupaten;
+                            $val = $jawabanUser[$id];
+                            $kab = Cache::remember("master_kab_{$val}", 86400, function () use ($val) {
+                                return DB::table('master_kota_kabupaten')->where('kode_wilayah_kota_kabupaten', $val)->value('kota_kabupaten');
+                            });
+                            if ($kab) $jawabanLabel[$id] = $kab;
                         }
                     }
 
@@ -187,15 +196,19 @@ class TracerController extends Controller
                     $kode_provinsi = $request->jawaban[$id];
                     $provinsi_label = !empty($request->jawaban_label[$id]) ? $request->jawaban_label[$id] : null;
                     if (empty($provinsi_label)) {
-                        $prov = \Illuminate\Support\Facades\DB::table('master_provinsi')->where('kode_wilayah_provinsi', $kode_provinsi)->first();
-                        if ($prov) $provinsi_label = $prov->provinsi;
+                        $prov = Cache::remember("master_provinsi_{$kode_provinsi}", 86400, function () use ($kode_provinsi) {
+                            return DB::table('master_provinsi')->where('kode_wilayah_provinsi', $kode_provinsi)->value('provinsi');
+                        });
+                        if ($prov) $provinsi_label = $prov;
                     }
                 } elseif ($kode === 'f5a2' && isset($request->jawaban[$id]) && !empty($request->jawaban[$id])) {
                     $kode_kabupaten = $request->jawaban[$id];
                     $kabupaten_label = !empty($request->jawaban_label[$id]) ? $request->jawaban_label[$id] : null;
                     if (empty($kabupaten_label)) {
-                        $kab = \Illuminate\Support\Facades\DB::table('master_kota_kabupaten')->where('kode_wilayah_kota_kabupaten', $kode_kabupaten)->first();
-                        if ($kab) $kabupaten_label = $kab->kota_kabupaten;
+                        $kab = Cache::remember("master_kab_{$kode_kabupaten}", 86400, function () use ($kode_kabupaten) {
+                            return DB::table('master_kota_kabupaten')->where('kode_wilayah_kota_kabupaten', $kode_kabupaten)->value('kota_kabupaten');
+                        });
+                        if ($kab) $kabupaten_label = $kab;
                     }
                 }
             }

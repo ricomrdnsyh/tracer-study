@@ -29,22 +29,21 @@ class AdminResponController extends Controller
         $query = ResponTracer::with(['mahasiswa.prodi.fakultas', 'kuesioner'])->select(['id_respon', 'mahasiswa_id', 'kuesioner_id', 'status', 'tgl_isi'])->orderByDesc('tgl_isi');
 
         if (auth()->user()->role === 'Fakultas') {
-            $query->whereHas('mahasiswa.prodi', function ($q) {
-                $q->where('fakultas_id', auth()->user()->fakultas_id);
-            });
-        } elseif ($request->has('fakultas_id') && !empty($request->fakultas_id) && $request->fakultas_id !== 'all') {
-            $query->whereHas('mahasiswa.prodi', function ($q) use ($request) {
-                $q->where('fakultas_id', $request->fakultas_id);
-            });
+            $facultyProdiIds = \App\Models\Prodi::where('fakultas_id', auth()->user()->fakultas_id)->pluck('id_prodi')->toArray();
+            $nimList = \App\Models\Mahasiswa::whereIn('prodi_id', $facultyProdiIds)->pluck('nim')->toArray();
+            $query->whereIn('mahasiswa_id', $nimList);
+        } elseif ($request->filled('fakultas_id') && $request->fakultas_id !== 'all') {
+            $facultyProdiIds = \App\Models\Prodi::where('fakultas_id', $request->fakultas_id)->pluck('id_prodi')->toArray();
+            $nimList = \App\Models\Mahasiswa::whereIn('prodi_id', $facultyProdiIds)->pluck('nim')->toArray();
+            $query->whereIn('mahasiswa_id', $nimList);
         }
 
-        if ($request->has('prodi_id') && !empty($request->prodi_id) && $request->prodi_id !== 'all') {
-            $query->whereHas('mahasiswa', function ($q) use ($request) {
-                $q->where('prodi_id', $request->prodi_id);
-            });
+        if ($request->filled('prodi_id') && $request->prodi_id !== 'all') {
+            $nimList = \App\Models\Mahasiswa::where('prodi_id', $request->prodi_id)->pluck('nim')->toArray();
+            $query->whereIn('mahasiswa_id', $nimList);
         }
 
-        if ($request->has('kuesioner_id') && !empty($request->kuesioner_id) && $request->kuesioner_id !== 'all') {
+        if ($request->filled('kuesioner_id') && $request->kuesioner_id !== 'all') {
             $query->where('kuesioner_id', $request->kuesioner_id);
         }
 
@@ -128,8 +127,11 @@ class AdminResponController extends Controller
             
             if ($kode === 'f5a0') {
                 if (!empty($jawabanUser[$id]) && strlen($jawabanUser[$id]) == 2) { // Kode Negara ID
-                    $negara = \Illuminate\Support\Facades\DB::table('master_negara')->where('kode_wilayah_negara', $jawabanUser[$id])->first();
-                    if ($negara) $jawabanUser[$id] = $negara->negara;
+                    $val = $jawabanUser[$id];
+                    $negara = \Illuminate\Support\Facades\Cache::remember("master_negara_{$val}", 86400, function () use ($val) {
+                        return \Illuminate\Support\Facades\DB::table('master_negara')->where('kode_wilayah_negara', $val)->value('negara');
+                    });
+                    if ($negara) $jawabanUser[$id] = $negara;
                 }
             } elseif ($kode === 'f18b') {
                 if (empty($jawabanUser[$id]) && $pekerjaan) {
@@ -140,16 +142,22 @@ class AdminResponController extends Controller
                     $jawabanUser[$id] = $pekerjaan->provinsi ?? $pekerjaan->kode_provinsi;
                 }
                 if (!empty($jawabanUser[$id]) && preg_match('/^\d+$/', $jawabanUser[$id])) { // Kode Provinsi
-                    $prov = \Illuminate\Support\Facades\DB::table('master_provinsi')->where('kode_wilayah_provinsi', $jawabanUser[$id])->first();
-                    if ($prov) $jawabanUser[$id] = $prov->provinsi;
+                    $val = $jawabanUser[$id];
+                    $prov = \Illuminate\Support\Facades\Cache::remember("master_provinsi_{$val}", 86400, function () use ($val) {
+                        return \Illuminate\Support\Facades\DB::table('master_provinsi')->where('kode_wilayah_provinsi', $val)->value('provinsi');
+                    });
+                    if ($prov) $jawabanUser[$id] = $prov;
                 }
             } elseif ($kode === 'f5a2') {
                 if (empty($jawabanUser[$id]) && $pekerjaan) {
                     $jawabanUser[$id] = $pekerjaan->kabupaten ?? $pekerjaan->kode_kabupaten;
                 }
                 if (!empty($jawabanUser[$id]) && preg_match('/^\d+$/', $jawabanUser[$id])) { // Kode Kabupaten
-                    $kab = \Illuminate\Support\Facades\DB::table('master_kota_kabupaten')->where('kode_wilayah_kota_kabupaten', $jawabanUser[$id])->first();
-                    if ($kab) $jawabanUser[$id] = $kab->kota_kabupaten;
+                    $val = $jawabanUser[$id];
+                    $kab = \Illuminate\Support\Facades\Cache::remember("master_kab_{$val}", 86400, function () use ($val) {
+                        return \Illuminate\Support\Facades\DB::table('master_kota_kabupaten')->where('kode_wilayah_kota_kabupaten', $val)->value('kota_kabupaten');
+                    });
+                    if ($kab) $jawabanUser[$id] = $kab;
                 }
             }
         }
