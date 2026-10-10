@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Fakultas;
 use App\Models\Mahasiswa;
 use App\Models\Prodi;
 use App\Models\TahunAkademik;
@@ -18,11 +19,14 @@ class AdminMahasiswaController extends Controller
 
         if (auth()->user()->role === 'Fakultas') {
             $prodi->where('fakultas_id', auth()->user()->fakultas_id);
+            $fakultas = Fakultas::where('id_fakultas', auth()->user()->fakultas_id)->get();
+        } else {
+            $fakultas = Fakultas::orderBy('nama_fakultas')->get();
         }
 
         $prodi = $prodi->get();
         $tahunAkademik = TahunAkademik::orderByDesc('id_smt')->get();
-        return view('admin.mahasiswa.index', compact('prodi', 'tahunAkademik'));
+        return view('admin.mahasiswa.index', compact('prodi', 'tahunAkademik', 'fakultas'));
     }
 
     public function getMahasiswa(Request $request)
@@ -33,6 +37,9 @@ class AdminMahasiswaController extends Controller
 
         if (auth()->user()->role === 'Fakultas') {
             $facultyProdiIds = Prodi::where('fakultas_id', auth()->user()->fakultas_id)->pluck('id_prodi')->toArray();
+            $query->whereIn('prodi_id', $facultyProdiIds);
+        } elseif ($request->filled('fakultas_id') && $request->fakultas_id !== 'all' && $request->fakultas_id !== '') {
+            $facultyProdiIds = Prodi::where('fakultas_id', $request->fakultas_id)->pluck('id_prodi')->toArray();
             $query->whereIn('prodi_id', $facultyProdiIds);
         }
 

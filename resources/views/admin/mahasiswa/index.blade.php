@@ -122,17 +122,33 @@
                                 <h5 class="text-primary mb-4"><i class="fas fa-filter text-primary me-2"></i>Filter Data
                                 </h5>
                                 <div class="row g-5">
-                                    <div class="col-lg-6 col-md-6 col-sm-12">
+                                    @if (auth()->user()->role !== 'Fakultas')
+                                        <div class="col-lg-4 col-md-12 col-sm-12">
+                                            <label class="form-label fw-bold mb-2">Fakultas:</label>
+                                            <select id="filter_fakultas" class="form-select form-select-sm"
+                                                data-control="select2" data-placeholder="Semua Fakultas"
+                                                data-allow-clear="true">
+                                                <option value="">Semua Fakultas</option>
+                                                @foreach ($fakultas as $f)
+                                                    <option value="{{ $f->id_fakultas }}">{{ $f->nama_fakultas }}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                    @endif
+                                    <div
+                                        class="{{ auth()->user()->role !== 'Fakultas' ? 'col-lg-4' : 'col-lg-6' }} col-md-12 col-sm-12">
                                         <label class="form-label fw-bold mb-2">Program Studi:</label>
                                         <select id="filter_prodi" class="form-select form-select-sm" data-control="select2"
                                             data-placeholder="Semua Program Studi" data-allow-clear="true">
                                             <option value="">Semua Program Studi</option>
                                             @foreach ($prodi as $p)
-                                                <option value="{{ $p->id_prodi }}">{{ $p->nama_prodi }}</option>
+                                                <option value="{{ $p->id_prodi }}" data-fakultas="{{ $p->fakultas_id }}">
+                                                    {{ $p->nama_prodi }}</option>
                                             @endforeach
                                         </select>
                                     </div>
-                                    <div class="col-lg-6 col-md-6 col-sm-12">
+                                    <div
+                                        class="{{ auth()->user()->role !== 'Fakultas' ? 'col-lg-4' : 'col-lg-6' }} col-md-12 col-sm-12">
                                         <label class="form-label fw-bold mb-2">Tahun Akademik:</label>
                                         <select id="filter_tahun_keluar" class="form-select form-select-sm"
                                             data-control="select2" data-placeholder="Semua Tahun Akademik"

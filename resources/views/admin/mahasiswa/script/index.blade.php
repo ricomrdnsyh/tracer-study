@@ -57,6 +57,7 @@
             ajax: {
                 url: '{{ route('admin.mahasiswa.data', [], false) }}',
                 data: function(d) {
+                    d.fakultas_id = $('#filter_fakultas').val();
                     d.prodi_id = $('#filter_prodi').val();
                     d.tahun_keluar = $('#filter_tahun_keluar').val();
                 }
@@ -110,11 +111,37 @@
             ]
         });
 
+        if ($('#filter_fakultas').length) {
+            var originalProdiOptions = $('#filter_prodi option').clone();
+
+            $('#filter_fakultas').on('change', function() {
+                var selectedFakultas = $(this).val();
+
+                $('#filter_prodi').empty();
+                if (selectedFakultas) {
+                    originalProdiOptions.each(function() {
+                        var fakultasId = $(this).data('fakultas');
+                        if (selectedFakultas == fakultasId || !$(this).val()) {
+                            $('#filter_prodi').append($(this).clone());
+                        }
+                    });
+                } else {
+                    $('#filter_prodi').append(originalProdiOptions.clone());
+                }
+
+                $('#filter_prodi').val('').trigger('change.select2');
+                $('#example').DataTable().ajax.reload();
+            });
+        }
+
         $('#filter_prodi, #filter_tahun_keluar').on('change', function() {
             $('#example').DataTable().ajax.reload();
         });
 
         $('#btn_reset_filter').on('click', function() {
+            if ($('#filter_fakultas').length) {
+                $('#filter_fakultas').val('').trigger('change.select2');
+            }
             $('#filter_prodi').val('').trigger('change');
             $('#filter_tahun_keluar').val('').trigger('change');
         });

@@ -65,17 +65,28 @@ class AdminStatistikController extends Controller
 
     public function exportLaporanWord(Request $request)
     {
-        $statsData = $this->statistikService->buildStatisticsData($request);
+        try {
+            $statsData = $this->statistikService->buildStatisticsData($request);
 
-        if (Storage::exists('templates/laporan_prodi.docx')) {
-            $templatePath = Storage::path('templates/laporan_prodi.docx');
-        } else {
-            return back()->with('error', 'File template laporan belum diunggah. Silakan kelola pada menu Template Laporan.');
+            if (Storage::exists('templates/laporan_prodi.docx')) {
+                $templatePath = Storage::path('templates/laporan_prodi.docx');
+            } else {
+                if ($request->ajax() || $request->wantsJson()) {
+                    return response()->json(['message' => 'File template laporan belum diunggah. Silakan kelola pada menu Template Laporan.'], 404);
+                }
+                return back()->with('error', 'File template laporan belum diunggah. Silakan kelola pada menu Template Laporan.');
+            }
+
+            $file = $this->laporanExportService->exportWord($statsData, $request->all(), $templatePath);
+
+            return response()->download($file['path'], $file['name'])->deleteFileAfterSend(true);
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('Error exportLaporanWord: ' . $e->getMessage());
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json(['message' => 'Gagal membuat dokumen laporan: ' . $e->getMessage()], 500);
+            }
+            return back()->with('error', 'Gagal membuat dokumen laporan: ' . $e->getMessage());
         }
-
-        $file = $this->laporanExportService->exportWord($statsData, $request->all(), $templatePath);
-
-        return response()->download($file['path'], $file['name'])->deleteFileAfterSend(true);
     }
 }
 

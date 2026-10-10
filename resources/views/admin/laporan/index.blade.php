@@ -24,7 +24,7 @@
                                 </div>
                             </div>
 
-                            <form id="form-export-laporan" action="{{ route('admin.laporan.export') }}" method="GET" target="_blank">
+                            <form id="form-export-laporan" action="{{ route('admin.laporan.export') }}" method="GET">
 
                                 <div class="bg-light rounded-4 p-8 mb-10 border border-gray-200">
                                     <h4 class="text-gray-800 fw-bold mb-6 d-flex align-items-center">
@@ -98,9 +98,14 @@
                                 </div>
 
                                 <div class="d-flex justify-content-center">
-                                    <button type="submit"
+                                    <button type="submit" id="btn-submit-laporan"
                                         class="btn btn-primary fw-bold px-8 py-3 w-100 shadow-sm hover-elevate-up">
-                                        <i class="fa-solid fa-cloud-arrow-down me-2 fs-4"></i> Generate & Download Laporan
+                                        <span class="indicator-label">
+                                            <i class="fa-solid fa-cloud-arrow-down me-2 fs-4"></i> Generate & Download Laporan
+                                        </span>
+                                        <span class="indicator-progress d-none">
+                                            <span class="spinner-border spinner-border-sm align-middle me-2"></span> Menyusun & Mengunduh Laporan...
+                                        </span>
                                     </button>
                                 </div>
                             </form>
@@ -151,21 +156,115 @@
                 toggleProdi();
             });
 
-            $('#form-export-laporan').on('submit', function(e) {
+            $('#form-export-laporan').on('submit', async function(e) {
+                e.preventDefault();
+
                 var hasTemplate = {{ $hasCustomTemplate ? 'true' : 'false' }};
 
                 if (!hasTemplate) {
-                    e.preventDefault();
                     Swal.fire({
+                        title: "Peringatan!",
                         text: "File template laporan belum diunggah! Silakan kelola pada menu Template Laporan terlebih dahulu.",
-                        icon: "error",
+                        icon: "warning",
                         buttonsStyling: false,
                         confirmButtonText: "Ok, Mengerti!",
                         customClass: {
-                            confirmButton: "btn btn-danger"
+                            confirmButton: "btn btn-warning"
                         }
                     });
                     return false;
+                }
+
+                var $btn = $('#btn-submit-laporan');
+                var $label = $btn.find('.indicator-label');
+                var $progress = $btn.find('.indicator-progress');
+
+                $btn.prop('disabled', true);
+                $label.addClass('d-none');
+                $progress.removeClass('d-none');
+
+                Swal.fire({
+                    title: 'Memproses Laporan...',
+                    text: 'Sistem sedang menyusun rekapitulasi data dan membuat dokumen Word. Mohon tunggu...',
+                    icon: 'info',
+                    allowOutsideClick: false,
+                    allowEscapeKey: false,
+                    showConfirmButton: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+
+                var url = $(this).attr('action');
+                var queryString = $(this).serialize();
+                var fullUrl = url + (url.indexOf('?') === -1 ? '?' : '&') + queryString;
+
+                try {
+                    const response = await fetch(fullUrl, {
+                        method: 'GET',
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    });
+
+                    if (!response.ok) {
+                        let errorMsg = 'Gagal mengunduh laporan tracer study.';
+                        try {
+                            const errJson = await response.json();
+                            if (errJson && errJson.message) {
+                                errorMsg = errJson.message;
+                            }
+                        } catch (ignore) {}
+                        throw new Error(errorMsg);
+                    }
+
+                    let filename = 'Laporan_Tracer_Study.docx';
+                    const disposition = response.headers.get('content-disposition');
+                    if (disposition && disposition.indexOf('filename=') !== -1) {
+                        let filenameRegex = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/;
+                        let matches = filenameRegex.exec(disposition);
+                        if (matches != null && matches[1]) {
+                            filename = matches[1].replace(/['"]/g, '').trim();
+                        }
+                    }
+
+                    const blob = await response.blob();
+                    const downloadUrl = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.style.display = 'none';
+                    a.href = downloadUrl;
+                    a.download = filename;
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(downloadUrl);
+                    a.remove();
+
+                    Swal.fire({
+                        title: 'Berhasil Diunduh!',
+                        text: 'Laporan Tracer Study (' + filename + ') berhasil dibuat dan diunduh ke perangkat Anda.',
+                        icon: 'success',
+                        buttonsStyling: false,
+                        confirmButtonText: 'Selesai',
+                        customClass: {
+                            confirmButton: 'btn btn-primary'
+                        }
+                    });
+                } catch (err) {
+                    console.error(err);
+                    Swal.fire({
+                        title: 'Gagal Mengunduh!',
+                        text: err.message || 'Terjadi kesalahan saat memproses laporan.',
+                        icon: 'error',
+                        buttonsStyling: false,
+                        confirmButtonText: 'Tutup',
+                        customClass: {
+                            confirmButton: 'btn btn-danger'
+                        }
+                    });
+                } finally {
+                    $btn.prop('disabled', false);
+                    $label.removeClass('d-none');
+                    $progress.addClass('d-none');
                 }
             });
         });
