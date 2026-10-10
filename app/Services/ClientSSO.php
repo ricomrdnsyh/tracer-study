@@ -3,7 +3,9 @@
 namespace App\Services;
 
 use Illuminate\Http\Client\Response;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 class ClientSSO
 {
@@ -36,38 +38,55 @@ class ClientSSO
         return $this->fetchAllPaginated('alumni', $payload);
     }
 
-    public function getLembagaFromApi(): array
+    public function getLembagaFromApi(bool $forceRefresh = false): array
     {
-        return $this->fetchData('lembaga');
-    }
-
-    public function getKaryawanFromApi(): array
-    {
-        $allKaryawans = [];
-        
-        try {
-            $lembagaList = $this->getLembagaFromApi();
-            
-            foreach ($lembagaList as $lembaga) {
-                if (isset($lembaga['id_lembaga'])) {
-                    try {
-                        $data = $this->fetchData('karyawan', [
-                            'id_lembaga' => $lembaga['id_lembaga'],
-                            'pagination' => 'off'
-                        ]);
-                        if (is_array($data)) {
-                            $allKaryawans = array_merge($allKaryawans, $data);
-                        }
-                    } catch (\Exception $e) {
-                        // Lanjut ke lembaga berikutnya jika error
-                    }
-                }
-            }
-        } catch (\Exception $e) {
-            // Gagal fetch lembaga list
+        if ($forceRefresh) {
+            Cache::forget('sso_lembaga_list');
         }
 
-        return $allKaryawans;
+        return Cache::remember('sso_lembaga_list', 86400, function () {
+            try {
+                return $this->fetchData('lembaga');
+            } catch (\Throwable $e) {
+                Log::warning("Gagal fetch lembaga SSO: " . $e->getMessage());
+                return [];
+            }
+        });
+    }
+
+    public function getKaryawanFromApi(bool $forceRefresh = false): array
+    {
+        if ($forceRefresh) {
+            Cache::forget('sso_karyawan_list');
+        }
+
+        return Cache::remember('sso_karyawan_list', 1800, function () use ($forceRefresh) {
+            $allKaryawans = [];
+
+            try {
+                $lembagaList = $this->getLembagaFromApi($forceRefresh);
+
+                foreach ($lembagaList as $lembaga) {
+                    if (isset($lembaga['id_lembaga'])) {
+                        try {
+                            $data = $this->fetchData('karyawan', [
+                                'id_lembaga' => $lembaga['id_lembaga'],
+                                'pagination' => 'off'
+                            ]);
+                            if (is_array($data)) {
+                                $allKaryawans = array_merge($allKaryawans, $data);
+                            }
+                        } catch (\Throwable $e) {
+                            Log::warning("Gagal fetch karyawan lembaga {$lembaga['id_lembaga']}: " . $e->getMessage());
+                        }
+                    }
+                }
+            } catch (\Throwable $e) {
+                Log::warning("Gagal fetch karyawan SSO: " . $e->getMessage());
+            }
+
+            return $allKaryawans;
+        });
     }
 
     public function fetchAllPaginated(string $filter, array $additionalPayload = []): array

@@ -16,10 +16,17 @@ class AdminUserController extends Controller
         protected ClientSSO $clientSSO
     ) {}
 
-    public function index()
+    public function index(Request $request)
     {
         $fakultas = \App\Models\Fakultas::all();
-        $karyawans = $this->clientSSO->getKaryawanFromApi();
+        $forceRefresh = $request->boolean('refresh_sso');
+        try {
+            $karyawans = $this->clientSSO->getKaryawanFromApi($forceRefresh);
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::warning('Error loading SSO karyawans: ' . $e->getMessage());
+            $karyawans = [];
+        }
+
         return view('admin.users.index', compact('fakultas', 'karyawans'));
     }
 
