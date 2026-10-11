@@ -20,6 +20,8 @@ use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Fakultas\DashboardController as FakultasDashboard;
 use App\Http\Controllers\Mahasiswa\DashboardController as MahasiswaDashboard;
 use App\Http\Controllers\Mahasiswa\TracerController;
+use App\Http\Controllers\SsoController;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Rap2hpoutre\LaravelLogViewer\LogViewerController;
 
@@ -31,6 +33,25 @@ Route::redirect('/login', '/login-admin');
 Route::get('/login-admin', [AuthController::class, 'showLoginForm'])->name('login');
 Route::post('/login-admin', [AuthController::class, 'login'])->name('login.post');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+
+// SSO Routes
+Route::any('/sso', [SsoController::class, 'sso'])->name('sso.callback');
+Route::any('/sso/logout/{sessionId}', [SsoController::class, 'logout'])->name('sso.logout');
+
+// Universal Dashboard Route Helper
+Route::get('/dashboard', function () {
+    if (Auth::guard('web')->check()) {
+        $user = Auth::guard('web')->user();
+        if ($user->role === 'Admin') {
+            return redirect()->route('admin.dashboard');
+        } elseif ($user->role === 'Fakultas') {
+            return redirect()->route('fakultas.dashboard');
+        }
+    } elseif (Auth::guard('mahasiswa')->check()) {
+        return redirect()->route('mahasiswa.dashboard');
+    }
+    return redirect()->route('login');
+})->name('dashboard');
 
 // Public route for Tracer Login
 Route::get('/isi-kuesioner', [AuthController::class, 'showTracerLoginForm'])->name('tracer.login');
