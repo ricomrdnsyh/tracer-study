@@ -250,5 +250,50 @@ $(document).ready(function() {
                 }
             });
         }
+
+        // Sembunyikan Provinsi & Kabupaten bila Negara selain Indonesia
+        if (code === 'f5a0') {
+            const scope = select.closest('form').length ? select.closest('form') : container;
+            const provSelect = scope.find('select[data-wilayah-select="f5a1"]');
+            const kabSelect = scope.find('select[data-wilayah-select="f5a2"]');
+
+            const applyNegaraVisibility = () => {
+                const val = (select.val() || '').toString().trim().toUpperCase();
+                const label = (($('#hidden_label_' + idPertanyaan).val()) || '').toString().trim().toLowerCase();
+                const isIndonesia = val === 'ID' || label === 'indonesia';
+
+                [provSelect, kabSelect].forEach((s) => {
+                    const box = s.closest('.pertanyaan-container');
+                    if (!box.length) return;
+                    if (val && !isIndonesia) {
+                        if (s.val()) {
+                            s.val(null).trigger('change');
+                        }
+                        const hiddenLabel = $('#hidden_label_' + s.data('id-pertanyaan'));
+                        hiddenLabel.val('');
+                        box.addClass('skip-hidden');
+                        if (s.data('was-required') === undefined) {
+                            s.data('was-required', s.prop('required'));
+                        }
+                        s.prop('required', false);
+                        s.prop('disabled', true);
+                    } else {
+                        box.removeClass('skip-hidden');
+                        if (s.data('was-required') !== undefined) {
+                            s.prop('required', s.data('was-required'));
+                        }
+                        if (s.is(provSelect)) {
+                            s.prop('disabled', !val);
+                        }
+                    }
+                });
+            };
+
+            select.on('change', function() {
+                setTimeout(applyNegaraVisibility, 0);
+            });
+
+            applyNegaraVisibility();
+        }
     });
 });

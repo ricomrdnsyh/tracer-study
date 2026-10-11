@@ -56,6 +56,11 @@
                                                         strtolower($kategori->nama_kategori),
                                                         'kompetensi'
                                                     );
+                                                    $isSkala = str_contains(
+                                                        strtolower($pertanyaan->teks_pertanyaan),
+                                                        'metode pembelajaran'
+                                                    );
+                                                    $isCompact = $isKompetensi || $isSkala;
                                                     $colClass = $isKompetensi ? 'col-12 col-md-6' : 'col-12';
                                                 @endphp
                                                 <div class="{{ $colClass }} mb-6 pertanyaan-container"
@@ -126,14 +131,14 @@
                                                         <div class="row g-3">
                                                             @foreach ($pertanyaan->opsi_jawaban as $idx => $opsi)
                                                                 <div
-                                                                    class="{{ $isKompetensi ? 'col' : 'col-12 col-md-6' }}">
+                                                                    class="{{ $isCompact ? 'col' : 'col-12 col-md-6' }}">
                                                                     <label
-                                                                        class="d-flex {{ $isKompetensi ? 'flex-column justify-content-center align-items-center' : 'align-items-center' }} border border-dashed border-gray-300 rounded {{ $isKompetensi ? 'p-2' : 'px-4 py-2' }} bg-hover-light cursor-pointer transition-base"
+                                                                        class="d-flex {{ $isCompact ? 'flex-column justify-content-center align-items-center' : 'align-items-center' }} border border-dashed border-gray-300 rounded {{ $isCompact ? 'p-2' : 'px-4 py-2' }} bg-hover-light cursor-pointer transition-base"
                                                                         style="transition: all 0.2s ease; height: 100%;">
                                                                         <div
-                                                                            class="form-check form-check-custom form-check-primary form-check-sm {{ $isKompetensi ? 'mb-2' : 'me-3' }}">
+                                                                            class="form-check form-check-custom form-check-primary form-check-sm {{ $isCompact ? 'mb-2' : 'me-3' }}">
                                                                             <input
-                                                                                class="form-check-input {{ $isKompetensi ? 'mx-auto' : '' }}"
+                                                                                class="form-check-input {{ $isCompact ? 'mx-auto' : '' }}"
                                                                                 type="radio" value="{{ $opsi }}"
                                                                                 name="jawaban[{{ $pertanyaan->id_pertanyaan }}]"
                                                                                 id="opt_{{ $pertanyaan->id_pertanyaan }}_{{ $idx }}"
@@ -141,7 +146,7 @@
                                                                                 {{ $pertanyaan->wajib ? 'required' : '' }}>
                                                                         </div>
                                                                         <span
-                                                                            class="text-gray-700 fw-semibold fs-7 {{ $isKompetensi ? 'text-center mt-1' : 'text-start' }}">
+                                                                            class="text-gray-700 fw-semibold fs-7 {{ $isCompact ? 'text-center mt-1' : 'text-start' }}">
                                                                             {{ $opsi }}
                                                                         </span>
                                                                     </label>
@@ -152,21 +157,21 @@
                                                         <div class="row g-3">
                                                             @foreach ($pertanyaan->opsi_jawaban as $idx => $opsi)
                                                                 <div
-                                                                    class="{{ $isKompetensi ? 'col' : 'col-12 col-md-6' }}">
+                                                                    class="{{ $isCompact ? 'col' : 'col-12 col-md-6' }}">
                                                                     <label
-                                                                        class="d-flex {{ $isKompetensi ? 'flex-column justify-content-center align-items-center' : 'align-items-center' }} border border-dashed border-gray-300 rounded {{ $isKompetensi ? 'p-2' : 'px-4 py-2' }} bg-hover-light cursor-pointer transition-base"
+                                                                        class="d-flex {{ $isCompact ? 'flex-column justify-content-center align-items-center' : 'align-items-center' }} border border-dashed border-gray-300 rounded {{ $isCompact ? 'p-2' : 'px-4 py-2' }} bg-hover-light cursor-pointer transition-base"
                                                                         style="transition: all 0.2s ease; height: 100%;">
                                                                         <div
-                                                                            class="form-check form-check-custom form-check-primary form-check-sm {{ $isKompetensi ? 'mb-2' : 'me-3' }}">
+                                                                            class="form-check form-check-custom form-check-primary form-check-sm {{ $isCompact ? 'mb-2' : 'me-3' }}">
                                                                             <input
-                                                                                class="form-check-input check-group-{{ $pertanyaan->id_pertanyaan }} {{ $isKompetensi ? 'mx-auto' : '' }}"
+                                                                                class="form-check-input check-group-{{ $pertanyaan->id_pertanyaan }} {{ $isCompact ? 'mx-auto' : '' }}"
                                                                                 type="checkbox" value="{{ $opsi }}"
                                                                                 name="jawaban[{{ $pertanyaan->id_pertanyaan }}][]"
                                                                                 id="opt_{{ $pertanyaan->id_pertanyaan }}_{{ $idx }}"
                                                                                 {{ is_array($answer) && in_array($opsi, $answer) ? 'checked' : '' }}>
                                                                         </div>
                                                                         <span
-                                                                            class="text-gray-700 fw-semibold fs-7 {{ $isKompetensi ? 'text-center mt-1' : 'text-start' }}">
+                                                                            class="text-gray-700 fw-semibold fs-7 {{ $isCompact ? 'text-center mt-1' : 'text-start' }}">
                                                                             {{ $opsi }}
                                                                         </span>
                                                                     </label>
@@ -229,7 +234,7 @@
 @endsection
 
 @section('js')
-    <script src="{{ asset('assets/js/tracer-lookup.js') }}"></script>
+    <script src="{{ asset('assets/js/tracer-lookup.js') }}?v={{ @filemtime(public_path('assets/js/tracer-lookup.js')) ?: '1' }}"></script>
     <style>
         .skip-hidden {
             display: none !important;
