@@ -28,50 +28,42 @@ class SsoController extends Controller
         if (isset($response['success']) && $response['success'] && !empty($response['data'])) {
             $responseData = $response['data'];
 
-            // Skenario 1: Login Mahasiswa (Response memiliki nim)
             if (!empty($responseData['nim'])) {
                 $nim = trim((string) $responseData['nim']);
-                $status = (!empty($responseData['id_jenis_keluar']) && (int) $responseData['id_jenis_keluar'] === 1)
-                    ? 'alumni'
-                    : 'aktif';
-
-                $save = [
-                    'nama'            => $responseData['nama'] ?? '',
-                    'prodi_id'        => $responseData['id_prodi'] ?? null,
-                    'email'           => $responseData['email'] ?? ($nim . '@student.unuja.ac.id'),
-                    'jenis_kelamin'   => isset($responseData['jenis_kelamin']) ? strtoupper(trim($responseData['jenis_kelamin'])) : null,
-                    'id_jenis_keluar' => $responseData['id_jenis_keluar'] ?? null,
-                    'status'          => $status,
-                ];
-
-                if (!empty($responseData['no_hp'])) {
-                    $save['no_hp'] = $responseData['no_hp'];
-                }
 
                 $mahasiswa = Mahasiswa::where('nim', $nim)->first();
 
                 if (!$mahasiswa) {
-                    $defaultAkademik = $responseData['tahun_keluar']
-                        ?? TahunAkademik::where('aktif', 'y')->value('id_smt')
-                        ?? '20261';
-
-                    $save['nim']         = $nim;
-                    $save['akademik_id'] = $defaultAkademik;
-                    $save['password']    = Hash::make($nim);
-
-                    $mahasiswa = Mahasiswa::create($save);
-                } else {
-                    $mahasiswa->update($save);
+                    return redirect()->route('login')->with(
+                        'error',
+                        "Data alumni dengan NIM {$nim} belum terdaftar di sistem Tracer Study. Silakan hubungi Admin untuk sinkronisasi data alumni."
+                    );
                 }
+
+                $updateData = [
+                    'nama'            => $responseData['nama'] ?? $mahasiswa->nama,
+                    'prodi_id'        => $responseData['id_prodi'] ?? $mahasiswa->prodi_id,
+                    'email'           => $responseData['email'] ?? $mahasiswa->email,
+                    'jenis_kelamin'   => isset($responseData['jenis_kelamin']) ? strtoupper(trim($responseData['jenis_kelamin'])) : $mahasiswa->jenis_kelamin,
+                    'id_jenis_keluar' => $responseData['id_jenis_keluar'] ?? $mahasiswa->id_jenis_keluar,
+                ];
+
+                if (!empty($responseData['no_hp'])) {
+                    $updateData['no_hp'] = $responseData['no_hp'];
+                }
+
+                if (!empty($responseData['id_jenis_keluar']) && (int) $responseData['id_jenis_keluar'] === 1) {
+                    $updateData['status'] = 'alumni';
+                }
+
+                $mahasiswa->update($updateData);
 
                 Auth::guard('mahasiswa')->login($mahasiswa);
 
                 $this->registerSsoSessionCallback($request, $responseData, $accessToken, $xToken, $userAgent);
 
                 return redirect()->route('mahasiswa.dashboard');
-            }
-            // Skenario 2: Login Pegawai / Staff / Dosen (Response memiliki id_penduduk)
-            elseif (!empty($responseData['id_penduduk'])) {
+            } elseif (!empty($responseData['id_penduduk'])) {
                 $idPenduduk = (string) $responseData['id_penduduk'];
                 $user = User::where('username', $idPenduduk)->first();
 
@@ -98,6 +90,22 @@ class SsoController extends Controller
             Log::warning('SSO connection error: ' . json_encode($response));
             return redirect()->route('login')->with('error', 'Gagal terhubung dengan SSO: ' . $errorMessage);
         }
+    }
+
+    public function dashboard()
+    {
+        if (Auth::guard('web')->check()) {
+            $user = Auth::guard('web')->user();
+            if ($user->role === 'Admin') {
+                return redirect()->route('admin.dashboard');
+            } elseif ($user->role === 'Fakultas') {
+                return redirect()->route('fakultas.dashboard');
+            }
+        } elseif (Auth::guard('mahasiswa')->check()) {
+            return redirect()->route('mahasiswa.dashboard');
+        }
+
+        return redirect()->route('login');
     }
 
     public function logout(string $sessionId)
@@ -186,7 +194,7 @@ class SsoController extends Controller
             $options[CURLOPT_HTTP_VERSION] = CURL_HTTP_VERSION_1_1;
         }
 
-        $options[CURLOPT_SSLVERSION] = 6; // CURL_SSLVERSION_TLSv1_2
+        $options[CURLOPT_SSLVERSION] = 6;
         $options[CURLOPT_SSL_CIPHER_LIST] = 'DEFAULT@SECLEVEL=1';
 
         if ($data !== null) {

@@ -39,19 +39,7 @@ Route::any('/sso', [SsoController::class, 'sso'])->name('sso.callback');
 Route::any('/sso/logout/{sessionId}', [SsoController::class, 'logout'])->name('sso.logout');
 
 // Universal Dashboard Route Helper
-Route::get('/dashboard', function () {
-    if (Auth::guard('web')->check()) {
-        $user = Auth::guard('web')->user();
-        if ($user->role === 'Admin') {
-            return redirect()->route('admin.dashboard');
-        } elseif ($user->role === 'Fakultas') {
-            return redirect()->route('fakultas.dashboard');
-        }
-    } elseif (Auth::guard('mahasiswa')->check()) {
-        return redirect()->route('mahasiswa.dashboard');
-    }
-    return redirect()->route('login');
-})->name('dashboard');
+Route::get('/dashboard', [SsoController::class, 'dashboard'])->name('dashboard');
 
 // Public route for Tracer Login
 Route::get('/isi-kuesioner', [AuthController::class, 'showTracerLoginForm'])->name('tracer.login');

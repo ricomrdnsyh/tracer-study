@@ -71,6 +71,18 @@ class SsoLoginTest extends TestCase
             ->onlyMethods(['makeCurlRequest'])
             ->getMock();
 
+        $prodiId = Prodi::value('id_prodi') ?? '1319bfef-2188-4240-b7a3-7a507bec2e64';
+        Mahasiswa::updateOrCreate(
+            ['nim' => '9999999999'],
+            [
+                'prodi_id' => $prodiId,
+                'akademik_id' => '20261',
+                'nama' => 'TEST MAHASISWA SSO',
+                'jenis_kelamin' => 'L',
+                'password' => bcrypt('password'),
+            ]
+        );
+
         $controllerMock->method('makeCurlRequest')
             ->willReturn([
                 'success' => true,
@@ -78,7 +90,7 @@ class SsoLoginTest extends TestCase
                     'nim'             => '9999999999',
                     'nama'            => 'TEST MAHASISWA SSO',
                     'email'           => 'test.sso@student.unuja.ac.id',
-                    'id_prodi'        => Prodi::value('id_prodi'),
+                    'id_prodi'        => $prodiId,
                     'jenis_kelamin'   => 'L',
                     'id_jenis_keluar' => null,
                 ]
@@ -151,6 +163,17 @@ class SsoLoginTest extends TestCase
                 'success' => true,
                 'data' => $payload,
             ]);
+
+        Mahasiswa::updateOrCreate(
+            ['nim' => '2521400094'],
+            [
+                'prodi_id' => '1319bfef-2188-4240-b7a3-7a507bec2e64',
+                'akademik_id' => '20261',
+                'nama' => 'JIHAN NABILLA',
+                'jenis_kelamin' => 'P',
+                'password' => bcrypt('password'),
+            ]
+        );
 
         $this->app->instance(SsoController::class, $controllerMock);
 

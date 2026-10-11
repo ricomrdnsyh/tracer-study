@@ -177,17 +177,18 @@
 <body id="kt_body" class="bg-body bg-grid">
     <div class="d-flex flex-column flex-root auth-wrapper">
         <div class="d-flex flex-center flex-column flex-column-fluid p-10 pb-lg-20">
-            <a href="{{ url('/') }}" class="mb-8">
-                <img alt="Logo" src="{{ asset('assets/media/logos/unuja.png') }}" class="h-60px" />
-            </a>
             <div class="w-lg-500px mx-auto auth-card">
                 <div class="auth-card-inner">
+                    <div class="text-center mb-7">
+                        <a href="{{ url('/') }}" class="d-inline-block mb-4">
+                            <img alt="Logo Tracer Study" src="{{ asset('assets/media/logos/tracer-dark.png') }}" class="h-50px" style="max-height: 50px; width: auto;" />
+                        </a>
+                        <h1 class="text-dark mb-2 auth-title fs-2">Selamat Datang</h1>
+                        <p class="text-muted auth-subtitle">Silakan masuk untuk mengakses Tracer Study UNUJA</p>
+                    </div>
+
                     <form id="login_form" class="form w-100" action="{{ route('login.post') }}" method="POST">
                         @csrf
-                        <div class="text-center mb-8">
-                            <h1 class="text-dark mb-2 auth-title fs-2">Selamat Datang</h1>
-                            <p class="text-muted auth-subtitle">Silakan masuk untuk mengakses Tracer Study UNUJA</p>
-                        </div>
 
                         <div class="fv-row mb-3">
                             <label class="form-label">Username / NIM</label>
@@ -210,20 +211,9 @@
                         </div>
 
                         <div class="text-center mt-5">
-                            <button type="submit" class="btn btn-sm btn-lg btn-login w-100 mb-3">
+                            <button type="submit" class="btn btn-sm btn-lg btn-login w-100 mb-5">
                                 Login
                             </button>
-
-                            <div class="d-flex align-items-center my-3">
-                                <div class="border-bottom flex-grow-1"></div>
-                                <span class="px-3 text-muted fs-8 text-uppercase fw-semibold">Atau</span>
-                                <div class="border-bottom flex-grow-1"></div>
-                            </div>
-
-                            <a href="https://sso.unuja.ac.id" class="btn btn-sm btn-lg btn-outline btn-outline-primary w-100 mb-4 d-flex align-items-center justify-content-center gap-2">
-                                <i class="fas fa-key"></i>
-                                <span>Masuk via Portal SSO UNUJA</span>
-                            </a>
 
                             <div class="text-muted auth-footer-text">
                                 Tracer Study Universitas Nurul Jadid
