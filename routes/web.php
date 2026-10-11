@@ -26,8 +26,8 @@ use Illuminate\Support\Facades\Route;
 use Rap2hpoutre\LaravelLogViewer\LogViewerController;
 
 Route::get('/', function () {
-    return redirect()->route('login');
-});
+    return view('landing');
+})->name('home');
 
 Route::redirect('/login', '/login-admin');
 Route::get('/login-admin', [AuthController::class, 'showLoginForm'])->name('login');
