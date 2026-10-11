@@ -213,6 +213,18 @@
                             <button type="submit" class="btn btn-sm btn-lg btn-login w-100 mb-3">
                                 Login
                             </button>
+
+                            <div class="d-flex align-items-center my-3">
+                                <div class="border-bottom flex-grow-1"></div>
+                                <span class="px-3 text-muted fs-8 text-uppercase fw-semibold">Atau</span>
+                                <div class="border-bottom flex-grow-1"></div>
+                            </div>
+
+                            <a href="https://sso.unuja.ac.id" class="btn btn-sm btn-lg btn-outline btn-outline-primary w-100 mb-4 d-flex align-items-center justify-content-center gap-2">
+                                <i class="fas fa-key"></i>
+                                <span>Masuk via Portal SSO UNUJA</span>
+                            </a>
+
                             <div class="text-muted auth-footer-text">
                                 Tracer Study Universitas Nurul Jadid
                             </div>
@@ -241,6 +253,34 @@
             });
         });
     </script>
+
+    @if (session('error'))
+        <script>
+            Swal.fire({
+                text: "{{ session('error') }}",
+                icon: "error",
+                buttonsStyling: false,
+                confirmButtonText: "OK, mengerti",
+                customClass: {
+                    confirmButton: "btn btn-danger"
+                }
+            });
+        </script>
+    @endif
+
+    @if (session('success'))
+        <script>
+            Swal.fire({
+                text: "{{ session('success') }}",
+                icon: "success",
+                buttonsStyling: false,
+                confirmButtonText: "OK",
+                customClass: {
+                    confirmButton: "btn btn-primary"
+                }
+            });
+        </script>
+    @endif
 
     @if ($errors->any())
         <script>
