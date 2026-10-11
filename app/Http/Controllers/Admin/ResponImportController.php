@@ -9,6 +9,7 @@ use App\Models\ResponTracer;
 use App\Models\JawabanDetail;
 use App\Models\Mahasiswa;
 use App\Models\PekerjaanAlumni;
+use App\Services\TracerResponService;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use PhpOffice\PhpSpreadsheet\IOFactory;
@@ -72,8 +73,12 @@ class ResponImportController extends Controller
         $kuesioner = Kuesioner::with('kategoriPertanyaans.pertanyaans')->findOrFail($request->kuesioner_id);
 
         $mapPertanyaan = [];
+        $opsiById = [];
         foreach ($kuesioner->kategoriPertanyaans as $kategori) {
             foreach ($kategori->pertanyaans as $pertanyaan) {
+                if (is_array($pertanyaan->opsi_jawaban) && count($pertanyaan->opsi_jawaban) > 0) {
+                    $opsiById[$pertanyaan->id_pertanyaan] = array_values($pertanyaan->opsi_jawaban);
+                }
                 if (!empty($pertanyaan->kode_pertanyaan)) {
                     $kode = strtoupper(trim($pertanyaan->kode_pertanyaan));
                     $mapPertanyaan[$kode][] = $pertanyaan->id_pertanyaan;
@@ -215,7 +220,7 @@ class ResponImportController extends Controller
                                     $batchJawaban[] = [
                                         'respon_id'     => $responId,
                                         'pertanyaan_id' => $pId,
-                                        'jawaban_text'  => (string) $jawabanVal,
+                                        'jawaban_text'  => TracerResponService::nomorToLabel($opsiById[$pId] ?? null, $jawabanVal, $kode),
                                         'jawaban_json'  => null,
                                         'created_at'    => $now,
                                         'updated_at'    => $now,
@@ -334,9 +339,11 @@ class ResponImportController extends Controller
 
         $pertanyaanKeys = [];
         $uniqueHeaders = [];
+        $pertanyaanById = [];
 
         foreach ($kuesioner->kategoriPertanyaans as $kategori) {
             foreach ($kategori->pertanyaans as $pertanyaan) {
+                $pertanyaanById[$pertanyaan->id_pertanyaan] = $pertanyaan;
                 if (!empty($pertanyaan->kode_pertanyaan)) {
                     $kode = strtoupper(trim($pertanyaan->kode_pertanyaan));
                     if (!in_array($kode, $uniqueHeaders, true)) {
@@ -356,27 +363,16 @@ class ResponImportController extends Controller
         }
 
         $rowNum = 2;
-        $query->chunk(250, function ($respons) use ($sheet, &$rowNum, $uniqueHeaders, $pertanyaanKeys) {
+        $query->chunk(250, function ($respons) use ($sheet, &$rowNum, $uniqueHeaders, $pertanyaanKeys, $pertanyaanById) {
             foreach ($respons as $respon) {
                 $sheet->setCellValue('A' . $rowNum, $respon->mahasiswa_id);
                 $sheet->setCellValue('B' . $rowNum, optional($respon->mahasiswa)->nama);
                 $sheet->setCellValue('C' . $rowNum, $respon->status);
                 $sheet->setCellValue('D' . $rowNum, $respon->tgl_isi ? Carbon::parse($respon->tgl_isi)->format('Y-m-d H:i') : '');
 
-                $jawabanMap = [];
+                $detailMap = [];
                 foreach ($respon->jawabanDetails as $detail) {
-                    $jawaban = $detail->jawaban_text;
-                    if ($detail->jawaban_json) {
-                        $decoded = is_string($detail->jawaban_json) ? json_decode($detail->jawaban_json, true) : $detail->jawaban_json;
-                        if (is_array($decoded) && isset($decoded['label'])) {
-                            $jawaban = $decoded['label'];
-                        } elseif (is_array($decoded)) {
-                            $jawaban = implode(', ', $decoded);
-                        } else {
-                            $jawaban = $decoded;
-                        }
-                    }
-                    $jawabanMap[$detail->pertanyaan_id] = $jawaban;
+                    $detailMap[$detail->pertanyaan_id] = $detail;
                 }
 
                 $colIndex = 'E';
@@ -384,9 +380,11 @@ class ResponImportController extends Controller
                     $val = '';
                     if (isset($pertanyaanKeys[$kode])) {
                         foreach ($pertanyaanKeys[$kode] as $pId) {
-                            if (!empty($jawabanMap[$pId])) {
-                                $val = $jawabanMap[$pId];
-                                break;
+                            if (isset($detailMap[$pId])) {
+                                $val = TracerResponService::jawabanToNomor($pertanyaanById[$pId] ?? null, $detailMap[$pId]);
+                                if ($val !== '') {
+                                    break;
+                                }
                             }
                         }
                     }
