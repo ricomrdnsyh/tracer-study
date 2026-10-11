@@ -1,4 +1,5 @@
 $(document).ready(function() {
+    const LOOKUP_BASE = window.tracerLookupBase || '/mahasiswa/tracer/lookup';
     const remoteSelectConfig = {
         f18b: {
             type: 'pt',
@@ -132,7 +133,7 @@ $(document).ready(function() {
     function performSearch(type, keyword, container, config, resultsContainer, statusText) {
         statusText.text('Mencari...');
         
-        let url = `/mahasiswa/tracer/lookup?type=${type}&keyword=${encodeURIComponent(keyword)}`;
+        let url = `${LOOKUP_BASE}?type=${type}&keyword=${encodeURIComponent(keyword)}`;
         
         if (config.dependsOn) {
             const parentHidden = $(`div[data-remote-select="${config.dependsOn}"]`).find('input[type="hidden"]');
@@ -200,7 +201,7 @@ $(document).ready(function() {
             placeholder: placeholder,
             allowClear: true,
             ajax: {
-                url: '/mahasiswa/tracer/lookup',
+                url: LOOKUP_BASE,
                 dataType: 'json',
                 delay: 250,
                 data: function(params) {

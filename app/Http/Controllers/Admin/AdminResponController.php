@@ -9,6 +9,7 @@ use App\Models\Mahasiswa;
 use App\Models\Pertanyaan;
 use App\Models\Prodi;
 use App\Models\ResponTracer;
+use App\Services\TracerResponService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
@@ -181,5 +182,133 @@ class AdminResponController extends Controller
         }
 
         return view('admin.respon.show', compact('respon', 'jawabanUser', 'jsonKemdikbud'));
+    }
+
+    public function create(Request $request)
+    {
+        $kuesionerList = Kuesioner::orderByDesc('id_kuesioner')->get();
+
+        $kuesionerAktif = null;
+        $mahasiswaTarget = null;
+        $jawabanUser = [];
+        $jawabanLabel = [];
+
+        if ($request->filled('kuesioner_id') && $request->filled('nim')) {
+            $kuesionerAktif = Kuesioner::with(['kategoriPertanyaans' => function ($q) {
+                $q->orderBy('urutan');
+            }, 'kategoriPertanyaans.pertanyaans'])->findOrFail($request->kuesioner_id);
+
+            $mahasiswaTarget = Mahasiswa::with('prodi.fakultas')
+                ->where('nim', trim((string) $request->nim))
+                ->firstOrFail();
+
+            if ($this->isFakultasScope() && !$this->inOwnFakultas($mahasiswaTarget)) {
+                abort(403, 'Mahasiswa tersebut bukan dari fakultas Anda.');
+            }
+
+            if (!$this->akademikCocok($kuesionerAktif, $mahasiswaTarget)) {
+                return redirect()->route('admin.respon.create', ['kuesioner_id' => $kuesionerAktif->id_kuesioner])
+                    ->with('error', "Mahasiswa {$mahasiswaTarget->nim} (lulus {$mahasiswaTarget->akademik_id}) tidak termasuk sasaran kuesioner ini (tahun akademik {$kuesionerAktif->akademik_id}).");
+            }
+
+            [$jawabanUser, $jawabanLabel] = TracerResponService::formData($kuesionerAktif, $mahasiswaTarget->nim);
+        }
+
+        return view('admin.respon.create', compact(
+            'kuesionerList',
+            'kuesionerAktif',
+            'mahasiswaTarget',
+            'jawabanUser',
+            'jawabanLabel'
+        ));
+    }
+
+    public function store(Request $request)
+    {
+        $request->validate([
+            'kuesioner_id' => 'required|exists:kuesioner,id_kuesioner',
+            'nim'          => 'required|exists:mahasiswa,nim',
+        ]);
+
+        $nim = trim((string) $request->nim);
+        $mahasiswa = Mahasiswa::with('prodi')->where('nim', $nim)->firstOrFail();
+
+        if ($this->isFakultasScope() && !$this->inOwnFakultas($mahasiswa)) {
+            return back()->with('error', 'Mahasiswa tersebut bukan dari fakultas Anda.');
+        }
+
+        $kuesioner = Kuesioner::findOrFail($request->kuesioner_id);
+        if (!$this->akademikCocok($kuesioner, $mahasiswa)) {
+            return back()->with('error', "Mahasiswa {$nim} (lulus {$mahasiswa->akademik_id}) tidak termasuk sasaran kuesioner ini (tahun akademik {$kuesioner->akademik_id}).");
+        }
+
+        try {
+            TracerResponService::save(
+                $request->kuesioner_id,
+                $nim,
+                $request->input('jawaban', []),
+                $request->input('jawaban_label', [])
+            );
+        } catch (\Throwable $e) {
+            return back()->with('error', 'Terjadi kesalahan saat menyimpan data: ' . $e->getMessage());
+        }
+
+        return redirect()->route('admin.respon.index')
+            ->with('success', "Jawaban atas nama {$mahasiswa->nama} ({$nim}) berhasil disimpan.");
+    }
+
+    public function mahasiswaSearch(Request $request)
+    {
+        $keyword = trim((string) $request->query('q', ''));
+
+        $query = Mahasiswa::with('prodi')->select(['nim', 'nama', 'prodi_id']);
+
+        if ($this->isFakultasScope()) {
+            $prodiIds = Prodi::where('fakultas_id', auth()->user()->fakultas_id)->pluck('id_prodi')->toArray();
+            $query->whereIn('prodi_id', $prodiIds);
+        }
+
+        if ($request->filled('kuesioner_id')) {
+            $akademikId = Kuesioner::where('id_kuesioner', $request->kuesioner_id)->value('akademik_id');
+            if (!empty($akademikId)) {
+                $query->where('akademik_id', $akademikId);
+            }
+        }
+
+        if ($keyword !== '') {
+            $query->where(function ($q) use ($keyword) {
+                $q->where('nim', 'like', "%{$keyword}%")
+                  ->orWhere('nama', 'like', "%{$keyword}%");
+            });
+        }
+
+        return response()->json(
+            $query->orderBy('nim')->limit(20)->get()->map(function ($m) {
+                $prodi = $m->prodi ? " ({$m->prodi->nama_prodi})" : '';
+                return ['id' => $m->nim, 'text' => "{$m->nim} - {$m->nama}{$prodi}"];
+            })->values()
+        );
+    }
+
+    public function lookup(Request $request)
+    {
+        return TracerResponService::lookup($request);
+    }
+
+    private function isFakultasScope(): bool
+    {
+        return auth()->user() && auth()->user()->role === 'Fakultas';
+    }
+
+    private function inOwnFakultas(Mahasiswa $mahasiswa): bool
+    {
+        return $mahasiswa->prodi
+            && (string) $mahasiswa->prodi->fakultas_id === (string) auth()->user()->fakultas_id;
+    }
+
+    private function akademikCocok(Kuesioner $kuesioner, Mahasiswa $mahasiswa): bool
+    {
+        return empty($kuesioner->akademik_id)
+            || (string) $mahasiswa->akademik_id === (string) $kuesioner->akademik_id;
     }
 }

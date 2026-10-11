@@ -8,12 +8,10 @@ use App\Models\Kuesioner;
 use App\Models\ResponTracer;
 use App\Models\JawabanDetail;
 use App\Models\PekerjaanAlumni;
+use App\Services\TracerResponService;
 use Illuminate\Http\Request;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Log;
 
 class TracerController extends Controller
 {
@@ -232,114 +230,9 @@ class TracerController extends Controller
         }
     }
 
-    public function lookup(Request $request): JsonResponse
+    public function lookup(Request $request)
     {
-        $type = trim($request->query('type', ''));
-        $keyword = trim($request->query('keyword', $request->query('q', '')));
-
-        $allowedTypes = ['negara', 'provinsi', 'kabupaten', 'pt', 'prodi'];
-        if (! in_array($type, $allowedTypes, true)) {
-            return response()->json([]);
-        }
-
-        \Illuminate\Support\Facades\Log::info("Tracer Lookup Hit:", $request->all());
-
-        if ($keyword === '' && in_array($type, ['pt', 'prodi'])) {
-            return response()->json([]);
-        }
-
-        $cacheKey = "tracer_lookup_{$type}_" . md5($keyword . $request->query('kode_negara', '') . $request->query('kode_provinsi', '') . $request->query('kode_pt', ''));
-        if ($request->has('refresh')) {
-            Cache::forget($cacheKey);
-        }
-        $results = Cache::remember($cacheKey, 43200, function () use ($type, $keyword, $request) {
-            $baseApi = 'https://tracerstudy.kemdiktisaintek.go.id/fe-api';
-            $results = [];
-            try {
-                $response = null;
-                $dataArray = [];
-                switch ($type) {
-                    case 'negara':
-                        $query = DB::table('master_negara');
-                        if (!empty($keyword)) {
-                            $query->where('negara', 'like', "%{$keyword}%");
-                        }
-                        $dataArray = $query->limit(50)->get()->map(fn($x) => (array)$x)->toArray();
-                        break;
-                    case 'provinsi':
-                        $query = DB::table('master_provinsi');
-                        $kodeNegara = $request->query('kode_negara', '');
-                        if ($kodeNegara) {
-                            $query->where('kode_wilayah_negara', $kodeNegara);
-                        }
-                        if (!empty($keyword)) {
-                            $query->where('provinsi', 'like', "%{$keyword}%");
-                        }
-                        $dataArray = $query->limit(50)->get()->map(fn($x) => (array)$x)->toArray();
-                        break;
-                    case 'kabupaten':
-                        $kodeProvinsi = $request->query('kode_provinsi', '');
-                        if ($kodeProvinsi) {
-                            $query = DB::table('master_kota_kabupaten')
-                                ->where('kode_wilayah_provinsi', $kodeProvinsi);
-                            if (!empty($keyword)) {
-                                $query->where('kota_kabupaten', 'like', "%{$keyword}%");
-                            }
-                            $dataArray = $query->limit(100)->get()->map(fn($x) => (array)$x)->toArray();
-                        }
-                        break;
-                    case 'pt':
-                        $response = Http::timeout(10)->withoutVerifying()->get("{$baseApi}/perguruan-tinggi", ['search' => $keyword, 'per_page' => 100]);
-                        if ($response && $response->successful()) {
-                            $dataArray = $response->json('result.data.perguruan_tinggi.data') ?? [];
-                        }
-                        break;
-                    case 'prodi':
-                        $kodePt = $request->query('kode_pt', '');
-                        if ($kodePt) {
-                            $response = Http::timeout(10)->withoutVerifying()->get("{$baseApi}/perguruan-tinggi/{$kodePt}/program-studi", ['search' => $keyword, 'per_page' => 100]);
-                            if ($response && $response->successful()) {
-                                $dataArray = $response->json('result.data.program_studi.data') ?? [];
-                            }
-                        }
-                        break;
-                }
-
-                if ($response) {
-                    Log::info("Tracer API Response ({$type}): Status " . $response->status() . " Body: " . substr($response->body(), 0, 1000));
-                }
-
-                if (in_array($type, ['pt', 'prodi']) && (!$response || !$response->successful())) {
-                    return null;
-                }
-
-                foreach ($dataArray as $item) {
-                        $results[] = match ($type) {
-                            'negara' => ['id' => $item['kode_wilayah_negara'] ?? $item['id_negara'] ?? $item['id_wil'] ?? '', 'text' => $item['negara'] ?? ''],
-                            'provinsi' => ['id' => $item['kode_wilayah_provinsi'] ?? $item['id_wil'] ?? '', 'text' => $item['provinsi'] ?? $item['nm_wil'] ?? ''],
-                            'kabupaten' => ['id' => $item['kode_wilayah_kota_kabupaten'] ?? $item['id_wil'] ?? $item['kode_kab'] ?? '', 'text' => $item['kota_kabupaten'] ?? $item['nm_wil'] ?? ''],
-                            'pt' => ['id' => $item['id_sp'] ?? '', 'text' => $item['nama_pt'] ?? ''],
-                            'prodi' => [
-                                'id' => $item['id_sms'] ?? '',
-                                'text' => isset($item['nama_prodi']) ? $item['nama_prodi'] . (isset($item['nm_jenj_didik']) ? ' (' . $item['nm_jenj_didik'] . ')' : '') : ''
-                            ],
-                            default => null,
-                        };
-                    }
-                    $results = array_filter($results);
-            } catch (\Exception $e) {
-                Log::error("Tracer Study Lookup Error ({$type}): " . $e->getMessage());
-
-                return null;
-            }
-
-            return array_slice($results, 0, 50);
-        });
-        if ($results === null) {
-            Cache::forget($cacheKey);
-        }
-
-        return response()->json($results ?? []);
+        return TracerResponService::lookup($request);
     }
 }
 

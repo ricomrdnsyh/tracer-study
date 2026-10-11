@@ -89,6 +89,20 @@
         #example .action-wrap i {
             line-height: 1 !important;
         }
+
+        #respon-toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: .5rem;
+        }
+
+        @media (max-width: 575.98px) {
+            #respon-toolbar .btn {
+                flex: 1 1 46%;
+                margin: 0 !important;
+                justify-content: center;
+            }
+        }
     </style>
 @endsection
 
@@ -107,19 +121,22 @@
                                     </h3>
                                 </div>
                             </div>
-                            <div class="card-toolbar">
-                                <button type="button" class="btn btn-sm btn-light-success me-2" data-bs-toggle="modal"
-                                    data-bs-target="#importModal">
-                                    <i class="fas fa-upload me-1"></i> Import Data
-                                </button>
-                                <button type="button" class="btn btn-sm btn-light-info me-2" data-bs-toggle="modal"
-                                    data-bs-target="#exportModal">
-                                    <i class="fas fa-file-export me-1"></i> Export Data
-                                </button>
-                                <button type="button" class="btn btn-sm btn-light-primary" data-bs-toggle="modal"
+                            <div class="card-toolbar" id="respon-toolbar">
+                                <button type="button" class="btn btn-sm btn-light-warning" data-bs-toggle="modal"
                                     data-bs-target="#templateModal">
                                     <i class="fas fa-download me-1"></i> Download Template
                                 </button>
+                                <button type="button" class="btn btn-sm btn-light-success" data-bs-toggle="modal"
+                                    data-bs-target="#importModal">
+                                    <i class="fas fa-upload me-1"></i> Import Data
+                                </button>
+                                <button type="button" class="btn btn-sm btn-light-info" data-bs-toggle="modal"
+                                    data-bs-target="#exportModal">
+                                    <i class="fas fa-file-export me-1"></i> Export Data
+                                </button>
+                                <a href="{{ route('admin.respon.create') }}" class="btn btn-sm btn-primary">
+                                    <i class="fas fa-user-plus me-1"></i> Tambah Responden
+                                </a>
                             </div>
                         </div>
 
@@ -210,11 +227,14 @@
                     @csrf
                     <div class="modal-body">
                         @if (auth()->user()->role === 'Fakultas')
-                            <div class="alert alert-dismissible bg-light-primary border border-primary border-dashed d-flex align-items-center p-3 mb-4">
+                            <div
+                                class="alert alert-dismissible bg-light-primary border border-primary border-dashed d-flex align-items-center p-3 mb-4">
                                 <i class="fa-solid fa-circle-info fs-2 text-primary me-3"></i>
                                 <div class="d-flex flex-column">
                                     <span class="fs-7 text-gray-800">
-                                        Import dibatasi: Hanya data mahasiswa dari <strong>{{ auth()->user()->fakultas->nama_fakultas ?? 'fakultas Anda' }}</strong> yang akan dimasukkan ke sistem. Data mahasiswa fakultas lain otomatis dilewati.
+                                        Import dibatasi: Hanya data mahasiswa dari
+                                        <strong>{{ auth()->user()->fakultas->nama_fakultas ?? 'fakultas Anda' }}</strong>
+                                        yang akan dimasukkan ke sistem. Data mahasiswa fakultas lain otomatis dilewati.
                                     </span>
                                 </div>
                             </div>
@@ -401,4 +421,3 @@
 
     @include('admin.respon.script.index')
 @endsection
-

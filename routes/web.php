@@ -87,6 +87,10 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:Admin,Fakultas
     Route::get('/respon/template', [ResponImportController::class, 'template'])->name('respon.template');
     Route::post('/respon/import', [ResponImportController::class, 'import'])->name('respon.import');
     Route::get('/respon/export', [ResponImportController::class, 'export'])->name('respon.export');
+    Route::get('/respon/create', [AdminResponController::class, 'create'])->name('respon.create');
+    Route::post('/respon', [AdminResponController::class, 'store'])->name('respon.store');
+    Route::get('/respon/mahasiswa-search', [AdminResponController::class, 'mahasiswaSearch'])->name('respon.mahasiswa-search');
+    Route::get('/respon/lookup', [AdminResponController::class, 'lookup'])->name('respon.lookup');
     Route::get('/respon/data', [AdminResponController::class, 'getRespon'])->name('respon.data');
     Route::resource('respon', AdminResponController::class)->only(['index', 'show']);
 
