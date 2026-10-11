@@ -30,17 +30,19 @@ Berdasarkan response aktual dari endpoint `me_url` SSO UNUJA:
 ]
 ```
 
-### Pemetaan Kolom ke Tabel `mahasiswa` (Tracer Study)
-Tabel `mahasiswa` di Tracer Study memiliki skema kolom:
-- `nim`: string (primary key) &larr; `$responseData['nim']`
+### Pemetaan Kolom Dinamis ke Tabel `mahasiswa` (Tracer Study)
+Logika pemetaan bersifat dinamis dan otomatis untuk **siapapun mahasiswa** yang login melalui SSO:
+- `nim`: string (primary key) &larr; `$responseData['nim']` (identitas unik setiap mahasiswa)
 - `nama`: string &larr; `$responseData['nama']`
-- `prodi_id`: string (UUID FK ke `prodi.id_prodi`) &larr; `$responseData['id_prodi']`
-- `email`: string &larr; `$responseData['email'] ?? ($responseData['nim'] . '@student.unuja.ac.id')`
-- `jenis_kelamin`: char(1) &larr; `$responseData['jenis_kelamin'] ?? null`
-- `id_jenis_keluar`: tinyint &larr; `$responseData['id_jenis_keluar'] ?? null`
-- `status`: string &larr; `(!empty($responseData['id_jenis_keluar']) && $responseData['id_jenis_keluar'] == 1) ? 'Lulus' : 'Aktif'`
-- `password`: string &larr; diisi default `Hash::make($responseData['nim'])` saat registrasi baru
-- `angkatan`: integer &larr; diambil dari 2 digit awal NIM jika numerik (`2000 + substr($nim, 0, 2)`), contoh: `'25'` &rarr; `2025`
+- `prodi_id`: string (UUID FK ke `prodi.id_prodi`) &larr; `$responseData['id_prodi'] ?? ($responseData['id_sms'] ?? null)`
+- `email`: string &larr; `$responseData['email'] ?? ($nim . '@student.unuja.ac.id')`
+- `jenis_kelamin`: char(1) nullable &larr; isset($responseData['jenis_kelamin']) ? strtoupper($responseData['jenis_kelamin']) : null
+- `id_jenis_keluar`: tinyint nullable &larr; $responseData['id_jenis_keluar'] ?? null
+- `status`: string &larr; `(!empty($responseData['id_jenis_keluar']) && (int)$responseData['id_jenis_keluar'] === 1) ? 'Lulus' : 'Aktif'`
+- `angkatan`: integer nullable &larr; dihitung dinamis dari 2 digit depan NIM (contoh: NIM `21xxxx` &rarr; 2021, `25xxxx` &rarr; 2025), fallback ke `(int)date('Y')`
+- `password`: jika mahasiswa baru (belum ada di DB), di-generate default `Hash::make($nim)`; jika sudah ada di DB, password lama tetap dipertahankan.
+
+Dengan metode `updateOrCreate` berbasis `nim`, setiap mahasiswa yang login akan otomatis terdaftar jika baru pertama kali masuk, atau diperbarui profil akademiknya jika sudah pernah ada.
 
 ### Pemetaan User Staf / Pegawai
 Jika response SSO tidak memiliki `nim`, melainkan `id_penduduk`:
