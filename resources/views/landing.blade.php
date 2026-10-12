@@ -11,721 +11,600 @@
     <meta name="robots" content="index, follow">
     <link rel="shortcut icon" href="{{ asset('assets/media/logos/unuja.png') }}" type="image/png">
 
-    <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400..700;1,400..700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300..800;1,300..800&display=swap"
+        rel="stylesheet">
 
-    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     fontFamily: {
-                        sans: ['"Instrument Sans"', 'sans-serif'],
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
                     },
-                    boxShadow: {
-                        '2xs': '0 1px 2px 0 rgba(0, 0, 0, 0.03)',
-                        'xs': '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
+                    colors: {
+                        navy: {
+                            950: '#0f2744',
+                            900: '#1e3a5f',
+                            800: '#274b73',
+                            700: '#1e40af',
+                        }
+                    },
+                    animation: {
+                        'float': 'float 7s ease-in-out infinite',
+                    },
+                    keyframes: {
+                        float: {
+                            '0%, 100%': {
+                                transform: 'translateY(0)'
+                            },
+                            '50%': {
+                                transform: 'translateY(-14px)'
+                            },
+                        },
                     }
                 }
             }
         }
     </script>
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+
+        .text-gradient {
+            background: linear-gradient(92deg, #60A5FA 0%, #A78BFA 55%, #FBBF24 110%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .text-gradient-light {
+            background: linear-gradient(92deg, #1d4ed8 0%, #4f46e5 55%, #d97706 110%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .glass {
+            background: rgba(255, 255, 255, .06);
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+            border: 1px solid rgba(255, 255, 255, .12);
+        }
+
+        .grid-bg {
+            background-image: linear-gradient(rgba(148, 163, 184, .09) 1px, transparent 1px), linear-gradient(90deg, rgba(148, 163, 184, .09) 1px, transparent 1px);
+            background-size: 44px 44px;
+        }
+
+        .reveal {
+            opacity: 0;
+            transform: translateY(24px);
+            transition: opacity .7s cubic-bezier(.22, 1, .36, 1), transform .7s cubic-bezier(.22, 1, .36, 1);
+        }
+
+        .reveal.visible {
+            opacity: 1;
+            transform: none;
+        }
+
+        .reveal-d1 {
+            transition-delay: .1s;
+        }
+
+        .reveal-d2 {
+            transition-delay: .2s;
+        }
+
+        .faq-content {
+            display: grid;
+            grid-template-rows: 0fr;
+            transition: grid-template-rows .35s cubic-bezier(.22, 1, .36, 1);
+        }
+
+        .faq-item.open .faq-content {
+            grid-template-rows: 1fr;
+        }
+
+        .faq-inner {
+            overflow: hidden;
+        }
+
+        .faq-item.open .faq-chevron {
+            transform: rotate(45deg);
+            background: #1d4ed8;
+        }
+
+        .faq-chevron {
+            transition: transform .3s ease, background .3s ease;
+        }
+
+        .hero-bar {
+            transform-origin: bottom;
+            animation: growBar 1.1s cubic-bezier(.22, 1, .36, 1) both;
+        }
+
+        @keyframes growBar {
+            from {
+                transform: scaleY(0);
+            }
+
+            to {
+                transform: scaleY(1);
+            }
+        }
+
+        @keyframes shimmer {
+            0% {
+                transform: translateX(-100%);
+            }
+
+            100% {
+                transform: translateX(100%);
+            }
+        }
+    </style>
 </head>
 
-<body class="bg-slate-50 text-slate-800 font-sans antialiased selection:bg-blue-600 selection:text-white"
-    style="background-image: linear-gradient(to right, rgba(203, 213, 225, 0.28) 1px, transparent 1px), linear-gradient(to bottom, rgba(203, 213, 225, 0.28) 1px, transparent 1px); background-size: 28px 28px;">
-
-    <!-- 1. Top Notice Announcement -->
-    <aside aria-label="Pengumuman Periode" class="bg-[#0b1e36] text-blue-100 text-xs sm:text-sm py-2 px-4 border-b border-blue-950/80">
-        <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2 text-center sm:text-left">
-            <div class="flex items-center gap-2">
-                <span class="inline-flex items-center justify-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-blue-600 text-white shadow-xs">Periode Aktif</span>
-                <span>Pelaporan Tracer Study Lulusan Tahun 2023 &amp; 2024 Sedang Berlangsung</span>
+<body class="bg-white text-slate-800 font-sans antialiased">
+    
+    <div id="hero" class="relative z-40 scroll-mt-0">
+        <div id="announcement" class="relative z-40 text-white text-xs sm:text-[13px] bg-navy-900 border-b border-blue-950/40" style="background-color:#1e3a5f">
+            <div class="max-w-7xl mx-auto px-4 py-2.5 flex items-center justify-center gap-2">
+                <span class="relative flex h-2 w-2 shrink-0">
+                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
+                    <span class="relative inline-flex rounded-full h-2 w-2 bg-white"></span>
+                </span>
+                <p class="font-medium text-slate-300">
+                    @if (!empty($kuesionerAktif))
+                        Periode pelaporan <strong class="text-white">{{ $kuesionerAktif->tahunAkademik->nm_smt ?? $kuesionerAktif->judul }}</strong> sedang berlangsung
+                        <span class="text-slate-400">• s/d {{ \Carbon\Carbon::parse($kuesionerAktif->tgl_selesai)->translatedFormat('d F Y') }}</span>
+                    @else
+                        Periode pelaporan kuesioner <strong class="text-white">belum dibuka</strong> — pantau informasi terbaru
+                    @endif
+                </p>
             </div>
-            <a href="#sasaran" class="inline-flex items-center text-yellow-400 hover:text-yellow-300 font-medium underline underline-offset-4 transition-colors">
-                Lihat Kriteria Sasaran &rarr;
-            </a>
         </div>
-    </aside>
+    </div>
 
-    <!-- 2. Header & Sticky Navbar -->
-    <header class="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-slate-200/80 shadow-xs transition-all">
+    
+    <header id="navbar"
+        class="sticky top-0 z-50 transition-all duration-300 bg-white/90 backdrop-blur-xl border-b border-slate-200/70">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex items-center justify-between h-20">
-                <!-- Brand Logo -->
-                <a href="{{ route('home') }}" class="flex items-center gap-3.5 group" aria-label="Beranda Tracer Study UNUJA">
-                    <img src="{{ asset('assets/media/logos/unuja.png') }}" alt="Logo Universitas Nurul Jadid" class="h-11 w-auto object-contain transition-transform group-hover:scale-105" loading="eager">
-                    <div class="flex flex-col">
-                        <span class="text-base sm:text-lg font-bold tracking-tight text-slate-900 leading-none">
-                            TRACER STUDY
-                        </span>
-                        <span class="text-xs font-semibold text-blue-600 tracking-wide mt-1">
-                            Universitas Nurul Jadid
-                        </span>
-                    </div>
+            <div class="flex items-center gap-2 h-[72px]">
+                <a href="{{ route('home') }}" class="flex items-center group" aria-label="Beranda Tracer Study UNUJA">
+                    <img src="{{ asset('assets/media/logos/tracer-dark.png') }}"
+                        alt="Tracer Study Universitas Nurul Jadid"
+                        class="h-11 w-auto object-contain transition-transform group-hover:scale-[1.02]"
+                        loading="eager">
                 </a>
 
-                <!-- Desktop Navigation Links -->
-                <nav class="hidden md:flex items-center gap-8 text-sm font-medium text-slate-600">
-                    <a href="#hero" class="hover:text-blue-600 transition-colors">Beranda</a>
-                    <a href="#sasaran" class="hover:text-blue-600 transition-colors">Sasaran Alumni</a>
-                    <a href="#alur" class="hover:text-blue-600 transition-colors">Alur Pengisian</a>
-                    <a href="#manfaat" class="hover:text-blue-600 transition-colors">Manfaat</a>
-                    <a href="#faq" class="hover:text-blue-600 transition-colors">Tanya Jawab</a>
-                </nav>
-
-                <!-- Action Buttons -->
-                <div class="hidden sm:flex items-center gap-3">
-                    <a href="{{ route('login') }}" class="inline-flex items-center justify-center px-4 py-2 text-xs font-semibold text-slate-700 hover:text-blue-700 hover:bg-blue-50/70 rounded-xl border border-slate-200 shadow-2xs hover:border-blue-200 transition-all" title="Masuk sebagai Administrator / Fakultas">
-                        Portal Staf &amp; Admin
-                    </a>
-                    <a href="{{ route('tracer.login') }}" class="inline-flex items-center justify-center gap-2 px-5 py-2 text-xs font-semibold text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 rounded-xl shadow-md shadow-blue-500/20 hover:shadow-blue-500/30 transition-all transform hover:-translate-y-0.5" title="Isi Formulir Tracer Study">
-                        <span>Isi Kuesioner</span>
-                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
+                <div class="hidden lg:flex items-center gap-1 ml-auto">
+                    <nav class="flex items-center gap-1 text-sm font-semibold text-slate-600">
+                        <a href="#hero"
+                            class="px-4 py-2 rounded-full hover:text-blue-700 hover:bg-blue-50 transition-all">Beranda</a>
+                        <a href="#tentang"
+                            class="px-4 py-2 rounded-full hover:text-blue-700 hover:bg-blue-50 transition-all">Tentang</a>
+                        <a href="#alur"
+                            class="px-4 py-2 rounded-full hover:text-blue-700 hover:bg-blue-50 transition-all">Alur</a>
+                        <a href="#faq"
+                            class="px-4 py-2 rounded-full hover:text-blue-700 hover:bg-blue-50 transition-all">FAQ</a>
+                        <a href="{{ route('tracer.login') }}"
+                            class="px-4 py-2 rounded-full hover:text-blue-700 hover:bg-blue-50 transition-all">Isi
+                            Kuesioner</a>
+                    </nav>
+                    <span class="w-px h-6 bg-slate-200 mx-2"></span>
+                    <a href="{{ route('login') }}"
+                        class="inline-flex items-center gap-2 px-5 py-2.5 text-[13px] font-bold text-white rounded-xl bg-navy-900 hover:bg-blue-700 shadow-lg shadow-navy-900/20 transition-all">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2"
+                                d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4M10 17l5-5-5-5M15 12H3" />
                         </svg>
+                        Login
                     </a>
                 </div>
 
-                <!-- Mobile Menu Button -->
-                <div class="flex sm:hidden">
-                    <button type="button" id="mobile-menu-btn" class="p-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-xl focus:outline-hidden" aria-expanded="false" aria-label="Buka navigasi menu">
-                        <svg id="menu-icon-open" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                <div class="hidden sm:flex lg:hidden items-center gap-2.5 ml-auto">
+                    <a href="{{ route('login') }}"
+                        class="inline-flex items-center gap-2 px-5 py-2.5 text-[13px] font-bold text-white rounded-xl bg-navy-900 hover:bg-blue-700 shadow-lg shadow-navy-900/20 transition-all">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2"
+                                d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4M10 17l5-5-5-5M15 12H3" />
                         </svg>
-                        <svg id="menu-icon-close" class="w-6 h-6 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                        </svg>
-                    </button>
+                        Login
+                    </a>
                 </div>
+
+                <button id="mobile-menu-btn"
+                    class="lg:hidden ml-auto sm:ml-2 p-2.5 rounded-xl text-slate-700 hover:bg-slate-100 transition-colors"
+                    aria-label="Menu">
+                    <svg id="menu-icon-open" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M4 7h16M4 12h16M4 17h16" />
+                    </svg>
+                    <svg id="menu-icon-close" class="w-6 h-6 hidden" fill="none" stroke="currentColor"
+                        viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
             </div>
         </div>
-
-        <!-- Mobile Drawer Menu -->
-        <div id="mobile-menu" class="hidden sm:hidden border-t border-slate-200 bg-white px-4 pt-3 pb-6 space-y-3">
-            <nav class="flex flex-col space-y-2 text-sm font-medium text-slate-700">
-                <a href="#hero" class="mobile-nav-link px-3 py-2 rounded-lg hover:bg-slate-50 hover:text-blue-600">Beranda</a>
-                <a href="#sasaran" class="mobile-nav-link px-3 py-2 rounded-lg hover:bg-slate-50 hover:text-blue-600">Sasaran Alumni</a>
-                <a href="#alur" class="mobile-nav-link px-3 py-2 rounded-lg hover:bg-slate-50 hover:text-blue-600">Alur Pengisian</a>
-                <a href="#manfaat" class="mobile-nav-link px-3 py-2 rounded-lg hover:bg-slate-50 hover:text-blue-600">Manfaat</a>
-                <a href="#faq" class="mobile-nav-link px-3 py-2 rounded-lg hover:bg-slate-50 hover:text-blue-600">Tanya Jawab</a>
+        <div id="mobile-menu" class="hidden lg:hidden border-t border-slate-100 bg-white/95 backdrop-blur-xl px-4 py-4">
+            <nav class="flex flex-col text-sm font-semibold text-slate-700">
+                <a href="#hero"
+                    class="mobile-nav-link px-4 py-3 rounded-xl hover:bg-blue-50 hover:text-blue-700">Beranda</a>
+                <a href="#tentang"
+                    class="mobile-nav-link px-4 py-3 rounded-xl hover:bg-blue-50 hover:text-blue-700">Tentang
+                    Tracer</a>
+                <a href="#alur"
+                    class="mobile-nav-link px-4 py-3 rounded-xl hover:bg-blue-50 hover:text-blue-700">Alur
+                    Pengisian</a>
+                <a href="#faq"
+                    class="mobile-nav-link px-4 py-3 rounded-xl hover:bg-blue-50 hover:text-blue-700">FAQ</a>
+                <a href="{{ route('tracer.login') }}"
+                    class="mobile-nav-link px-4 py-3 rounded-xl hover:bg-blue-50 hover:text-blue-700">Isi
+                    Kuesioner</a>
             </nav>
-            <div class="pt-3 border-t border-slate-100 flex flex-col gap-2">
-                <a href="{{ route('tracer.login') }}" class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 text-xs font-semibold text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 rounded-xl shadow-xs text-center">
-                    Isi Kuesioner Sekarang
-                </a>
-                <a href="{{ route('login') }}" class="w-full inline-flex items-center justify-center px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-100 rounded-xl border border-slate-200 text-center">
-                    Portal Staf &amp; Admin
+            <div class="pt-3 mt-2 border-t border-slate-100">
+                <a href="{{ route('login') }}"
+                    class="flex items-center justify-center gap-2 px-4 py-3 text-[13px] font-bold text-white rounded-xl bg-navy-900">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2"
+                            d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4M10 17l5-5-5-5M15 12H3" />
+                    </svg>
+                    Login
                 </a>
             </div>
         </div>
     </header>
 
-    <main id="hero">
-        <!-- 3. Hero Section (Split Interactive Showcase) -->
-        <section class="relative pt-12 pb-20 lg:pt-16 lg:pb-28 overflow-hidden">
-            <!-- Decorative Ambient Glows -->
-            <div class="absolute -top-24 left-1/4 w-96 h-96 bg-blue-400/15 rounded-full blur-3xl pointer-events-none -z-10"></div>
-            <div class="absolute top-28 right-10 w-[420px] h-[420px] bg-indigo-300/15 rounded-full blur-3xl pointer-events-none -z-10"></div>
+    
+    <div id="hero-fixed-bg" class="fixed inset-0 pointer-events-none z-0 overflow-hidden">
+        <img src="{{ asset('assets/media/illustrations/unuja-jaya.png') }}"
+            alt="Gedung Rektorat Universitas Nurul Jadid (UNUJA)"
+            class="w-full h-full object-cover object-[center_20%]">
 
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center">
-                    
-                    <!-- Left Column: Academic Pitch & CTA -->
-                    <div class="lg:col-span-7 space-y-6 text-left">
-                        <div class="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-blue-50/90 border border-blue-200/80 text-blue-700 text-xs font-semibold shadow-2xs">
-                            <span class="w-2 h-2 rounded-full bg-blue-600 animate-pulse"></span>
-                            <span>Instrumen Resmi Ditjen Diktiristek &amp; BAN-PT</span>
-                        </div>
+        
+        <div class="absolute inset-0 bg-slate-950/[0.08]"></div>
 
-                        <h1 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-slate-900 leading-[1.18]">
-                            Satu Langkah Nyata Alumni untuk <span class="bg-gradient-to-r from-blue-600 via-blue-700 to-indigo-700 bg-clip-text text-transparent">Kemajuan Almamater</span>.
-                        </h1>
+        
+        <div class="absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-white/90 via-white/25 to-transparent"></div>
+        <div class="absolute inset-x-0 bottom-0 h-48 bg-gradient-to-t from-white via-white/80 to-transparent"></div>
+    </div>
 
-                        <p class="text-base sm:text-lg text-slate-600 leading-relaxed max-w-2xl">
-                            Tracer Study Universitas Nurul Jadid merupakan sarana resmi penelusuran rekam jejak, masa transisi karir, serta relevansi kurikulum pendidikan tinggi. Kontribusi data Anda adalah fondasi utama peningkatan akreditasi program studi dan pengembangan mutu lulusan UNUJA.
-                        </p>
-
-                        <!-- Call to Actions -->
-                        <div class="pt-2 flex flex-col sm:flex-row items-stretch sm:items-center gap-3.5">
-                            <a href="{{ route('tracer.login') }}" class="inline-flex items-center justify-center gap-3 px-7 py-3.5 text-sm font-semibold text-white bg-gradient-to-r from-blue-600 via-blue-700 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 active:bg-blue-800 rounded-xl shadow-lg shadow-blue-500/25 hover:shadow-blue-500/35 transition-all transform hover:-translate-y-0.5">
-                                <span>Mulai Pengisian Kuesioner</span>
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
-                                </svg>
-                            </a>
-                            <a href="#alur" class="inline-flex items-center justify-center px-6 py-3.5 text-sm font-semibold text-slate-700 hover:text-slate-900 bg-white hover:bg-slate-50/80 rounded-xl border border-slate-200/90 shadow-2xs hover:border-slate-300 transition-colors">
-                                Pelajari Alur &amp; Sasaran
-                            </a>
-                        </div>
-
-                        <!-- Trust / Guidance Footnote -->
-                        <div class="pt-3 flex flex-wrap items-center gap-y-2 gap-x-6 text-xs text-slate-500 font-medium">
-                            <div class="flex items-center gap-1.5">
-                                <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                                </svg>
-                                <span>Estimasi waktu: ~5–7 Menit</span>
-                            </div>
-                            <div class="flex items-center gap-1.5">
-                                <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
-                                </svg>
-                                <span>Kerahasiaan terlindungi UU PDP</span>
-                            </div>
-                            <div class="flex items-center gap-1.5">
-                                <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2"/>
-                                </svg>
-                                <span>Masuk via NIM &amp; Tanggal Lahir</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Right Column: Interactive Questionnaire Showcase Card -->
-                    <div class="lg:col-span-5 relative">
-                        <div class="relative bg-white/95 backdrop-blur-md rounded-3xl border border-slate-200/90 shadow-2xl shadow-blue-900/10 p-6 sm:p-7 overflow-hidden transition-all hover:border-blue-300">
-                            
-                            <!-- Card Header: Window Controls & Badge -->
-                            <div class="flex items-center justify-between pb-4 border-b border-slate-100">
-                                <div class="flex items-center gap-2">
-                                    <div class="flex items-center gap-1.5">
-                                        <span class="w-2.5 h-2.5 rounded-full bg-rose-400"></span>
-                                        <span class="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
-                                        <span class="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
-                                    </div>
-                                    <span class="ml-2 text-xs font-bold text-slate-700 tracking-tight">Simulasi Pengisian Kuesioner</span>
-                                </div>
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-blue-50 text-blue-700 border border-blue-200">
-                                    Tahun Pelaporan 2026
-                                </span>
-                            </div>
-
-                            <!-- Step Progress Indicator -->
-                            <div class="py-4 space-y-1.5">
-                                <div class="flex items-center justify-between text-xs font-semibold text-slate-600">
-                                    <span>Langkah 1 dari 4: Identifikasi Lulusan</span>
-                                    <span class="text-blue-600 font-bold">25% Selesai</span>
-                                </div>
-                                <div class="w-full h-2 rounded-full bg-slate-100 overflow-hidden">
-                                    <div class="h-full bg-gradient-to-r from-blue-600 to-indigo-600 rounded-full w-1/4 animate-pulse"></div>
-                                </div>
-                            </div>
-
-                            <!-- Interactive Simulated Form Fields -->
-                            <div class="space-y-3.5 py-2">
-                                <!-- NIM Field Mock -->
-                                <div class="p-3.5 rounded-xl bg-slate-50/80 border border-slate-200 space-y-1">
-                                    <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500">Nomor Induk Mahasiswa (NIM)</label>
-                                    <div class="flex items-center justify-between">
-                                        <span class="font-mono text-sm font-bold text-slate-900 tracking-wider">20205100***</span>
-                                        <span class="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200">
-                                            <svg class="w-3 h-3 text-emerald-600" fill="currentColor" viewBox="0 0 20 20">
-                                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-                                            </svg>
-                                            Terdaftar di PDDikti
-                                        </span>
-                                    </div>
-                                </div>
-
-                                <!-- Tanggal Lahir Field Mock -->
-                                <div class="p-3.5 rounded-xl bg-slate-50/80 border border-slate-200 space-y-1">
-                                    <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500">Tanggal Lahir Responden</label>
-                                    <div class="flex items-center justify-between">
-                                        <span class="font-mono text-sm font-semibold text-slate-700">12 / 08 / 2001</span>
-                                        <span class="inline-flex items-center gap-1 text-[11px] font-medium text-slate-500">
-                                            <svg class="w-3.5 h-3.5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
-                                            </svg>
-                                            Verifikasi Otentik
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Highlights Bar -->
-                            <div class="mt-2 grid grid-cols-2 gap-2 text-[11px] font-medium text-slate-600">
-                                <div class="flex items-center gap-1.5 p-2 rounded-lg bg-blue-50/60 border border-blue-100">
-                                    <svg class="w-3.5 h-3.5 text-blue-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-                                    </svg>
-                                    <span>Autosave Aktif</span>
-                                </div>
-                                <div class="flex items-center gap-1.5 p-2 rounded-lg bg-emerald-50/60 border border-emerald-100">
-                                    <svg class="w-3.5 h-3.5 text-emerald-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
-                                    </svg>
-                                    <span>Enkripsi SSL 256-bit</span>
-                                </div>
-                            </div>
-
-                            <!-- Direct Action Button inside Showcase -->
-                            <a href="{{ route('tracer.login') }}" class="mt-5 w-full inline-flex items-center justify-center gap-2 px-4 py-3 text-xs font-bold uppercase tracking-wider text-blue-700 bg-blue-50 hover:bg-blue-100 border border-blue-200/90 rounded-xl transition-all hover:shadow-xs">
-                                <span>Akses Formulir Pengisian Resmi</span>
-                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
-                                </svg>
-                            </a>
-                        </div>
-                    </div>
-
-                </div>
-            </div>
-        </section>
-
-        <!-- 4. Key Metrics Ribbon -->
-        <section class="border-y border-slate-200/80 bg-white/80 backdrop-blur-xs py-10" aria-label="Ringkasan Statistik Institusi">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="grid grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
-                    <!-- Metric 1 -->
-                    <div class="p-4 rounded-2xl bg-white border border-slate-200/80 shadow-2xs hover:border-blue-300 transition-all text-center sm:text-left">
-                        <div class="flex items-center justify-center sm:justify-start gap-2 mb-1">
-                            <span class="w-2 h-2 rounded-full bg-blue-600"></span>
-                            <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Fakultas</span>
-                        </div>
-                        <div class="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">4 Fakultas</div>
-                        <p class="text-xs text-slate-500 font-medium mt-1">FAI, FT, FKes, &amp; FSH UNUJA</p>
-                    </div>
-
-                    <!-- Metric 2 -->
-                    <div class="p-4 rounded-2xl bg-white border border-slate-200/80 shadow-2xs hover:border-blue-300 transition-all text-center sm:text-left">
-                        <div class="flex items-center justify-center sm:justify-start gap-2 mb-1">
-                            <span class="w-2 h-2 rounded-full bg-indigo-600"></span>
-                            <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Program Studi</span>
-                        </div>
-                        <div class="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">15+ Prodi</div>
-                        <p class="text-xs text-slate-500 font-medium mt-1">Terakreditasi BAN-PT &amp; LAM</p>
-                    </div>
-
-                    <!-- Metric 3 -->
-                    <div class="p-4 rounded-2xl bg-white border border-slate-200/80 shadow-2xs hover:border-blue-300 transition-all text-center sm:text-left">
-                        <div class="flex items-center justify-center sm:justify-start gap-2 mb-1">
-                            <span class="w-2 h-2 rounded-full bg-emerald-600"></span>
-                            <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Target Mutu</span>
-                        </div>
-                        <div class="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">Standar IKU-1</div>
-                        <p class="text-xs text-slate-500 font-medium mt-1">Kesiapan Kerja &amp; Karir Lulusan</p>
-                    </div>
-
-                    <!-- Metric 4 -->
-                    <div class="p-4 rounded-2xl bg-white border border-slate-200/80 shadow-2xs hover:border-blue-300 transition-all text-center sm:text-left">
-                        <div class="flex items-center justify-center sm:justify-start gap-2 mb-1">
-                            <span class="w-2 h-2 rounded-full bg-amber-500"></span>
-                            <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Keamanan Data</span>
-                        </div>
-                        <div class="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">100% Aman</div>
-                        <p class="text-xs text-slate-500 font-medium mt-1">Anonimitas &amp; Perlindungan UU PDP</p>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- 5. Sasaran & Kriteria Alumni (Target Cohort) - Sleek SVG Badges (No Emojis) -->
-        <section id="sasaran" class="py-16 sm:py-24 border-b border-slate-200/80">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="max-w-3xl mb-12 sm:mb-16">
-                    <span class="text-xs font-bold uppercase tracking-widest text-blue-600">Kriteria Responden</span>
-                    <h2 class="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-slate-900 tracking-tight mt-2">
-                        Siapa yang Wajib Mengisi Tracer Study?
-                    </h2>
-                    <p class="text-slate-600 mt-3 text-base leading-relaxed">
-                        Sesuai pedoman pelaporan Dikti, seluruh lulusan pada kohort sasaran diharapkan berpartisipasi aktif apapun status transisi aktivitas yang sedang dijalani saat ini.
-                    </p>
+    
+    <section id="hero-section" class="relative z-10 overflow-hidden bg-transparent min-h-[700px] lg:min-h-[760px] flex flex-col justify-between pt-8 pb-10 sm:pt-10 sm:pb-12">
+        <div class="relative w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div aria-hidden="true" class="absolute left-1/2 top-[-3rem] -translate-x-1/2 w-[92%] max-w-3xl h-[135%] bg-white/60 blur-3xl rounded-[3rem] pointer-events-none"></div>
+            <div class="relative max-w-3xl mx-auto text-center">
+                <div class="reveal inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-white/95 backdrop-blur-md border border-white shadow-lg shadow-navy-900/10 text-xs font-semibold text-blue-900">
+                    <span class="px-2.5 py-0.5 rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-[11px] font-bold tracking-wide">RESMI</span>
+                    <span class="flex items-center gap-1.5">
+                        Instrumen Diktiristek &amp; BAN-PT
+                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                    </span>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
-                    <!-- Kohort 1: Bekerja -->
-                    <div class="bg-white p-7 rounded-3xl border border-slate-200/90 shadow-2xs hover:border-blue-300 hover:shadow-md hover:-translate-y-1 transition-all group">
-                        <div class="flex items-center justify-between mb-5">
-                            <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 text-white flex items-center justify-center shadow-md shadow-blue-500/20 group-hover:scale-105 transition-transform">
-                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
-                                </svg>
-                            </div>
-                            <span class="text-[11px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-blue-50 text-blue-700 border border-blue-200/80">
-                                Kategori 01
-                            </span>
-                        </div>
-                        <h3 class="text-lg font-bold text-slate-900">Alumni yang Sedang Bekerja</h3>
-                        <p class="text-sm text-slate-600 mt-2.5 leading-relaxed">
-                            Bekerja di instansi pemerintah, BUMN, perusahaan swasta, yayasan, organisasi non-profit, maupun lembaga pendidikan formal/non-formal.
-                        </p>
-                        <div class="mt-5 pt-4 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-blue-600">
-                            <span>Fokus: Keselarasan bidang studi</span>
-                            <span class="text-slate-400">&rarr;</span>
-                        </div>
-                    </div>
+                <h1 class="reveal reveal-d1 mt-4 text-3xl sm:text-5xl font-extrabold tracking-tight leading-[1.15] text-navy-950 drop-shadow-[0_2px_12px_rgba(255,255,255,0.9)]">
+                    Satu Langkah Kecil Alumni,<br>
+                    <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-700 via-indigo-600 to-blue-900">Lompatan Besar Almamater.</span>
+                </h1>
 
-                    <!-- Kohort 2: Wirausaha -->
-                    <div class="bg-white p-7 rounded-3xl border border-slate-200/90 shadow-2xs hover:border-blue-300 hover:shadow-md hover:-translate-y-1 transition-all group">
-                        <div class="flex items-center justify-between mb-5">
-                            <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 text-white flex items-center justify-center shadow-md shadow-indigo-500/20 group-hover:scale-105 transition-transform">
-                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
-                                </svg>
-                            </div>
-                            <span class="text-[11px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200/80">
-                                Kategori 02
-                            </span>
-                        </div>
-                        <h3 class="text-lg font-bold text-slate-900">Alumni Berwirausaha</h3>
-                        <p class="text-sm text-slate-600 mt-2.5 leading-relaxed">
-                            Mendirikan usaha mandiri, freelance profesional, startup rintisan, atau mengelola usaha keluarga di berbagai sektor ekonomi produktif.
-                        </p>
-                        <div class="mt-5 pt-4 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-indigo-600">
-                            <span>Fokus: Skala usaha &amp; kemandirian</span>
-                            <span class="text-slate-400">&rarr;</span>
-                        </div>
-                    </div>
-
-                    <!-- Kohort 3: Studi Lanjut / Transisi -->
-                    <div class="bg-white p-7 rounded-3xl border border-slate-200/90 shadow-2xs hover:border-blue-300 hover:shadow-md hover:-translate-y-1 transition-all group">
-                        <div class="flex items-center justify-between mb-5">
-                            <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white flex items-center justify-center shadow-md shadow-emerald-500/20 group-hover:scale-105 transition-transform">
-                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14zm-4 6v-7.5"/>
-                                </svg>
-                            </div>
-                            <span class="text-[11px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200/80">
-                                Kategori 03
-                            </span>
-                        </div>
-                        <h3 class="text-lg font-bold text-slate-900">Studi Lanjut &amp; Mencari Peluang</h3>
-                        <p class="text-sm text-slate-600 mt-2.5 leading-relaxed">
-                            Melanjutkan jenjang magister/doktoral, mengikuti sertifikasi profesi, atau yang sedang aktif mencari peluang karir pertama.
-                        </p>
-                        <div class="mt-5 pt-4 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-emerald-600">
-                            <span>Fokus: Linieritas studi &amp; transisi karir</span>
-                            <span class="text-slate-400">&rarr;</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Equal Value Callout Banner -->
-                <div class="mt-8 p-5 rounded-2xl bg-white border border-blue-200/80 shadow-2xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                    <div class="flex items-start gap-3">
-                        <div class="p-1.5 rounded-full bg-blue-600 text-white mt-0.5 shrink-0 shadow-xs">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
-                            </svg>
-                        </div>
-                        <p class="text-xs sm:text-sm text-slate-700 leading-relaxed font-medium">
-                            <strong class="text-slate-900">Catatan Penting:</strong> Seluruh status aktivitas alumni memiliki bobot nilai yang setara dalam evaluasi mutu pendidikan kampus. Tidak ada penilaian benar atau salah.
-                        </p>
-                    </div>
-                    <a href="{{ route('tracer.login') }}" class="shrink-0 text-xs font-bold text-blue-600 hover:text-blue-800 underline underline-offset-4">
-                        Isi Kuesioner Sekarang &rarr;
-                    </a>
-                </div>
-            </div>
-        </section>
-
-        <!-- 6. Alur 4 Langkah Pengisian (Connected Process Roadmap) -->
-        <section id="alur" class="py-16 sm:py-24 bg-white/90 backdrop-blur-xs border-b border-slate-200/80">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="text-center max-w-3xl mx-auto mb-16">
-                    <span class="text-xs font-bold uppercase tracking-widest text-blue-600">Tahapan Sederhana</span>
-                    <h2 class="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-slate-900 tracking-tight mt-2">
-                        Alur Pengisian Kuesioner Tracer Study
-                    </h2>
-                    <p class="text-slate-600 mt-3 text-base leading-relaxed">
-                        Hanya butuh 4 langkah ringkas untuk menyelesaikan partisipasi Anda. Seluruh proses dirancang efisien dan mudah diakses dari perangkat apapun.
-                    </p>
-                </div>
-
-                <!-- Process Steps Grid with Connection Flow -->
-                <div class="relative grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                    <!-- Step 1 -->
-                    <div class="relative bg-slate-50/80 p-6 rounded-3xl border border-slate-200/90 flex flex-col hover:border-blue-300 hover:shadow-md transition-all">
-                        <div class="flex items-center justify-between mb-4">
-                            <span class="w-10 h-10 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-600 text-white font-bold text-sm flex items-center justify-center shadow-md shadow-blue-500/20">01</span>
-                            <span class="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Langkah 1</span>
-                        </div>
-                        <h3 class="text-base font-bold text-slate-900">Akses &amp; Identifikasi</h3>
-                        <p class="text-xs sm:text-sm text-slate-600 mt-2 leading-relaxed flex-1">
-                            Buka formulir tracer study, lalu masukkan <strong>NIM</strong> dan <strong>Tanggal Lahir</strong> untuk verifikasi data alumni terdaftar.
-                        </p>
-                        <div class="mt-4 pt-3 border-t border-slate-200 text-xs font-semibold text-blue-600">
-                            Tanpa registrasi akun baru
-                        </div>
-                    </div>
-
-                    <!-- Step 2 -->
-                    <div class="relative bg-slate-50/80 p-6 rounded-3xl border border-slate-200/90 flex flex-col hover:border-blue-300 hover:shadow-md transition-all">
-                        <div class="flex items-center justify-between mb-4">
-                            <span class="w-10 h-10 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-600 text-white font-bold text-sm flex items-center justify-center shadow-md shadow-blue-500/20">02</span>
-                            <span class="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Langkah 2</span>
-                        </div>
-                        <h3 class="text-base font-bold text-slate-900">Verifikasi Biodata</h3>
-                        <p class="text-xs sm:text-sm text-slate-600 mt-2 leading-relaxed flex-1">
-                            Periksa nama lengkap, program studi, tahun kelulusan, dan perbarui nomor kontak atau email aktif Anda untuk korespondensi resmi.
-                        </p>
-                        <div class="mt-4 pt-3 border-t border-slate-200 text-xs font-semibold text-blue-600">
-                            Sinkronisasi data otomatis
-                        </div>
-                    </div>
-
-                    <!-- Step 3 -->
-                    <div class="relative bg-slate-50/80 p-6 rounded-3xl border border-slate-200/90 flex flex-col hover:border-blue-300 hover:shadow-md transition-all">
-                        <div class="flex items-center justify-between mb-4">
-                            <span class="w-10 h-10 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-600 text-white font-bold text-sm flex items-center justify-center shadow-md shadow-blue-500/20">03</span>
-                            <span class="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Langkah 3</span>
-                        </div>
-                        <h3 class="text-base font-bold text-slate-900">Isi Riwayat Transisi</h3>
-                        <p class="text-xs sm:text-sm text-slate-600 mt-2 leading-relaxed flex-1">
-                            Jawab kuesioner mengenai masa tunggu kerja, relevansi kompetensi mata kuliah, pengalaman kerja, atau kendala dalam transisi karir.
-                        </p>
-                        <div class="mt-4 pt-3 border-t border-slate-200 text-xs font-semibold text-blue-600">
-                            Format pilihan ganda &amp; singkat
-                        </div>
-                    </div>
-
-                    <!-- Step 4 -->
-                    <div class="relative bg-slate-50/80 p-6 rounded-3xl border border-slate-200/90 flex flex-col hover:border-blue-300 hover:shadow-md transition-all">
-                        <div class="flex items-center justify-between mb-4">
-                            <span class="w-10 h-10 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-600 text-white font-bold text-sm flex items-center justify-center shadow-md shadow-blue-500/20">04</span>
-                            <span class="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Langkah 4</span>
-                        </div>
-                        <h3 class="text-base font-bold text-slate-900">Kirim &amp; Selesai</h3>
-                        <p class="text-xs sm:text-sm text-slate-600 mt-2 leading-relaxed flex-1">
-                            Simpan jawaban akhir. Sistem mencatat partisipasi Anda secara resmi sebagai bagian dari pemenuhan instrumen akreditasi prodi.
-                        </p>
-                        <div class="mt-4 pt-3 border-t border-slate-200 text-xs font-semibold text-blue-600">
-                            Tercatat langsung di PDSI
-                        </div>
-                    </div>
-                </div>
-
-                <!-- CTA Banner Under Steps -->
-                <div class="mt-14 text-center">
-                    <a href="{{ route('tracer.login') }}" class="inline-flex items-center justify-center gap-2.5 px-8 py-3.5 text-sm font-bold text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 rounded-xl shadow-lg shadow-blue-500/20 hover:shadow-blue-500/30 transition-all transform hover:-translate-y-0.5">
-                        <span>Mulai Langkah Pertama Sekarang</span>
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
-                        </svg>
-                    </a>
-                </div>
-            </div>
-        </section>
-
-        <!-- 7. Tiga Nilai Manfaat Nyata (Institutional Impact) -->
-        <section id="manfaat" class="py-16 sm:py-24 border-b border-slate-200/80">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="max-w-3xl mb-12 sm:mb-16">
-                    <span class="text-xs font-bold uppercase tracking-widest text-blue-600">Dampak Nyata</span>
-                    <h2 class="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-slate-900 tracking-tight mt-2">
-                        Mengapa Kontribusi Anda Sangat Krusial?
-                    </h2>
-                    <p class="text-slate-600 mt-3 text-base leading-relaxed">
-                        Data tracer study bukanlah sekadar formalitas pengisian borang, melainkan instrumen ilmiah yang berdampak langsung pada nilai akreditasi almamater dan adik tingkat Anda.
-                    </p>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                    <!-- Pillar 1: Akreditasi -->
-                    <div class="bg-white p-8 rounded-3xl border border-slate-200/90 shadow-2xs hover:border-blue-300 hover:shadow-md transition-all space-y-4">
-                        <div class="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center border border-blue-200/80">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"/>
-                            </svg>
-                        </div>
-                        <h3 class="text-xl font-bold text-slate-900">Peringkat Akreditasi Unggul</h3>
-                        <p class="text-sm text-slate-600 leading-relaxed">
-                            Respon rate tracer study adalah indikator penilaian wajib BAN-PT dan Lembaga Akreditasi Mandiri (LAM). Semakin tinggi tingkat partisipasi alumni, semakin kuat pengakuan mutu ijazah lulusan UNUJA secara nasional.
-                        </p>
-                    </div>
-
-                    <!-- Pillar 2: Kurikulum -->
-                    <div class="bg-white p-8 rounded-3xl border border-slate-200/90 shadow-2xs hover:border-blue-300 hover:shadow-md transition-all space-y-4">
-                        <div class="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center border border-blue-200/80">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
-                            </svg>
-                        </div>
-                        <h3 class="text-xl font-bold text-slate-900">Pemutakhiran Kurikulum Praktis</h3>
-                        <p class="text-sm text-slate-600 leading-relaxed">
-                            Umpan balik Anda mengenai kompetensi yang paling relevan di tempat kerja digunakan oleh para dosen dan dekanat untuk meremajakan kurikulum agar mahasiswa senantiasa adaptif terhadap kebutuhan industri modern.
-                        </p>
-                    </div>
-
-                    <!-- Pillar 3: Jejaring Karir -->
-                    <div class="bg-white p-8 rounded-3xl border border-slate-200/90 shadow-2xs hover:border-blue-300 hover:shadow-md transition-all space-y-4">
-                        <div class="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center border border-blue-200/80">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
-                            </svg>
-                        </div>
-                        <h3 class="text-xl font-bold text-slate-900">Penguatan Sinergi Alumni</h3>
-                        <p class="text-sm text-slate-600 leading-relaxed">
-                            Membangun basis data jejaring alumni yang kuat di berbagai sektor industri di Indonesia, membuka peluang kolaborasi profesional, magang bagi mahasiswa aktif, serta kemitraan riset kampus dengan dunia usaha.
-                        </p>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- 8. Komitmen Jaminan Privasi Data (Trust & Privacy Box) -->
-        <section class="py-12 bg-white/60 border-b border-slate-200/80">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="rounded-3xl p-8 sm:p-10 text-white relative overflow-hidden shadow-xl" style="background: linear-gradient(160deg, #0f2744, #1e3a5f 50%, #1e40af);">
-                    <div class="max-w-3xl space-y-4">
-                        <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-white/10 border border-white/20 text-yellow-400 text-xs font-semibold">
-                            <span>Jaminan Perlindungan Data Pribadi (UU No. 27/2022)</span>
-                        </div>
-                        <h3 class="text-xl sm:text-2xl font-bold tracking-tight">
-                            Kerahasiaan Jawaban Anda Adalah Prioritas Tertinggi Kami.
-                        </h3>
-                        <p class="text-sm text-white/80 leading-relaxed">
-                            Setiap informasi yang Anda masukkan dikelola dengan enkripsi aman oleh Pusat Data &amp; Sistem Informasi (PDSI) Universitas Nurul Jadid. Data hanya diproses secara agregat statistik untuk keperluan akreditasi Dikti dan tidak akan disebarluaskan kepada pihak ketiga manapun untuk tujuan komersial.
-                        </p>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- 9. FAQ Accordion (Tanya Jawab Terstruktur) -->
-        <section id="faq" class="py-16 sm:py-24 border-b border-slate-200/80">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-start">
-                    
-                    <!-- Left Side: Header & Helpdesk Card -->
-                    <div class="lg:col-span-4 space-y-6">
-                        <div>
-                            <span class="inline-block px-3 py-1 rounded-full bg-blue-50 border border-blue-200 text-blue-700 text-xs font-bold uppercase tracking-wider mb-3">
-                                FAQ
-                            </span>
-                            <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
-                                Pertanyaan Umum
-                            </h2>
-                            <p class="text-slate-600 mt-3 text-sm leading-relaxed">
-                                Punya pertanyaan seputar pengisian kuesioner Tracer Study? Temukan jawaban untuk pertanyaan yang paling sering diajukan oleh alumni di bawah ini.
-                            </p>
-                        </div>
-
-                        <!-- Masih Butuh Bantuan Box -->
-                        <div class="bg-white rounded-3xl border border-slate-200/90 p-6 sm:p-7 shadow-2xs space-y-4">
-                            <div class="w-11 h-11 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center border border-blue-200/80">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
-                                </svg>
-                            </div>
-                            <div>
-                                <h3 class="text-base font-bold text-slate-900">Masih butuh bantuan?</h3>
-                                <p class="text-xs sm:text-sm text-slate-500 mt-1 leading-relaxed">
-                                    Jika jawaban yang Anda cari tidak ada, silakan hubungi tim helpdesk PDSI kami untuk bantuan lebih lanjut.
-                                </p>
-                            </div>
-                            <a href="mailto:tracer@unuja.ac.id" class="inline-flex items-center justify-center w-full px-4 py-3 text-xs font-bold text-white bg-slate-900 hover:bg-slate-800 rounded-xl transition-colors shadow-2xs">
-                                Hubungi Kami via Email
-                            </a>
-                        </div>
-                    </div>
-
-                    <!-- Right Side: Accordion List -->
-                    <div class="lg:col-span-8 space-y-3.5" id="faq-accordion">
-                        <!-- FAQ 1 -->
-                        <div class="bg-white rounded-2xl border border-slate-200/90 shadow-2xs overflow-hidden transition-all">
-                            <button type="button" class="faq-btn w-full px-6 py-5 text-left font-bold text-slate-900 flex items-center justify-between gap-4 hover:bg-slate-50/60 transition-colors focus:outline-hidden" aria-expanded="false">
-                                <span class="text-sm sm:text-base">Apakah alumni yang belum bekerja tetap wajib mengisi?</span>
-                                <svg class="faq-icon w-5 h-5 text-slate-400 shrink-0 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                                </svg>
-                            </button>
-                            <div class="faq-content hidden px-6 pb-5 pt-1 text-sm text-slate-600 leading-relaxed border-t border-slate-100">
-                                Ya, sangat wajib. Informasi mengenai alumni yang sedang dalam masa transisi, mempersiapkan diri untuk studi lanjut, atau masih mencari peluang karir sangat bernilai bagi universitas untuk memetakan kendala riil lulusan dan memperbaiki program pembekalan karir di kampus.
-                            </div>
-                        </div>
-
-                        <!-- FAQ 2 -->
-                        <div class="bg-white rounded-2xl border border-slate-200/90 shadow-2xs overflow-hidden transition-all">
-                            <button type="button" class="faq-btn w-full px-6 py-5 text-left font-bold text-slate-900 flex items-center justify-between gap-4 hover:bg-slate-50/60 transition-colors focus:outline-hidden" aria-expanded="false">
-                                <span class="text-sm sm:text-base">Kredensial apa yang digunakan untuk masuk ke formulir?</span>
-                                <svg class="faq-icon w-5 h-5 text-slate-400 shrink-0 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                                </svg>
-                            </button>
-                            <div class="faq-content hidden px-6 pb-5 pt-1 text-sm text-slate-600 leading-relaxed border-t border-slate-100">
-                                Anda cukup memasukkan Nomor Induk Mahasiswa (NIM) saat kuliah dan Tanggal Lahir Anda sesuai data yang terdaftar pada sistem akademik. Anda tidak perlu membuat akun baru.
-                            </div>
-                        </div>
-
-                        <!-- FAQ 3 -->
-                        <div class="bg-white rounded-2xl border border-slate-200/90 shadow-2xs overflow-hidden transition-all">
-                            <button type="button" class="faq-btn w-full px-6 py-5 text-left font-bold text-slate-900 flex items-center justify-between gap-4 hover:bg-slate-50/60 transition-colors focus:outline-hidden" aria-expanded="false">
-                                <span class="text-sm sm:text-base">Berapa lama waktu yang dibutuhkan untuk mengisi kuesioner?</span>
-                                <svg class="faq-icon w-5 h-5 text-slate-400 shrink-0 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                                </svg>
-                            </button>
-                            <div class="faq-content hidden px-6 pb-5 pt-1 text-sm text-slate-600 leading-relaxed border-t border-slate-100">
-                                Rata-rata waktu pengisian adalah antara 5 hingga 7 menit. Pertanyaan disajikan dalam bentuk pilihan ganda yang intuitif. Jika pengisian terputus, data yang telah diisi sebelumnya akan tetap tersimpan otomatis.
-                            </div>
-                        </div>
-
-                        <!-- FAQ 4 -->
-                        <div class="bg-white rounded-2xl border border-slate-200/90 shadow-2xs overflow-hidden transition-all">
-                            <button type="button" class="faq-btn w-full px-6 py-5 text-left font-bold text-slate-900 flex items-center justify-between gap-4 hover:bg-slate-50/60 transition-colors focus:outline-hidden" aria-expanded="false">
-                                <span class="text-sm sm:text-base">Bagaimana jika NIM saya tidak ditemukan atau lupa?</span>
-                                <svg class="faq-icon w-5 h-5 text-slate-400 shrink-0 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                                </svg>
-                            </button>
-                            <div class="faq-content hidden px-6 pb-5 pt-1 text-sm text-slate-600 leading-relaxed border-t border-slate-100">
-                                Silakan periksa nomor ijazah/transkrip nilai Anda, atau hubungi Pusat Data &amp; Sistem Informasi (PDSI) / Biro Kemahasiswaan UNUJA melalui kontak helpdesk di bagian bawah halaman ini dengan menyertakan nama lengkap, program studi, dan tahun kelulusan.
-                            </div>
-                        </div>
-
-                        <!-- FAQ 5 -->
-                        <div class="bg-white rounded-2xl border border-slate-200/90 shadow-2xs overflow-hidden transition-all">
-                            <button type="button" class="faq-btn w-full px-6 py-5 text-left font-bold text-slate-900 flex items-center justify-between gap-4 hover:bg-slate-50/60 transition-colors focus:outline-hidden" aria-expanded="false">
-                                <span class="text-sm sm:text-base">Apakah data pribadi saya akan dipublikasikan secara umum?</span>
-                                <svg class="faq-icon w-5 h-5 text-slate-400 shrink-0 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                                </svg>
-                            </button>
-                            <div class="faq-content hidden px-6 pb-5 pt-1 text-sm text-slate-600 leading-relaxed border-t border-slate-100">
-                                Tidak. Seluruh data identitas personal, instansi bekerja, dan rentang penghasilan sepenuhnya dianonimkan dan dilindungi. Laporan yang dipublikasikan hanya berbentuk rekapitulasi statistik agregat (misal: persentase keselarasan bidang atau rata-rata waktu tunggu lulusan).
-                            </div>
-                        </div>
-                    </div>
-
-                </div>
-            </div>
-        </section>
-
-        <!-- 10. Final Call to Action -->
-        <section class="py-16 sm:py-20 text-white relative" style="background: linear-gradient(160deg, #0f2744, #1e3a5f 50%, #1e40af);">
-            <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-6">
-                <span class="inline-flex items-center px-3.5 py-1 rounded-full text-xs font-semibold bg-white/10 border border-white/20 text-yellow-400">
-                    Mari Berkontribusi Hari Ini
-                </span>
-                <h2 class="text-2xl sm:text-4xl font-extrabold tracking-tight">
-                    Suara Anda Membantu Menentukan Masa Depan Almamater.
-                </h2>
-                <p class="text-white/80 text-sm sm:text-base max-w-2xl mx-auto leading-relaxed">
-                    Setiap detik waktu yang Anda luangkan menjadi pijakan kokoh bagi kemajuan ribuan mahasiswa aktif Universitas Nurul Jadid.
+                <p class="reveal reveal-d2 mt-3 text-sm sm:text-base text-slate-700 font-medium leading-relaxed max-w-xl mx-auto drop-shadow-[0_1px_8px_rgba(255,255,255,0.9)]">
+                    Ceritakan perjalanan karirmu lewat Tracer Study UNUJA — cukup ±5 menit dengan NIM. Kontribusi datamu menentukan mutu kampus dan akreditasi program studi.
                 </p>
-                <div class="pt-2 flex flex-col sm:flex-row items-center justify-center gap-4">
-                    <a href="{{ route('tracer.login') }}" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-4 text-sm font-bold text-slate-900 bg-white hover:bg-yellow-400 rounded-xl shadow-lg transition-all transform hover:-translate-y-0.5">
-                        <span>Isi Kuesioner Sekarang</span>
-                        <svg class="w-4 h-4 text-slate-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
-                        </svg>
+
+                <div class="reveal reveal-d2 mt-6 flex flex-col sm:flex-row items-center justify-center gap-3">
+                    <a href="{{ route('tracer.login') }}" class="group inline-flex items-center justify-center gap-2.5 px-8 py-3.5 text-sm font-bold text-white bg-navy-900 hover:bg-blue-700 rounded-2xl shadow-xl shadow-navy-900/25 transition-all hover:-translate-y-0.5 w-full sm:w-auto">
+                        <span>Mulai Isi Kuesioner</span>
+                        <svg class="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
                     </a>
-                    <a href="{{ route('login') }}" class="w-full sm:w-auto inline-flex items-center justify-center px-6 py-4 text-sm font-semibold text-white hover:text-yellow-400 rounded-xl border border-white/20 hover:bg-white/10 transition-colors">
-                        Login Pengelola Staf &amp; Admin
+                    <a href="#alur" class="group inline-flex items-center justify-center gap-2 px-8 py-3.5 text-sm font-bold text-navy-900 bg-white/95 hover:bg-white backdrop-blur-md rounded-2xl border border-white hover:border-blue-300 transition-all shadow-lg shadow-navy-900/10 w-full sm:w-auto">
+                        <svg class="w-4 h-4 text-blue-700 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        <span>Lihat Caranya</span>
                     </a>
                 </div>
             </div>
-        </section>
-    </main>
+        </div>
 
+        
+        <div class="w-full h-12 sm:h-20 pointer-events-none"></div>
 
-    <!-- 11. Institutional Footer (Sesuai Desain Web E-Lapor UNUJA) -->
-    <footer style="background: linear-gradient(160deg, #0f2744, #1e3a5f 50%, #1e40af);">
+        
+        <div class="relative w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="reveal reveal-d2 max-w-3xl mx-auto">
+                <div class="flex flex-wrap items-center justify-center gap-x-8 gap-y-3 rounded-2xl bg-navy-950/90 backdrop-blur-xl border border-white/15 shadow-[0_18px_40px_-12px_rgba(15,39,68,0.5)] px-6 sm:px-8 py-4">
+                    <div class="flex items-center gap-4 sm:gap-8">
+                        <span class="flex items-center gap-2 whitespace-nowrap">
+                            <span class="flex items-center justify-center w-8 h-8 rounded-lg bg-amber-500/20 border border-amber-400/30">
+                                <svg class="w-4 h-4 text-amber-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                            </span>
+                            <span class="text-xs font-bold text-white">±5 menit <span class="font-medium text-slate-300">pengisian</span></span>
+                        </span>
+                        <span class="flex items-center gap-2 whitespace-nowrap">
+                            <span class="flex items-center justify-center w-8 h-8 rounded-lg bg-blue-500/20 border border-blue-400/30">
+                                <svg class="w-4 h-4 text-blue-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4M10 17l5-5-5-5M15 12H3"/></svg>
+                            </span>
+                            <span class="text-xs font-bold text-white">Tanpa akun <span class="font-medium text-slate-300">cukup NIM</span></span>
+                        </span>
+                        <span class="flex items-center gap-2 whitespace-nowrap">
+                            <span class="flex items-center justify-center w-8 h-8 rounded-lg bg-emerald-500/20 border border-emerald-400/30">
+                                <svg class="w-4 h-4 text-emerald-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+                            </span>
+                            <span class="text-xs font-bold text-white">Aman <span class="font-medium text-slate-300">• UU PDP</span></span>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    
+    <section id="tentang" class="relative z-20">
+        
+        <div class="h-28 sm:h-36 bg-gradient-to-b from-white/0 via-white/80 to-white"></div>
+
+        <div class="bg-white">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16 sm:pb-20">
+                <div class="grid lg:grid-cols-2 gap-10 lg:gap-14 items-center">
+                    <div class="reveal flex justify-center">
+                        <svg viewBox="0 0 480 380" class="w-full max-w-xl h-auto" fill="none" role="img"
+                            aria-label="Ilustrasi alumni mengisi kuesioner tracer study di ponsel">
+                            <ellipse cx="230" cy="340" rx="130" ry="13" fill="#DBEAFE" />
+
+                            
+                            <path d="M60 106h24M72 94v24" stroke="#F59E0B" stroke-width="5" stroke-linecap="round" />
+                            <path d="M408 80h20M418 70v20" stroke="#818CF8" stroke-width="5"
+                                stroke-linecap="round" />
+                            <circle cx="96" cy="322" r="6" fill="#93C5FD" />
+                            <rect x="250" y="90" width="10" height="14" rx="2" fill="#F59E0B"
+                                transform="rotate(18 255 97)" />
+                            <rect x="432" y="176" width="10" height="14" rx="2" fill="#818CF8"
+                                transform="rotate(-15 437 183)" />
+                            <circle cx="66" cy="220" r="5" fill="#6EE7B7" />
+
+                            
+                            <rect x="76" y="274" width="26" height="16" rx="8" stroke="#92400E"
+                                stroke-width="5" />
+                            <rect x="48" y="286" width="80" height="56" rx="10" fill="#D97706" />
+                            <rect x="48" y="286" width="80" height="22" rx="10" fill="#B45309" />
+                            <rect x="81" y="302" width="14" height="10" rx="3" fill="#FDE68A" />
+
+                            
+                            <rect x="296" y="64" width="124" height="228" rx="22" fill="#0F2744" />
+                            <rect x="306" y="78" width="104" height="200" rx="12" fill="#fff" />
+                            <rect x="314" y="88" width="56" height="10" rx="5" fill="#1E3A5F" />
+                            <rect x="314" y="102" width="88" height="7" rx="3.5" fill="#CBD5E1" />
+                            <circle cx="323" cy="123" r="9" fill="#ECFDF5" stroke="#10B981"
+                                stroke-width="2" />
+                            <path d="M319 123l3 3 6-6" stroke="#10B981" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round" />
+                            <rect x="338" y="119" width="64" height="8" rx="4" fill="#E2E8F0" />
+                            <circle cx="323" cy="147" r="9" fill="#ECFDF5" stroke="#10B981"
+                                stroke-width="2" />
+                            <path d="M319 147l3 3 6-6" stroke="#10B981" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round" />
+                            <rect x="338" y="143" width="64" height="8" rx="4" fill="#E2E8F0" />
+                            <circle cx="323" cy="171" r="9" fill="#fff" stroke="#CBD5E1"
+                                stroke-width="2" />
+                            <rect x="338" y="167" width="48" height="8" rx="4" fill="#F1F5F9" />
+                            <rect x="314" y="190" width="88" height="10" rx="5" fill="#F1F5F9" />
+                            <rect x="314" y="190" width="58" height="10" rx="5" fill="#10B981" />
+                            <rect x="314" y="208" width="88" height="28" rx="14" fill="#1E40AF" />
+                            <rect x="338" y="219" width="40" height="7" rx="3.5" fill="#fff"
+                                opacity=".95" />
+                            <rect x="338" y="284" width="40" height="5" rx="2.5" fill="#475569" />
+
+                            
+                            <rect x="138" y="106" width="108" height="134" rx="52" fill="#1E3A5F" />
+                            
+                            <rect x="146" y="210" width="92" height="116" rx="26" fill="#274B73" />
+                            <polygon points="180,210 204,210 192,238" fill="#fff" />
+                            
+                            <rect x="122" y="222" width="27" height="68" rx="13.5" fill="#274B73" />
+                            <rect x="92" y="284" width="58" height="20" rx="10" fill="#fff"
+                                stroke="#E2E8F0" stroke-width="2" />
+                            <rect x="104" y="284" width="12" height="20" fill="#EF4444" />
+                            <circle cx="135" cy="294" r="11" fill="#F6C89F" />
+                            
+                            <rect x="234" y="230" width="72" height="26" rx="13" fill="#274B73" />
+                            <circle cx="308" cy="243" r="11" fill="#F6C89F" />
+
+                            
+                            <ellipse cx="192" cy="164" rx="33" ry="37" fill="#F6C89F" />
+                            <path d="M174 196Q192 206 210 196" stroke="#EAB88A" stroke-width="3"
+                                stroke-linecap="round" />
+                            <circle cx="180" cy="162" r="3.6" fill="#0F2744" />
+                            <circle cx="204" cy="162" r="3.6" fill="#0F2744" />
+                            <ellipse cx="171" cy="174" rx="5" ry="3" fill="#F9A8A8"
+                                opacity=".7" />
+                            <ellipse cx="213" cy="174" rx="5" ry="3" fill="#F9A8A8"
+                                opacity=".7" />
+                            <path d="M182 180Q192 189 202 180" stroke="#92400E" stroke-width="3"
+                                stroke-linecap="round" />
+
+                            
+                            <polygon points="138,116 192,90 246,116 192,142" fill="#0F2744" />
+                            <circle cx="192" cy="116" r="4" fill="#475569" />
+                            <line x1="246" y1="116" x2="246" y2="152" stroke="#F59E0B"
+                                stroke-width="4" stroke-linecap="round" />
+                            <circle cx="246" cy="158" r="6" fill="#F59E0B" />
+
+                            
+                            <circle cx="404" cy="274" r="24" fill="#ECFDF5" stroke="#A7F3D0"
+                                stroke-width="2" />
+                            <path d="M404 260l9 3.5v7c0 7-3.5 11.5-9 14-5.5-2.5-9-7-9-14v-7l9-3.5z" fill="#10B981" />
+                            <path d="M399.5 274l3.5 3.5 6-6" stroke="#fff" stroke-width="2.5" stroke-linecap="round"
+                                stroke-linejoin="round" />
+                        </svg>
+                    </div>
+                    <div class="reveal reveal-d1">
+                        <p class="text-xs font-extrabold uppercase tracking-[0.2em] text-blue-600">Tentang</p>
+                        <h2 class="mt-2 text-2xl sm:text-3xl font-extrabold tracking-tight text-navy-900">Apa Itu <span
+                                class="text-transparent bg-clip-text bg-gradient-to-r from-blue-700 via-indigo-600 to-blue-900">TRACER
+                                STUDY</span>?</h2>
+                        <p class="mt-4 text-sm sm:text-[15px] text-slate-500 leading-relaxed text-justify"><strong
+                                class="text-navy-900">Tracer Study UNUJA</strong> adalah portal resmi penelusuran rekam
+                            jejak lulusan Universitas Nurul Jadid — mencakup <strong class="text-navy-900">seluruh
+                                fakultas dan program studi</strong>. Melalui kuesioner baku berstandar <strong
+                                class="text-navy-900">Diktiristek dan BAN-PT</strong>, universitas memotret perjalanan
+                            alumni setelah lulus: masa tunggu kerja pertama, jenis dan bidang pekerjaan, kesesuaian ilmu
+                            dengan karier, hingga kepuasan terhadap layanan kampus.</p>
+                        <p class="mt-3 text-sm sm:text-[15px] text-slate-500 leading-relaxed text-justify">Bagi alumni,
+                            ini cara termudah berkontribusi untuk almamater — cukup <strong class="text-navy-900">NIM
+                                saja</strong>, sekitar <strong class="text-navy-900">±5 menit</strong>,
+                            tanpa membuat akun. Bagi kampus, setiap jawaban menjadi <strong class="text-navy-900">bukti
+                                akreditasi</strong>, bahan menyelaraskan kurikulum dengan dunia kerja, dan penguat
+                            jejaring alumni. Seluruh data bersifat <strong class="text-navy-900">rahasia</strong>,
+                            dilaporkan dalam bentuk <strong class="text-navy-900">agregat</strong>, dan dilindungi
+                            <strong class="text-navy-900">UU PDP No. 27/2022</strong>.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    
+    <section id="alur" class="relative z-20 py-16 sm:py-20 overflow-hidden bg-navy-900"
+        style="background-color:#1e3a5f">
+        <div class="absolute -top-24 -left-24 w-96 h-96 rounded-full bg-blue-500/20 blur-3xl pointer-events-none">
+        </div>
+        <div
+            class="absolute -bottom-32 -right-24 w-[28rem] h-[28rem] rounded-full bg-indigo-500/20 blur-3xl pointer-events-none">
+        </div>
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+            <div class="reveal max-w-2xl mx-auto text-center">
+                <p class="text-xs font-extrabold uppercase tracking-[0.2em] text-sky-300">Alur</p>
+                <h2 class="mt-2 text-2xl sm:text-3xl font-extrabold tracking-tight text-white">4 Langkah, ±5 Menit</h2>
+                <p class="mt-3 text-sm sm:text-base text-blue-100/80 leading-relaxed">Tanpa daftar akun — cukup NIM.</p>
+            </div>
+            <div class="relative mt-10">
+                <div class="hidden lg:block absolute top-12 left-[13%] right-[13%] border-t-2 border-dashed border-white/25"
+                    aria-hidden="true"></div>
+                <div class="relative grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    @foreach ([['01', 'Masuk', 'NIM saja, tanpa daftar akun.', 'M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4M10 17l5-5-5-5M15 12H3', 'from-blue-600 to-indigo-600 shadow-blue-600/30'], ['02', 'Verifikasi', 'Cek biodata & perbarui kontak.', 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z', 'from-indigo-500 to-purple-600 shadow-indigo-500/30'], ['03', 'Isi', 'Jawab riwayat karir & studi.', 'M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z', 'from-amber-400 to-orange-500 shadow-orange-500/30'], ['04', 'Kirim', 'Tercatat resmi untuk akreditasi.', 'M12 19l9 2-9-18-9 18 9-2zm0 0v-8', 'from-emerald-500 to-teal-600 shadow-emerald-500/30']] as $s)
+                        <div
+                            class="reveal rounded-3xl bg-white p-6 shadow-xl shadow-navy-950/20 hover:-translate-y-1.5 hover:shadow-2xl transition-all">
+                            <div class="flex items-start justify-between">
+                                <span
+                                    class="flex items-center justify-center w-12 h-12 rounded-2xl bg-gradient-to-br {{ $s[4] }} text-white shadow-lg">
+                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="{{ $s[3] }}" />
+                                    </svg>
+                                </span>
+                                <span
+                                    class="text-4xl font-extrabold text-slate-100 leading-none select-none">{{ $s[0] }}</span>
+                            </div>
+                            <h3 class="mt-4 font-extrabold text-navy-900">{{ $s[1] }}</h3>
+                            <p class="mt-1 text-sm text-slate-500 leading-relaxed">{{ $s[2] }}</p>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+            <div
+                class="reveal mt-8 rounded-3xl p-5 sm:p-6 flex flex-col sm:flex-row items-start sm:items-center gap-4 bg-gradient-to-r from-amber-300 to-amber-400 shadow-xl shadow-navy-950/20">
+                <span
+                    class="hidden sm:flex items-center justify-center w-12 h-12 rounded-2xl bg-navy-900 text-amber-300 shrink-0 shadow-lg">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                    </svg>
+                </span>
+                <p class="flex-1 text-sm text-navy-950 leading-relaxed"><strong class="font-extrabold">Kenapa
+                        penting?</strong> Datamu pengaruhi akreditasi BAN-PT/LAM, relevansi kurikulum, dan jejaring
+                    alumni — tunduk pada UU Perlindungan Data Pribadi No. 27/2022.</p>
+                <a href="{{ route('tracer.login') }}"
+                    class="shrink-0 inline-flex items-center gap-2 px-6 py-3 text-sm font-bold text-white bg-navy-900 hover:bg-blue-700 rounded-xl shadow-lg shadow-navy-900/20 transition-all">
+                    Isi Sekarang
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                            d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                    </svg>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    
+    <section id="faq" class="relative z-20 py-16 sm:py-20 bg-white overflow-hidden">
+        <div class="absolute top-10 -left-24 w-80 h-80 rounded-full bg-blue-100/60 blur-3xl pointer-events-none"></div>
+        <div class="absolute bottom-0 -right-24 w-80 h-80 rounded-full bg-indigo-100/60 blur-3xl pointer-events-none">
+        </div>
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+            <div class="grid lg:grid-cols-5 gap-10 lg:gap-14 items-start">
+                <div class="reveal lg:col-span-2 lg:sticky lg:top-32 text-center lg:text-left">
+                    <p class="text-xs font-extrabold uppercase tracking-[0.2em] text-blue-600">FAQ</p>
+                    <h2 class="mt-2 text-2xl sm:text-3xl font-extrabold tracking-tight text-navy-900">Sering ditanyakan
+                    </h2>
+                    <p class="mt-3 text-sm sm:text-base text-slate-500 leading-relaxed">Jawaban cepat seputar pengisian
+                        kuesioner. Masih ragu? Tim kami siap membantu.</p>
+                    <div class="mt-6 rounded-3xl p-6 text-white shadow-xl shadow-navy-900/20"
+                        style="background: linear-gradient(135deg, #0f2744, #1e3a5f 60%, #1e40af);">
+                        <span
+                            class="mx-auto lg:mx-0 flex items-center justify-center w-11 h-11 rounded-2xl bg-white/10 border border-white/15">
+                            <svg class="w-5 h-5 text-amber-300" fill="none" stroke="currentColor"
+                                viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+                            </svg>
+                        </span>
+                        <h3 class="mt-4 font-extrabold">Butuh bantuan?</h3>
+                        <p class="mt-1 text-sm text-blue-100/80">Hubungi tim Tracer Study UNUJA lewat email.</p>
+                        <a href="mailto:lpip@unuja.ac.id"
+                            class="mt-4 inline-flex items-center gap-2 px-5 py-2.5 text-[13px] font-bold text-navy-900 bg-white hover:bg-amber-300 rounded-xl transition-all">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                            </svg>
+                            lpip@unuja.ac.id
+                        </a>
+                    </div>
+                </div>
+                <div class="reveal reveal-d1 lg:col-span-3 space-y-3">
+                    @foreach ([
+        ['Apakah alumni yang belum bekerja tetap wajib mengisi?', 'Ya, sangat wajib. Informasi mengenai alumni yang sedang dalam masa transisi, mempersiapkan diri untuk studi lanjut, atau masih mencari peluang karir sangat bernilai bagi universitas untuk memetakan kendala riil lulusan dan memperbaiki program pembekalan karir di kampus.'],
+        ['Kredensial apa yang digunakan untuk masuk ke formulir?', 'Anda cukup memasukkan Nomor Induk Mahasiswa (NIM) saat kuliah sesuai data yang terdaftar pada sistem akademik. Anda tidak perlu membuat akun baru.'],
+        ['Berapa lama waktu yang dibutuhkan untuk mengisi kuesioner?', 'Rata-rata waktu pengisian adalah antara 5 hingga 7 menit. Pertanyaan disajikan dalam bentuk pilihan ganda yang intuitif. Jika pengisian terputus, data yang telah diisi sebelumnya akan tetap tersimpan otomatis.'],
+        ['Bagaimana jika NIM saya tidak ditemukan atau lupa?', 'Silakan periksa nomor ijazah/transkrip nilai Anda, atau hubungi Lembaga Pengembangan dan Inovasi Pembelajaran (LPIP) / Biro Kemahasiswaan UNUJA melalui kontak helpdesk di bagian bawah halaman ini dengan menyertakan nama lengkap, program studi, dan tahun kelulusan.'],
+        ['Apakah data pribadi saya akan dipublikasikan secara umum?', 'Tidak. Seluruh data identitas personal, instansi bekerja, dan rentang penghasilan sepenuhnya dianonimkan dan dilindungi. Laporan yang dipublikasikan hanya berbentuk rekapitulasi statistik agregat (misal: persentase keselarasan bidang atau rata-rata waktu tunggu lulusan).'],
+    ] as $f)
+                        <div
+                            class="faq-item bg-white rounded-2xl border border-slate-200 overflow-hidden hover:border-blue-300 hover:shadow-md transition-all">
+                            <button type="button"
+                                class="faq-btn w-full px-5 sm:px-6 py-4 text-left flex items-center gap-4">
+                                <span
+                                    class="hidden sm:flex items-center justify-center w-9 h-9 rounded-xl bg-blue-50 text-blue-700 text-xs font-extrabold shrink-0">{{ str_pad($loop->iteration, 2, '0', STR_PAD_LEFT) }}</span>
+                                <span class="flex-1 font-bold text-navy-900 text-[15px]">{{ $f[0] }}</span>
+                                <span
+                                    class="faq-chevron flex items-center justify-center w-8 h-8 rounded-full bg-navy-900 text-white shrink-0">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                                            d="M12 5v14M5 12h14" />
+                                    </svg>
+                                </span>
+                            </button>
+                            <div class="faq-content">
+                                <div class="faq-inner">
+                                    <p
+                                        class="px-5 sm:px-6 sm:pl-[4.75rem] pb-5 text-sm text-slate-500 leading-relaxed">
+                                        {{ $f[1] }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+        </div>
+    </section>
+
+    
+    <footer class="relative z-20" style="background: linear-gradient(160deg, #0f2744, #1e3a5f 50%, #1e40af);">
         <div class="relative max-w-7xl mx-auto px-4 sm:px-6 pt-16 pb-12">
             <div class="absolute top-0 left-0 right-0 h-px"
                 style="background: linear-gradient(90deg, transparent, rgba(59,130,246,0.4), transparent);"></div>
@@ -735,12 +614,14 @@
                 <div class="sm:col-span-2 lg:col-span-4">
                     <div class="mb-6">
                         <a href="{{ route('home') }}" class="inline-block">
-                            <img src="{{ asset('assets/media/logos/unuja.png') }}" alt="Logo Universitas Nurul Jadid"
+                            <img src="{{ asset('assets/media/logos/tracer.png') }}"
+                                alt="Tracer Study Universitas Nurul Jadid"
                                 class="h-10 lg:h-[50px] w-auto object-contain hover:opacity-90 active:opacity-90 transition-opacity active:scale-[0.98]">
                         </a>
                     </div>
                     <p class="text-white/50 text-sm leading-relaxed max-w-xs">
-                        Portal resmi Tracer Study Universitas Nurul Jadid untuk penelusuran rekam jejak lulusan, peningkatan mutu pendidikan, dan akreditasi program studi.
+                        Portal resmi Tracer Study Universitas Nurul Jadid untuk penelusuran rekam jejak lulusan,
+                        peningkatan mutu pendidikan, dan akreditasi program studi.
                     </p>
                     <div class="flex gap-2.5 mt-6">
                         <a href="https://www.facebook.com/universitasnuruljadid/" target="_blank"
@@ -751,7 +632,8 @@
                         </a>
                         <a href="https://www.instagram.com/unujaofficial/" target="_blank"
                             class="w-9 h-9 rounded-xl bg-white/5 flex items-center justify-center text-white/40 hover:bg-white/10 active:bg-white/10 hover:text-yellow-400 active:text-yellow-400 transition-all no-underline active:scale-[0.98]">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2"
+                                viewBox="0 0 24 24">
                                 <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
                                 <path d="M16 11.37A4 4 0 1112.63 8 4 4 0 0116 11.37z" />
                                 <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
@@ -768,7 +650,7 @@
                             class="w-9 h-9 rounded-xl bg-white/5 flex items-center justify-center text-white/40 hover:bg-white/10 active:bg-white/10 hover:text-yellow-400 active:text-yellow-400 transition-all no-underline active:scale-[0.98]">
                             <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                                 <path
-                                    d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.27 6.27 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 0 006.34 6.34 6.34 0 006.33-6.34V8.69a8.18 8.18 0 004.79 1.54V6.78a4.85 4.85 0 01-1.02-.09z" />
+                                    d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.27 6.27 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V8.69a8.18 8.18 0 004.79 1.54V6.78a4.85 4.85 0 01-1.02-.09z" />
                             </svg>
                         </a>
                     </div>
@@ -783,9 +665,12 @@
                                 stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round"
                                     d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                             </svg>
-                            <span class="leading-relaxed hover:text-yellow-400 active:text-yellow-400 transition-colors cursor-default active:scale-[0.98]">JL. PP
+                            <span
+                                class="leading-relaxed hover:text-yellow-400 active:text-yellow-400 transition-colors cursor-default active:scale-[0.98]">JL.
+                                PP
                                 Nurul Jadid, Dusun Tj. Lor, Karanganyar, Kec. Paiton, Kabupaten Probolinggo, Jawa Timur
                                 67291</span>
                         </li>
@@ -796,7 +681,8 @@
                                     d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
                             </svg>
                             <a href="tel:+628883077077"
-                                class="text-white/50 no-underline hover:text-yellow-400 active:text-yellow-400 transition-colors active:scale-[0.98]">0888 30 77077</a>
+                                class="text-white/50 no-underline hover:text-yellow-400 active:text-yellow-400 transition-colors active:scale-[0.98]">0888
+                                30 77077</a>
                         </li>
                         <li class="flex items-center gap-2.5">
                             <svg class="w-4 h-4 shrink-0 text-blue-400/70" fill="none" stroke="currentColor"
@@ -805,7 +691,9 @@
                                 <path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2" />
                                 <rect x="6" y="14" width="12" height="8" />
                             </svg>
-                            <span class="hover:text-yellow-400 active:text-yellow-400 transition-colors cursor-default active:scale-[0.98]">Fax 0888 30 77077</span>
+                            <span
+                                class="hover:text-yellow-400 active:text-yellow-400 transition-colors cursor-default active:scale-[0.98]">Fax
+                                0888 30 77077</span>
                         </li>
                         <li class="flex items-center gap-2.5">
                             <svg class="w-4 h-4 shrink-0 text-blue-400/70" fill="none" stroke="currentColor"
@@ -813,8 +701,8 @@
                                 <path stroke-linecap="round" stroke-linejoin="round"
                                     d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                             </svg>
-                            <a href="mailto:tracer@unuja.ac.id"
-                                class="text-white/50 no-underline hover:text-yellow-400 active:text-yellow-400 transition-colors active:scale-[0.98]">tracer@unuja.ac.id</a>
+                            <a href="mailto:unuja@unuja.ac.id"
+                                class="text-white/50 no-underline hover:text-yellow-400 active:text-yellow-400 transition-colors active:scale-[0.98]">unuja@unuja.ac.id</a>
                         </li>
                     </ul>
                 </div>
@@ -840,7 +728,7 @@
                     <h4 class="font-bold text-white/80 text-xs uppercase tracking-[0.15em] mb-4">Navigasi</h4>
                     <div class="w-8 h-0.5 rounded-full mb-5 bg-yellow-400"></div>
                     <ul class="flex flex-col gap-2.5 text-sm list-none p-0 m-0">
-                        @foreach ([['url' => '#hero', 'label' => 'Beranda'], ['url' => '#sasaran', 'label' => 'Sasaran Alumni'], ['url' => '#alur', 'label' => 'Alur Pengisian'], ['url' => '#manfaat', 'label' => 'Manfaat'], ['url' => '#faq', 'label' => 'FAQ / Bantuan']] as $link)
+                        @foreach ([['url' => '#hero', 'label' => 'Beranda'], ['url' => '#tentang', 'label' => 'Tentang Tracer'], ['url' => '#alur', 'label' => 'Alur Pengisian'], ['url' => '#faq', 'label' => 'FAQ / Bantuan']] as $link)
                             <li><a href="{{ $link['url'] }}"
                                     class="inline-flex items-center gap-2 text-white/50 no-underline hover:text-yellow-400 active:text-yellow-400 hover:translate-x-1.5 active:translate-x-1.5 transition-all duration-300 group active:scale-[0.98]">
                                     <svg class="w-3.5 h-3.5 text-blue-400/70 group-hover:text-yellow-400 group-active:text-yellow-400 transition-colors shrink-0 active:scale-[0.98]"
@@ -850,92 +738,126 @@
                                     {{ $link['label'] }}
                                 </a></li>
                         @endforeach
-                        <li><a href="{{ route('login') }}"
-                                class="inline-flex items-center gap-2 text-white/50 no-underline hover:text-yellow-400 active:text-yellow-400 hover:translate-x-1.5 active:translate-x-1.5 transition-all duration-300 group active:scale-[0.98]">
-                                <svg class="w-3.5 h-3.5 text-blue-400/70 group-hover:text-yellow-400 group-active:text-yellow-400 transition-colors shrink-0 active:scale-[0.98]"
-                                    fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
-                                </svg>
-                                Portal Admin
-                            </a></li>
                     </ul>
                 </div>
             </div>
         </div>
 
         <div class="border-t border-white/5">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 py-5 flex flex-col md:flex-row items-center justify-between gap-3">
-                <p class="text-sm text-white/30 m-0 font-medium">&copy; {{ date('Y') }} PDSI Universitas Nurul Jadid.
-                    Hak Cipta Dilindungi.</p>
+            <div
+                class="max-w-7xl mx-auto px-4 sm:px-6 py-5 flex flex-col md:flex-row items-center justify-between gap-3">
+                <p class="text-sm text-white/30 m-0 font-medium">&copy; {{ date('Y') }} PDSI Universitas Nurul Jadid. Hak Cipta Dilindungi.</p>
                 <div class="flex items-center gap-4 text-sm text-white/30">
-                    <a href="#faq" class="text-white/30 no-underline hover:text-yellow-400 active:text-yellow-400 transition-colors active:scale-[0.98]">Kebijakan
+                    <a href="#faq"
+                        class="text-white/30 no-underline hover:text-yellow-400 active:text-yellow-400 transition-colors active:scale-[0.98]">Kebijakan
                         Privasi</a>
                     <span class="w-1 h-1 rounded-full bg-white/10"></span>
-                    <a href="#alur" class="text-white/30 no-underline hover:text-yellow-400 active:text-yellow-400 transition-colors active:scale-[0.98]">Syarat
+                    <a href="#alur"
+                        class="text-white/30 no-underline hover:text-yellow-400 active:text-yellow-400 transition-colors active:scale-[0.98]">Syarat
                         &amp; Ketentuan</a>
                 </div>
             </div>
         </div>
     </footer>
 
-    <!-- Interactive Vanilla JS (Accordion & Mobile Drawer) -->
+    <button id="back-top"
+        class="fixed bottom-6 right-6 z-50 hidden items-center justify-center w-12 h-12 rounded-2xl bg-navy-900 text-white shadow-2xl hover:bg-blue-700 transition-all"
+        aria-label="Kembali ke atas">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 15l7-7 7 7" />
+        </svg>
+    </button>
+
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            // Mobile Menu Toggle
-            const mobileBtn = document.getElementById('mobile-menu-btn');
-            const mobileMenu = document.getElementById('mobile-menu');
-            const iconOpen = document.getElementById('menu-icon-open');
-            const iconClose = document.getElementById('menu-icon-close');
+        // Mobile menu
+        const menuBtn = document.getElementById('mobile-menu-btn');
+        const mobileMenu = document.getElementById('mobile-menu');
+        const iconOpen = document.getElementById('menu-icon-open');
+        const iconClose = document.getElementById('menu-icon-close');
+        menuBtn.addEventListener('click', () => {
+            const isHidden = mobileMenu.classList.toggle('hidden');
+            iconOpen.classList.toggle('hidden', !isHidden);
+            iconClose.classList.toggle('hidden', isHidden);
+        });
+        document.querySelectorAll('.mobile-nav-link').forEach(a => a.addEventListener('click', () => {
+            mobileMenu.classList.add('hidden');
+            iconOpen.classList.remove('hidden');
+            iconClose.classList.add('hidden');
+        }));
 
-            if (mobileBtn && mobileMenu) {
-                mobileBtn.addEventListener('click', function () {
-                    const isExpanded = mobileBtn.getAttribute('aria-expanded') === 'true';
-                    mobileBtn.setAttribute('aria-expanded', !isExpanded);
-                    mobileMenu.classList.toggle('hidden');
-                    iconOpen.classList.toggle('hidden');
-                    iconClose.classList.toggle('hidden');
-                });
+        // FAQ accordion
+        document.querySelectorAll('.faq-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const item = btn.closest('.faq-item');
+                const wasOpen = item.classList.contains('open');
+                document.querySelectorAll('.faq-item.open').forEach(i => i.classList.remove('open'));
+                if (!wasOpen) item.classList.add('open');
+            });
+        });
 
-                // Auto close mobile drawer when any link is clicked
-                document.querySelectorAll('.mobile-nav-link').forEach(link => {
-                    link.addEventListener('click', () => {
-                        mobileMenu.classList.add('hidden');
-                        mobileBtn.setAttribute('aria-expanded', 'false');
-                        iconOpen.classList.remove('hidden');
-                        iconClose.classList.add('hidden');
-                    });
-                });
+        // Scroll reveal
+        const io = new IntersectionObserver(entries => {
+            entries.forEach(e => {
+                if (e.isIntersecting) {
+                    e.target.classList.add('visible');
+                    io.unobserve(e.target);
+                }
+            });
+        }, {
+            threshold: 0.12
+        });
+        document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+        // Hero progress bar
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                const bar = document.getElementById('hero-progress');
+                if (bar) bar.style.width = '68%';
+            }, 400);
+        });
+
+        // Navbar shadow + back-to-top
+        const backTop = document.getElementById('back-top');
+        const navbar = document.getElementById('navbar');
+
+        function updateScrollState() {
+            const y = window.scrollY;
+            if (navbar) navbar.classList.toggle('shadow-lg', y > 10);
+            if (backTop) {
+                if (y > 600) {
+                    backTop.classList.remove('hidden');
+                    backTop.classList.add('flex');
+                } else {
+                    backTop.classList.add('hidden');
+                    backTop.classList.remove('flex');
+                }
             }
+        }
 
-            // FAQ Accordion
-            const faqButtons = document.querySelectorAll('.faq-btn');
-            faqButtons.forEach(button => {
-                button.addEventListener('click', function () {
-                    const content = this.nextElementSibling;
-                    const icon = this.querySelector('.faq-icon');
-                    const isExpanded = this.getAttribute('aria-expanded') === 'true';
+        window.addEventListener('scroll', updateScrollState, { passive: true });
+        updateScrollState();
 
-                    // Close all others
-                    faqButtons.forEach(otherBtn => {
-                        if (otherBtn !== this) {
-                            otherBtn.setAttribute('aria-expanded', 'false');
-                            otherBtn.nextElementSibling.classList.add('hidden');
-                            const otherIcon = otherBtn.querySelector('.faq-icon');
-                            if (otherIcon) otherIcon.style.transform = 'rotate(0deg)';
-                        }
-                    });
+        if ('scrollRestoration' in history) {
+            history.scrollRestoration = 'manual';
+        }
+        if (!window.location.hash || window.location.hash === '#hero') {
+            window.scrollTo(0, 0);
+        }
 
-                    // Toggle current
-                    if (isExpanded) {
-                        this.setAttribute('aria-expanded', 'false');
-                        content.classList.add('hidden');
-                        if (icon) icon.style.transform = 'rotate(0deg)';
-                    } else {
-                        this.setAttribute('aria-expanded', 'true');
-                        content.classList.remove('hidden');
-                        if (icon) icon.style.transform = 'rotate(180deg)';
-                    }
+        backTop.addEventListener('click', () => window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+        }));
+
+        // Klik Beranda kembali ke paling atas halaman agar pita pengumuman terlihat
+        document.querySelectorAll('a[href="#hero"]').forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                window.scrollTo({
+                    top: 0,
+                    behavior: 'smooth'
                 });
+                history.pushState(null, '', window.location.pathname);
             });
         });
     </script>
