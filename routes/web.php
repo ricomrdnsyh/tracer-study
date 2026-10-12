@@ -17,6 +17,7 @@ use App\Http\Controllers\Admin\AdminWilayahController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboard;
 use App\Http\Controllers\Admin\ResponImportController;
 use App\Http\Controllers\Auth\AuthController;
+use App\Http\Controllers\Auth\BantuanNimController;
 use App\Http\Controllers\Fakultas\DashboardController as FakultasDashboard;
 use App\Http\Controllers\Mahasiswa\DashboardController as MahasiswaDashboard;
 use App\Http\Controllers\Mahasiswa\TracerController;
@@ -49,9 +50,11 @@ Route::any('/sso/logout/{sessionId}', [SsoController::class, 'logout'])->name('s
 // Universal Dashboard Route Helper
 Route::get('/dashboard', [SsoController::class, 'dashboard'])->name('dashboard');
 
-// Public route for Tracer Login
+// Public route for Tracer Login & Bantuan Lupa NIM
 Route::get('/isi-kuesioner', [AuthController::class, 'showTracerLoginForm'])->name('tracer.login');
 Route::post('/isi-kuesioner', [AuthController::class, 'tracerLogin'])->name('tracer.login.post');
+Route::post('/bantuan-lupa-nim', [BantuanNimController::class, 'store'])->name('tracer.bantuan_nim.store');
+Route::get('/api/prodi-by-fakultas/{fakultasId}', [BantuanNimController::class, 'getProdiByFakultas'])->name('api.prodi.by_fakultas');
 
 Route::get('log-viewer', [LogViewerController::class, 'index'])->middleware(['auth', 'role:Admin']);
 

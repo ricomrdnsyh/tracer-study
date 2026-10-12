@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Mahasiswa;
+use App\Models\Fakultas;
 
 class AuthController extends Controller
 {
@@ -16,7 +17,11 @@ class AuthController extends Controller
 
     public function showTracerLoginForm()
     {
-        return view('auth.tracer-login');
+        $fakultas = Fakultas::with(['prodis' => function ($query) {
+            $query->orderBy('nama_prodi');
+        }])->orderBy('nama_fakultas')->get();
+
+        return view('auth.tracer-login', compact('fakultas'));
     }
 
     public function tracerLogin(Request $request)

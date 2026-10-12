@@ -171,6 +171,94 @@
         .swal2-popup {
             font-family: 'Poppins', sans-serif;
         }
+
+        /* Select2 Custom Styling for Modal */
+        .select2-container--bootstrap5 .select2-selection--single,
+        .select2-container .select2-selection--single {
+            height: calc(1.5em + 1.5rem + 2px) !important;
+            padding: 0.5rem 1rem !important;
+            border-radius: 0.75rem !important;
+            border: 1.5px solid #e5e7eb !important;
+            display: flex !important;
+            align-items: center !important;
+            background-color: #ffffff !important;
+            transition: all 0.3s ease !important;
+        }
+
+        .select2-container--bootstrap5.select2-container--focus .select2-selection--single,
+        .select2-container--bootstrap5.select2-container--open .select2-selection--single,
+        .select2-container--open .select2-selection--single {
+            border-color: var(--primary-color) !important;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1) !important;
+        }
+
+        .select2-container .select2-selection--single .select2-selection__rendered {
+            color: var(--dark-color) !important;
+            font-size: 0.95rem !important;
+            padding-left: 0 !important;
+            padding-right: 1.5rem !important;
+            font-family: 'Poppins', sans-serif !important;
+        }
+
+        .select2-container .select2-selection--single .select2-selection__placeholder {
+            color: #9ca3af !important;
+            font-weight: 400 !important;
+        }
+
+        .select2-container .select2-selection--single .select2-selection__arrow {
+            height: 100% !important;
+            right: 12px !important;
+            top: 0 !important;
+            display: flex !important;
+            align-items: center !important;
+        }
+
+        .select2-dropdown {
+            border-radius: 0.75rem !important;
+            border: 1px solid rgba(148, 163, 184, 0.4) !important;
+            box-shadow: 0 15px 35px rgba(15, 23, 42, 0.15) !important;
+            font-family: 'Poppins', sans-serif !important;
+            z-index: 1060 !important;
+            overflow: hidden !important;
+        }
+
+        .select2-search--dropdown {
+            padding: 0.6rem !important;
+        }
+
+        .select2-search--dropdown .select2-search__field {
+            border-radius: 0.5rem !important;
+            border: 1.5px solid #e5e7eb !important;
+            padding: 0.5rem 0.75rem !important;
+            font-size: 0.875rem !important;
+            font-family: 'Poppins', sans-serif !important;
+        }
+
+        .select2-search--dropdown .select2-search__field:focus {
+            border-color: var(--primary-color) !important;
+            outline: none !important;
+        }
+
+        .select2-results__option {
+            padding: 0.6rem 1rem !important;
+            font-size: 0.9rem !important;
+            transition: all 0.2s ease !important;
+        }
+
+        .select2-results__option--highlighted[aria-selected] {
+            background-color: var(--primary-color) !important;
+            color: #ffffff !important;
+        }
+
+        /* Hilangkan spinner default pada input number */
+        input[type=number]::-webkit-inner-spin-button,
+        input[type=number]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        input[type=number] {
+            -moz-appearance: textfield;
+        }
     </style>
 </head>
 
@@ -181,23 +269,45 @@
                 <div class="auth-card-inner">
                     <div class="text-center mb-7">
                         <a href="{{ url('/') }}" class="d-inline-block mb-4">
-                            <img alt="Logo Tracer Study" src="{{ asset('assets/media/logos/tracer-dark.png') }}" class="h-50px" style="max-height: 50px; width: auto;" />
+                            <img alt="Logo Tracer Study" src="{{ asset('assets/media/logos/tracer-dark.png') }}"
+                                class="h-50px" style="max-height: 50px; width: auto;" />
                         </a>
                         <h1 class="text-dark mb-2 auth-title fs-2">Tracer Study Mahasiswa</h1>
                         <p class="text-muted auth-subtitle">Masukkan NIM Anda untuk mengisi kuesioner Tracer Study</p>
                     </div>
 
+                    @php
+                        $fakultas =
+                            $fakultas ??
+                            \App\Models\Fakultas::with([
+                                'prodis' => function ($q) {
+                                    $q->orderBy('nama_prodi');
+                                },
+                            ])
+                                ->orderBy('nama_fakultas')
+                                ->get();
+                    @endphp
+
                     <form id="login_form" class="form w-100" action="{{ route('tracer.login.post') }}" method="POST">
                         @csrf
 
-                        <div class="fv-row mb-5">
+                        <div class="fv-row mb-3">
                             <label class="form-label">Nomor Induk Mahasiswa (NIM)</label>
                             <input class="form-control" type="text" name="nim" value="{{ old('nim') }}"
                                 placeholder="Masukkan NIM Anda" required autofocus autocomplete="off" />
                         </div>
 
-                        <div class="text-center mt-5">
-                            <button type="submit" class="btn btn-sm btn-lg btn-login w-100 mb-5">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <span class="text-muted" style="font-size: 0.825rem;">Lupa NIM Anda?</span>
+                            <button type="button" class="btn btn-link p-0 text-decoration-none fw-semibold"
+                                style="font-size: 0.825rem; color: var(--primary-color);" data-bs-toggle="modal"
+                                data-bs-target="#modalBantuanNim">
+                                <i class="fas fa-question-circle me-1"></i> Bantuan Lupa NIM
+                            </button>
+                        </div>
+
+                        <div class="text-center mt-3">
+                            <button type="submit" class="btn btn-login w-100 mb-4">
                                 Lanjut Isi Kuesioner
                             </button>
 
@@ -207,6 +317,113 @@
                         </div>
                     </form>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Bantuan Lupa NIM -->
+    <div class="modal fade" id="modalBantuanNim" tabindex="-1" aria-labelledby="modalBantuanNimLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content border-0 shadow-lg" style="border-radius: 18px; overflow: hidden;">
+                <div class="modal-header border-0 py-4 px-5"
+                    style="background: linear-gradient(135deg, #eff6ff 0%, #f8fafc 100%);">
+                    <div class="d-flex align-items-center">
+                        <div class="me-3 p-3 rounded-circle text-white shadow-sm d-flex align-items-center justify-content-center"
+                            style="width: 44px; height: 44px; background: var(--primary-color);">
+                            <i class="fas fa-id-card fs-5 text-white"></i>
+                        </div>
+                        <div>
+                            <h5 class="modal-title fw-bold text-dark mb-0 fs-5" id="modalBantuanNimLabel">
+                                Bantuan Verifikasi Lupa NIM
+                            </h5>
+                            <span class="text-muted" style="font-size: 0.8rem;">Pihak LPIP UNUJA akan memverifikasi dan
+                                menghubungi Anda via WhatsApp</span>
+                        </div>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <form id="form_bantuan_nim" action="{{ route('tracer.bantuan_nim.store') }}" method="POST">
+                    @csrf
+                    <div class="modal-body p-4 p-md-5">
+                        <div class="p-3 mb-4 rounded-3 d-flex align-items-start"
+                            style="background-color: #f0fdf4; border: 1px solid #bbf7d0;">
+                            <i class="fab fa-whatsapp text-success fs-4 me-3 mt-1"></i>
+                            <div style="font-size: 0.85rem; color: #166534;">
+                                <strong>Layanan Bantuan Alumni:</strong> Silakan lengkapi identitas Anda di bawah ini.
+                                Setelah formulir dikirim, notifikasi akan langsung masuk ke email LPIP dan staf kami
+                                akan segera menghubungi nomor WhatsApp aktif Anda.
+                            </div>
+                        </div>
+
+                        <div class="row g-3">
+                            <div class="col-12">
+                                <label class="form-label mb-1">Nama Lengkap <span class="text-danger">*</span></label>
+                                <input type="text" name="nama" id="bantuan_nama" class="form-control"
+                                    placeholder="Contoh: Ahmad Fauzi" required />
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label mb-1">Fakultas <span class="text-danger">*</span></label>
+                                <select name="fakultas_id" id="bantuan_fakultas_id"
+                                    class="form-select form-select-solid" data-control="select2"
+                                    data-dropdown-parent="#modalBantuanNim" data-placeholder="Pilih Fakultas"
+                                    data-allow-clear="true" style="width: 100%;" required>
+                                    <option value=""></option>
+                                    @foreach ($fakultas as $fak)
+                                        <option value="{{ $fak->id_fakultas }}">{{ $fak->nama_fakultas }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label mb-1">Program Studi <span
+                                        class="text-danger">*</span></label>
+                                <select name="prodi_id" id="bantuan_prodi_id" class="form-select form-select-solid"
+                                    data-control="select2" data-dropdown-parent="#modalBantuanNim"
+                                    data-placeholder="Pilih Program Studi" data-allow-clear="true"
+                                    style="width: 100%;" required disabled>
+                                    <option value=""></option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label mb-1">Nomor WhatsApp Aktif <span
+                                        class="text-danger">*</span></label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i
+                                            class="fab fa-whatsapp text-success me-1"></i></span>
+                                    <input type="number" name="no_wa" id="bantuan_no_wa" class="form-control"
+                                        placeholder="Contoh: 081234567890" required />
+                                </div>
+                                <span class="text-muted" style="font-size: 0.75rem;">Pastikan nomor terhubung dengan
+                                    WhatsApp aktif</span>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label mb-1">Perkiraan Tahun Kelulusan <span
+                                        class="text-muted fw-normal">(Opsional)</span></label>
+                                <input type="number" name="tahun_lulus" id="bantuan_tahun_lulus"
+                                    class="form-control" placeholder="Contoh: 2023" min="1990" max="{{ date('Y') + 1 }}" />
+                            </div>
+
+                            <div class="col-12">
+                                <label class="form-label mb-1">Catatan Tambahan <span
+                                        class="text-muted fw-normal">(Opsional)</span></label>
+                                <textarea name="keterangan" id="bantuan_keterangan" class="form-control" rows="2"
+                                    placeholder="Catatan tambahan jika ada"></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="modal-footer border-0 py-3 px-5" style="background-color: #f8fafc;">
+                        <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal">Batal</button>
+                        <button type="submit" id="btn_submit_bantuan" class="btn btn-login px-5">
+                            <i class="fas fa-paper-plane me-1"></i> Kirim Permohonan
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
@@ -227,6 +444,147 @@
                     Swal.showLoading();
                 }
             });
+        });
+
+        // Chained Dropdown Fakultas -> Prodi with Select2
+        const prodisByFakultas = @json(
+            $fakultas->mapWithKeys(function ($f) {
+                return [
+                    $f->id_fakultas => $f->prodis->map(function ($p) {
+                        return ['id_prodi' => $p->id_prodi, 'nama_prodi' => $p->nama_prodi];
+                    }),
+                ];
+            }));
+
+        $(document).ready(function() {
+            const $modal = $('#modalBantuanNim');
+            const $fakultas = $('#bantuan_fakultas_id');
+            const $prodi = $('#bantuan_prodi_id');
+
+            function initModalSelect2() {
+                $fakultas.select2({
+                    dropdownParent: $modal,
+                    placeholder: 'Pilih Fakultas',
+                    allowClear: true,
+                    width: '100%'
+                });
+
+                $prodi.select2({
+                    dropdownParent: $modal,
+                    placeholder: 'Pilih Program Studi',
+                    allowClear: true,
+                    width: '100%'
+                });
+            }
+
+            // Inisialisasi awal
+            initModalSelect2();
+
+            // Re-inisialisasi / refresh dimensi saat modal terbuka sempurna
+            $modal.on('shown.bs.modal', function() {
+                initModalSelect2();
+            });
+
+            // Handler perubahan Fakultas -> isi opsi Program Studi
+            $fakultas.on('change', function() {
+                const fakultasId = $(this).val();
+                $prodi.empty().append('<option value=""></option>');
+
+                if (fakultasId && prodisByFakultas[fakultasId]) {
+                    prodisByFakultas[fakultasId].forEach(function(item) {
+                        const opt = new Option(item.nama_prodi, item.id_prodi, false, false);
+                        $prodi.append(opt);
+                    });
+                    $prodi.prop('disabled', false);
+                } else {
+                    $prodi.prop('disabled', true);
+                }
+
+                $prodi.val(null).trigger('change');
+            });
+
+            // Reset saat modal ditutup
+            $modal.on('hidden.bs.modal', function() {
+                const formEl = document.getElementById('form_bantuan_nim');
+                if (formEl) formEl.reset();
+                $fakultas.val(null).trigger('change');
+                $prodi.empty().append('<option value=""></option>').val(null).prop('disabled', true)
+                    .trigger('change');
+            });
+
+            // AJAX Submission Form Bantuan Lupa NIM
+            const formBantuan = document.getElementById('form_bantuan_nim');
+            if (formBantuan) {
+                formBantuan.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    const btnSubmit = document.getElementById('btn_submit_bantuan');
+                    const originalHtml = btnSubmit.innerHTML;
+                    btnSubmit.disabled = true;
+                    btnSubmit.innerHTML =
+                        '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span> Mengirim...';
+
+                    const formData = new FormData(formBantuan);
+
+                    fetch(formBantuan.action, {
+                            method: 'POST',
+                            headers: {
+                                'Accept': 'application/json',
+                                'X-Requested-With': 'XMLHttpRequest'
+                            },
+                            body: formData
+                        })
+                        .then(response => {
+                            if (!response.ok) {
+                                return response.json().then(errData => {
+                                    throw errData;
+                                });
+                            }
+                            return response.json();
+                        })
+                        .then(data => {
+                            const modalEl = document.getElementById('modalBantuanNim');
+                            const modalInstance = bootstrap.Modal.getInstance(modalEl);
+                            if (modalInstance) {
+                                modalInstance.hide();
+                            }
+                            formBantuan.reset();
+                            $fakultas.val(null).trigger('change');
+                            $prodi.empty().append('<option value=""></option>').val(null).prop(
+                                'disabled', true).trigger('change');
+
+                            Swal.fire({
+                                title: 'Permohonan Berhasil Dikirim!',
+                                text: data.message,
+                                icon: 'success',
+                                confirmButtonText: 'Tutup',
+                                customClass: {
+                                    confirmButton: 'btn btn-login'
+                                }
+                            });
+                        })
+                        .catch(err => {
+                            let errorMsg = 'Terjadi kendala saat mengirim permohonan.';
+                            if (err && err.errors) {
+                                errorMsg = Object.values(err.errors).flat().join('<br>');
+                            } else if (err && err.message) {
+                                errorMsg = err.message;
+                            }
+                            Swal.fire({
+                                title: 'Gagal Mengirim',
+                                html: errorMsg,
+                                icon: 'error',
+                                confirmButtonText: 'OK',
+                                customClass: {
+                                    confirmButton: 'btn btn-danger'
+                                }
+                            });
+                        })
+                        .finally(() => {
+                            btnSubmit.disabled = false;
+                            btnSubmit.innerHTML = originalHtml;
+                        });
+                });
+            }
         });
     </script>
 
@@ -261,30 +619,28 @@
     @if ($errors->any())
         <script>
             Swal.fire({
+                title: "NIM Tidak Ditemukan",
                 text: "{{ $errors->first() }}",
-                icon: "error",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonText: "<i class='fas fa-question-circle me-1'></i> Bantuan Lupa NIM",
+                cancelButtonText: "Coba Lagi",
                 buttonsStyling: false,
-                confirmButtonText: "OK, mengerti",
                 customClass: {
-                    confirmButton: "btn btn-danger"
+                    confirmButton: "btn btn-login me-3",
+                    cancelButton: "btn btn-secondary"
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    const modalEl = document.getElementById('modalBantuanNim');
+                    if (modalEl) {
+                        const modal = new bootstrap.Modal(modalEl);
+                        modal.show();
+                    }
                 }
             });
         </script>
     @endif
-
-    <script>
-        const togglePassword = document.querySelector('#togglePassword');
-        const passwordInput = document.querySelector('#password');
-
-        togglePassword.addEventListener('click', function() {
-            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
-            passwordInput.setAttribute('type', type);
-            this.innerHTML = type === 'password' ?
-                '<i class="fas fa-eye"></i>' :
-                '<i class="fas fa-eye-slash"></i>';
-        });
-    </script>
 </body>
 
 </html>
-
