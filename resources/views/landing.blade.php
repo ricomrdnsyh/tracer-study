@@ -153,12 +153,12 @@
     
     <div id="hero" class="relative z-40 scroll-mt-0">
         <div id="announcement" class="relative z-40 text-white text-xs sm:text-[13px] bg-navy-900 border-b border-blue-950/40" style="background-color:#1e3a5f">
-            <div class="max-w-7xl mx-auto px-4 py-2.5 flex items-center justify-center gap-2">
-                <span class="relative flex h-2 w-2 shrink-0">
-                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
-                    <span class="relative inline-flex rounded-full h-2 w-2 bg-white"></span>
-                </span>
-                <p class="font-medium text-slate-300">
+            <div class="max-w-7xl mx-auto px-4 py-2 sm:py-2.5 flex items-center justify-center text-center">
+                <p class="w-full font-medium text-slate-300 text-center leading-relaxed">
+                    <span class="relative inline-flex h-2 w-2 shrink-0 align-middle mr-2 -translate-y-px">
+                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-2 w-2 bg-white"></span>
+                    </span>
                     @if (!empty($kuesionerAktif))
                         Periode pelaporan <strong class="text-white">{{ $kuesionerAktif->tahunAkademik->nm_smt ?? $kuesionerAktif->judul }}</strong> sedang berlangsung
                         <span class="text-slate-400">• s/d {{ \Carbon\Carbon::parse($kuesionerAktif->tgl_selesai)->translatedFormat('d F Y') }}</span>
@@ -315,28 +315,45 @@
         <div class="w-full h-12 sm:h-20 pointer-events-none"></div>
 
         
-        <div class="relative w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="reveal reveal-d2 max-w-3xl mx-auto">
-                <div class="flex flex-wrap items-center justify-center gap-x-8 gap-y-3 rounded-2xl bg-navy-950/90 backdrop-blur-xl border border-white/15 shadow-[0_18px_40px_-12px_rgba(15,39,68,0.5)] px-6 sm:px-8 py-4">
-                    <div class="flex items-center gap-4 sm:gap-8">
-                        <span class="flex items-center gap-2 whitespace-nowrap">
-                            <span class="flex items-center justify-center w-8 h-8 rounded-lg bg-amber-500/20 border border-amber-400/30">
-                                <svg class="w-4 h-4 text-amber-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        <div class="relative w-full max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
+            <div class="reveal reveal-d2 max-w-xl sm:max-w-3xl mx-auto">
+                <div class="rounded-2xl bg-navy-950/85 backdrop-blur-xl border border-white/15 shadow-[0_18px_40px_-12px_rgba(15,39,68,0.45)] px-3 py-2.5 sm:px-8 sm:py-4">
+                    <div class="grid grid-cols-3 gap-1 sm:gap-8 sm:flex sm:items-center sm:justify-center">
+                        <div class="flex items-center justify-center gap-1.5 sm:gap-2.5">
+                            <span class="flex items-center justify-center w-6 h-6 sm:w-8 sm:h-8 rounded-lg bg-amber-500/20 border border-amber-400/30 shrink-0">
+                                <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
                             </span>
-                            <span class="text-xs font-bold text-white">±5 menit <span class="font-medium text-slate-300">pengisian</span></span>
-                        </span>
-                        <span class="flex items-center gap-2 whitespace-nowrap">
-                            <span class="flex items-center justify-center w-8 h-8 rounded-lg bg-blue-500/20 border border-blue-400/30">
-                                <svg class="w-4 h-4 text-blue-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4M10 17l5-5-5-5M15 12H3"/></svg>
+                            <div class="leading-tight sm:leading-normal">
+                                <span class="text-[11px] sm:text-xs font-bold text-white whitespace-nowrap">±5 menit </span>
+                                <span class="block sm:inline text-[9px] sm:text-xs font-medium text-slate-300 whitespace-nowrap">pengisian</span>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center justify-center gap-1.5 sm:gap-2.5">
+                            <span class="flex items-center justify-center w-6 h-6 sm:w-8 sm:h-8 rounded-lg bg-blue-500/20 border border-blue-400/30 shrink-0">
+                                <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-blue-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4M10 17l5-5-5-5M15 12H3"/>
+                                </svg>
                             </span>
-                            <span class="text-xs font-bold text-white">Tanpa akun <span class="font-medium text-slate-300">cukup NIM</span></span>
-                        </span>
-                        <span class="flex items-center gap-2 whitespace-nowrap">
-                            <span class="flex items-center justify-center w-8 h-8 rounded-lg bg-emerald-500/20 border border-emerald-400/30">
-                                <svg class="w-4 h-4 text-emerald-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+                            <div class="leading-tight sm:leading-normal">
+                                <span class="text-[11px] sm:text-xs font-bold text-white whitespace-nowrap">Tanpa akun </span>
+                                <span class="block sm:inline text-[9px] sm:text-xs font-medium text-slate-300 whitespace-nowrap">cukup NIM</span>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center justify-center gap-1.5 sm:gap-2.5">
+                            <span class="flex items-center justify-center w-6 h-6 sm:w-8 sm:h-8 rounded-lg bg-emerald-500/20 border border-emerald-400/30 shrink-0">
+                                <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-emerald-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+                                </svg>
                             </span>
-                            <span class="text-xs font-bold text-white">Aman <span class="font-medium text-slate-300">• UU PDP</span></span>
-                        </span>
+                            <div class="leading-tight sm:leading-normal">
+                                <span class="text-[11px] sm:text-xs font-bold text-white whitespace-nowrap">Aman </span>
+                                <span class="block sm:inline text-[9px] sm:text-xs font-medium text-slate-300 whitespace-nowrap"><span class="hidden sm:inline">• </span>UU PDP</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
