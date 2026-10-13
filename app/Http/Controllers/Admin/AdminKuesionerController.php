@@ -159,10 +159,12 @@ class AdminKuesionerController extends Controller
 
             foreach ($kategori->pertanyaans as $pertanyaan) {
                 $pertanyaanSyaratKode = null;
+                $pertanyaanSyaratKat = null;
                 if ($pertanyaan->syarat_pertanyaan_id) {
-                    $syarat = $pertanyaanMap->get($pertanyaan->syarat_pertanyaan_id) ?? \App\Models\Pertanyaan::find($pertanyaan->syarat_pertanyaan_id);
+                    $syarat = $pertanyaanMap->get($pertanyaan->syarat_pertanyaan_id) ?? \App\Models\Pertanyaan::with('kategori')->find($pertanyaan->syarat_pertanyaan_id);
                     if ($syarat) {
                         $pertanyaanSyaratKode = $syarat->kode_pertanyaan;
+                        $pertanyaanSyaratKat = $syarat->kategori ? $syarat->kategori->nama_kategori : null;
                     }
                 }
 
@@ -173,6 +175,7 @@ class AdminKuesionerController extends Controller
                     'opsi_jawaban' => $pertanyaan->opsi_jawaban,
                     'wajib' => $pertanyaan->wajib,
                     'syarat_kode_pertanyaan' => $pertanyaanSyaratKode,
+                    'syarat_kategori_nama' => $pertanyaanSyaratKat,
                     'syarat_jawaban' => $pertanyaan->syarat_jawaban,
                 ];
             }
@@ -183,7 +186,7 @@ class AdminKuesionerController extends Controller
         $filename = 'kuesioner-export-' . date('Y-m-d') . '.json';
 
         return response()->streamDownload(function () use ($exportData) {
-            echo json_encode($exportData, JSON_PRETTY_PRINT);
+            echo json_encode($exportData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
         }, $filename, [
             'Content-Type' => 'application/json',
         ]);
@@ -204,7 +207,9 @@ class AdminKuesionerController extends Controller
 
         try {
             DB::transaction(function () use ($data, $kuesioner) {
-                $insertedQuestions = [];
+                $insertedByCatAndKode = [];
+                $insertedByCatNameAndKode = [];
+                $insertedGlobalByKode = [];
                 $kategoriMap = [];
                 $pertanyaanMap = [];
 
@@ -252,13 +257,20 @@ class AdminKuesionerController extends Controller
                             );
 
                             if (!empty($pertanyaan->kode_pertanyaan)) {
-                                $insertedQuestions[$pertanyaan->kode_pertanyaan] = $pertanyaan->id_pertanyaan;
+                                $kKode = strtoupper(trim($pertanyaan->kode_pertanyaan));
+                                $insertedByCatAndKode[$kategori->id_kategori][$kKode] = $pertanyaan->id_pertanyaan;
+                                $insertedByCatNameAndKode[$kategori->nama_kategori][$kKode] = $pertanyaan->id_pertanyaan;
+                                if (!isset($insertedGlobalByKode[$kKode])) {
+                                    $insertedGlobalByKode[$kKode] = $pertanyaan->id_pertanyaan;
+                                }
                             }
 
                             if (!empty($p['syarat_kode_pertanyaan'])) {
                                 $pertanyaanMap[] = [
                                     'model' => $pertanyaan,
-                                    'syarat_kode' => $p['syarat_kode_pertanyaan']
+                                    'kategori_id' => $kategori->id_kategori,
+                                    'syarat_kode' => strtoupper(trim($p['syarat_kode_pertanyaan'])),
+                                    'syarat_kategori_nama' => $p['syarat_kategori_nama'] ?? null,
                                 ];
                             }
                         }
@@ -266,18 +278,39 @@ class AdminKuesionerController extends Controller
                 }
 
                 foreach ($pertanyaanMap as $pMap) {
-                    if (isset($insertedQuestions[$pMap['syarat_kode']])) {
+                    $targetId = null;
+                    $sKode = $pMap['syarat_kode'];
+                    $catId = $pMap['kategori_id'];
+                    $sKatNama = $pMap['syarat_kategori_nama'] ?? null;
+
+                    // 1. Jika ada nama kategori syarat spesifik
+                    if ($sKatNama && isset($insertedByCatNameAndKode[$sKatNama][$sKode])) {
+                        $targetId = $insertedByCatNameAndKode[$sKatNama][$sKode];
+                    }
+                    // 2. Prioritaskan pertanyaan di kategori yang SAMA
+                    if (!$targetId && isset($insertedByCatAndKode[$catId][$sKode])) {
+                        $targetId = $insertedByCatAndKode[$catId][$sKode];
+                    }
+                    // 3. Fallback ke global map
+                    if (!$targetId && isset($insertedGlobalByKode[$sKode])) {
+                        $targetId = $insertedGlobalByKode[$sKode];
+                    }
+
+                    if ($targetId) {
                         $pMap['model']->update([
-                            'syarat_pertanyaan_id' => $insertedQuestions[$pMap['syarat_kode']]
+                            'syarat_pertanyaan_id' => $targetId
                         ]);
                     }
                 }
 
                 foreach ($kategoriMap as $kMap) {
-                    if ($kMap['syarat_kode'] && isset($insertedQuestions[$kMap['syarat_kode']])) {
-                        $kMap['model']->update([
-                            'syarat_pertanyaan_id' => $insertedQuestions[$kMap['syarat_kode']]
-                        ]);
+                    if ($kMap['syarat_kode']) {
+                        $sKode = strtoupper(trim($kMap['syarat_kode']));
+                        if (isset($insertedGlobalByKode[$sKode])) {
+                            $kMap['model']->update([
+                                'syarat_pertanyaan_id' => $insertedGlobalByKode[$sKode]
+                            ]);
+                        }
                     }
                 }
             });
