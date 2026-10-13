@@ -47,6 +47,15 @@
                 }
             }
 
+            function cleanConditionText(str) {
+                if (!str) return '';
+                return String(str)
+                    .replace(/^\s*(\[\w+\])?\s*(\(0\/1\))?\s*(\(\d+\))?\s*/, '')
+                    .replace(/\s+/g, ' ')
+                    .trim()
+                    .toLowerCase();
+            }
+
             function checkCondition(syaratId, syaratJawabanJson) {
                 if (!syaratId) return true;
 
@@ -66,20 +75,23 @@
                     syaratJawaban = [syaratJawaban];
                 }
 
-                if (Array.isArray(userVal)) {
-                    let match = false;
-                    for (let i = 0; i < userVal.length; i++) {
-                        let val = String(userVal[i]).trim().toLowerCase();
-                        if (syaratJawaban.some(sj => String(sj).trim().toLowerCase() === val)) {
-                            match = true;
-                            break;
+                let userVals = Array.isArray(userVal) ? userVal : [userVal];
+
+                for (let uv of userVals) {
+                    let rawUv = String(uv).trim().toLowerCase();
+                    let cleanUv = cleanConditionText(uv);
+
+                    for (let sj of syaratJawaban) {
+                        let rawSj = String(sj).trim().toLowerCase();
+                        let cleanSj = cleanConditionText(sj);
+
+                        if (rawUv === rawSj || (cleanUv !== '' && cleanUv === cleanSj)) {
+                            return true;
                         }
                     }
-                    return match;
-                } else {
-                    let val = String(userVal).trim().toLowerCase();
-                    return syaratJawaban.some(sj => String(sj).trim().toLowerCase() === val);
                 }
+
+                return false;
             }
 
             function evaluateSkipLogic() {

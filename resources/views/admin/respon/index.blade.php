@@ -126,11 +126,11 @@
                                     data-bs-target="#templateModal">
                                     <i class="fas fa-download me-1"></i> Download Template
                                 </button>
-                                <button type="button" class="btn btn-sm btn-light-success" data-bs-toggle="modal"
+                                <button type="button" class="btn btn-sm btn-light-info" data-bs-toggle="modal"
                                     data-bs-target="#importModal">
                                     <i class="fas fa-upload me-1"></i> Import Data
                                 </button>
-                                <button type="button" class="btn btn-sm btn-light-info" data-bs-toggle="modal"
+                                <button type="button" class="btn btn-sm btn-light-success" data-bs-toggle="modal"
                                     data-bs-target="#exportModal">
                                     <i class="fas fa-file-export me-1"></i> Export Data
                                 </button>

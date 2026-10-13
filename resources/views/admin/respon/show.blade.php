@@ -318,6 +318,30 @@
                         </div>
                         <div class="card-body p-6 p-lg-10">
                             <form id="form_respon">
+                                @php
+                                    $isSelectedRadio = function($ans, $opt) {
+                                        if ($ans === null || $ans === '') return false;
+                                        if ($ans === $opt) return true;
+                                        $c1 = preg_replace('/^\s*(\[\w+\])?\s*(\(0\/1\))?\s*(\(\d+\))?\s*/', '', trim((string)$ans));
+                                        $c2 = preg_replace('/^\s*(\[\w+\])?\s*(\(0\/1\))?\s*(\(\d+\))?\s*/', '', trim((string)$opt));
+                                        if ($c1 !== '' && strcasecmp($c1, $c2) === 0) return true;
+                                        if (preg_match('/^\((\d+)\)/', $opt, $m) && (string)$ans === $m[1]) return true;
+                                        return false;
+                                    };
+
+                                    $isCheckedBox = function($ansList, $opt) {
+                                        if (empty($ansList)) return false;
+                                        $arr = is_array($ansList) ? $ansList : [ $ansList ];
+                                        foreach ($arr as $item) {
+                                            if ($item === $opt) return true;
+                                            $c1 = preg_replace('/^\s*(\[\w+\])?\s*(\(0\/1\))?\s*(\(\d+\))?\s*/', '', trim((string)$item));
+                                            $c2 = preg_replace('/^\s*(\[\w+\])?\s*(\(0\/1\))?\s*(\(\d+\))?\s*/', '', trim((string)$opt));
+                                            if ($c1 !== '' && strcasecmp($c1, $c2) === 0) return true;
+                                            if (preg_match('/^\[(F\d+)\]/i', $opt, $m) && strcasecmp((string)$item, $m[1]) === 0) return true;
+                                        }
+                                        return false;
+                                    };
+                                @endphp
                                 @foreach ($respon->kuesioner->kategoriPertanyaans as $kategori)
                                     <div class="kategori-container"
                                         data-syarat-pertanyaan="{{ $kategori->syarat_pertanyaan_id }}"
@@ -368,7 +392,7 @@
                                                                                 value="{{ $opsi }}"
                                                                                 name="jawaban[{{ $pertanyaan->id_pertanyaan }}]"
                                                                                 id="opt_{{ $pertanyaan->id_pertanyaan }}_{{ $idx }}"
-                                                                                {{ $answer == $opsi ? 'checked' : '' }}
+                                                                                {{ $isSelectedRadio($answer, $opsi) ? 'checked' : '' }}
                                                                                 disabled>
                                                                         </div>
                                                                         <span
@@ -395,7 +419,7 @@
                                                                                 value="{{ $opsi }}"
                                                                                 name="jawaban[{{ $pertanyaan->id_pertanyaan }}][]"
                                                                                 id="opt_{{ $pertanyaan->id_pertanyaan }}_{{ $idx }}"
-                                                                                {{ is_array($answer) && in_array($opsi, $answer) ? 'checked' : '' }}
+                                                                                {{ $isCheckedBox($answer, $opsi) ? 'checked' : '' }}
                                                                                 disabled>
                                                                         </div>
                                                                         <span
@@ -413,7 +437,7 @@
                                                             <option value=""></option>
                                                             @foreach ($pertanyaan->opsi_jawaban as $opsi)
                                                                 <option value="{{ $opsi }}"
-                                                                    {{ $answer == $opsi ? 'selected' : '' }}>
+                                                                    {{ $isSelectedRadio($answer, $opsi) ? 'selected' : '' }}>
                                                                     {{ $opsi }}
                                                                 </option>
                                                             @endforeach
@@ -477,18 +501,24 @@
                     syaratJawaban = JSON.parse(syaratJawabanJson) || [];
                 } catch (e) {}
 
-                if (Array.isArray(userVal)) {
-                    let match = false;
-                    for (let i = 0; i < userVal.length; i++) {
-                        if (syaratJawaban.includes(userVal[i])) {
-                            match = true;
-                            break;
+                let cleanText = function(str) {
+                    if (!str) return '';
+                    return String(str).replace(/^\s*(\[\w+\])?\s*(\(0\/1\))?\s*(\(\d+\))?\s*/, '').replace(/\s+/g, ' ').trim().toLowerCase();
+                };
+
+                let userVals = Array.isArray(userVal) ? userVal : [userVal];
+                for (let uv of userVals) {
+                    let rawUv = String(uv).trim().toLowerCase();
+                    let cUv = cleanText(uv);
+                    for (let sj of syaratJawaban) {
+                        let rawSj = String(sj).trim().toLowerCase();
+                        let cSj = cleanText(sj);
+                        if (rawUv === rawSj || (cUv !== '' && cUv === cSj)) {
+                            return true;
                         }
                     }
-                    return match;
-                } else {
-                    return syaratJawaban.includes(userVal);
                 }
+                return false;
             }
 
             function evaluateSkipLogic() {

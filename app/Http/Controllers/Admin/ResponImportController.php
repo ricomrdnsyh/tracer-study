@@ -13,6 +13,8 @@ use App\Services\TracerResponService;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use PhpOffice\PhpSpreadsheet\IOFactory;
+use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
+use PhpOffice\PhpSpreadsheet\Cell\DataType;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 
@@ -32,24 +34,38 @@ class ResponImportController extends Controller
 
         $headers = ['NIM'];
 
-        $uniqueHeaders = [];
+        $rawHeaders = [];
         foreach ($kuesioner->kategoriPertanyaans as $kategori) {
             foreach ($kategori->pertanyaans as $pertanyaan) {
-                if (!empty($pertanyaan->kode_pertanyaan)) {
-                    $kode = strtoupper(trim($pertanyaan->kode_pertanyaan));
-                    if (!in_array($kode, $uniqueHeaders, true)) {
-                        $uniqueHeaders[] = $kode;
-                        $headers[] = $kode;
-                    }
+                $kode = !empty($pertanyaan->kode_pertanyaan)
+                    ? strtoupper(trim($pertanyaan->kode_pertanyaan))
+                    : 'P' . $pertanyaan->id_pertanyaan;
+                if (!in_array($kode, $rawHeaders, true)) {
+                    $rawHeaders[] = $kode;
                 }
             }
         }
 
-        $col = 'A';
+        foreach ($rawHeaders as $kode) {
+            if ($kode === 'F4') {
+                foreach (array_keys(TracerResponService::F4_MAP) as $subKode) {
+                    $headers[] = $subKode;
+                }
+            } elseif ($kode === 'F16') {
+                foreach (array_keys(TracerResponService::F16_MAP) as $subKode) {
+                    $headers[] = $subKode;
+                }
+            } else {
+                $headers[] = $kode;
+            }
+        }
+
+        $colIdx = 1;
         foreach ($headers as $header) {
-            $sheet->setCellValue($col . '1', $header);
-            $sheet->getStyle($col . '1')->getFont()->setBold(true);
-            $col++;
+            $colLetter = Coordinate::stringFromColumnIndex($colIdx);
+            $sheet->setCellValue($colLetter . '1', $header);
+            $sheet->getStyle($colLetter . '1')->getFont()->setBold(true);
+            $colIdx++;
         }
 
         $filename = 'Template_Import_Respon_' . preg_replace('/[^A-Za-z0-9\-]/', '_', $kuesioner->judul) . '.xlsx';
@@ -79,10 +95,10 @@ class ResponImportController extends Controller
                 if (is_array($pertanyaan->opsi_jawaban) && count($pertanyaan->opsi_jawaban) > 0) {
                     $opsiById[$pertanyaan->id_pertanyaan] = array_values($pertanyaan->opsi_jawaban);
                 }
-                if (!empty($pertanyaan->kode_pertanyaan)) {
-                    $kode = strtoupper(trim($pertanyaan->kode_pertanyaan));
-                    $mapPertanyaan[$kode][] = $pertanyaan->id_pertanyaan;
-                }
+                $kode = !empty($pertanyaan->kode_pertanyaan)
+                    ? strtoupper(trim($pertanyaan->kode_pertanyaan))
+                    : 'P' . $pertanyaan->id_pertanyaan;
+                $mapPertanyaan[$kode][] = $pertanyaan->id_pertanyaan;
             }
         }
 
@@ -209,24 +225,91 @@ class ResponImportController extends Controller
 
                     $importedCount++;
 
+                    $f4Selected = [];
+                    $f16Selected = [];
+
                     foreach ($headers as $index => $headerKode) {
                         if ($index === $nimIndex) continue;
 
                         $kode = strtoupper(trim((string)$headerKode));
-                        if (isset($mapPertanyaan[$kode])) {
-                            $jawabanVal = $row[$index] ?? null;
-                            if ($jawabanVal !== null && $jawabanVal !== '') {
-                                foreach ($mapPertanyaan[$kode] as $pId) {
-                                    $batchJawaban[] = [
-                                        'respon_id'     => $responId,
-                                        'pertanyaan_id' => $pId,
-                                        'jawaban_text'  => TracerResponService::nomorToLabel($opsiById[$pId] ?? null, $jawabanVal, $kode),
-                                        'jawaban_json'  => null,
-                                        'created_at'    => $now,
-                                        'updated_at'    => $now,
-                                    ];
-                                }
+                        $jawabanVal = $row[$index] ?? null;
+                        if ($jawabanVal === null || $jawabanVal === '') continue;
+
+                        if (isset(TracerResponService::F4_MAP[$kode])) {
+                            if ((string)$jawabanVal === '1') {
+                                $f4Selected[] = $kode;
                             }
+                            continue;
+                        }
+
+                        if (isset(TracerResponService::F16_MAP[$kode])) {
+                            if ((string)$jawabanVal === '1') {
+                                $f16Selected[] = $kode;
+                            }
+                            continue;
+                        }
+
+                        if (isset($mapPertanyaan[$kode])) {
+                            foreach ($mapPertanyaan[$kode] as $pId) {
+                                $batchJawaban[] = [
+                                    'respon_id'     => $responId,
+                                    'pertanyaan_id' => $pId,
+                                    'jawaban_text'  => TracerResponService::nomorToLabel($opsiById[$pId] ?? null, $jawabanVal, $kode),
+                                    'jawaban_json'  => null,
+                                    'created_at'    => $now,
+                                    'updated_at'    => $now,
+                                ];
+                            }
+                        }
+                    }
+
+                    if (!empty($f4Selected) && isset($mapPertanyaan['F4'])) {
+                        foreach ($mapPertanyaan['F4'] as $pId) {
+                            $resolvedOptions = [];
+                            $opsiPertanyaan = $opsiById[$pId] ?? [];
+                            foreach ($f4Selected as $subK) {
+                                $matchedOpt = null;
+                                foreach ($opsiPertanyaan as $opt) {
+                                    if (str_starts_with(trim($opt), "[{$subK}]")) {
+                                        $matchedOpt = $opt;
+                                        break;
+                                    }
+                                }
+                                $resolvedOptions[] = $matchedOpt ?? (TracerResponService::F4_MAP[$subK] ?? $subK);
+                            }
+                            $batchJawaban[] = [
+                                'respon_id'     => $responId,
+                                'pertanyaan_id' => $pId,
+                                'jawaban_text'  => null,
+                                'jawaban_json'  => json_encode($resolvedOptions),
+                                'created_at'    => $now,
+                                'updated_at'    => $now,
+                            ];
+                        }
+                    }
+
+                    if (!empty($f16Selected) && isset($mapPertanyaan['F16'])) {
+                        foreach ($mapPertanyaan['F16'] as $pId) {
+                            $resolvedOptions = [];
+                            $opsiPertanyaan = $opsiById[$pId] ?? [];
+                            foreach ($f16Selected as $subK) {
+                                $matchedOpt = null;
+                                foreach ($opsiPertanyaan as $opt) {
+                                    if (str_starts_with(trim($opt), "[{$subK}]")) {
+                                        $matchedOpt = $opt;
+                                        break;
+                                    }
+                                }
+                                $resolvedOptions[] = $matchedOpt ?? (TracerResponService::F16_MAP[$subK] ?? $subK);
+                            }
+                            $batchJawaban[] = [
+                                'respon_id'     => $responId,
+                                'pertanyaan_id' => $pId,
+                                'jawaban_text'  => null,
+                                'jawaban_json'  => json_encode($resolvedOptions),
+                                'created_at'    => $now,
+                                'updated_at'    => $now,
+                            ];
                         }
                     }
 
@@ -338,34 +421,52 @@ class ResponImportController extends Controller
         $headers = ['NIM', 'Nama Mahasiswa', 'Status', 'Tanggal Isi'];
 
         $pertanyaanKeys = [];
-        $uniqueHeaders = [];
+        $rawHeaders = [];
         $pertanyaanById = [];
 
         foreach ($kuesioner->kategoriPertanyaans as $kategori) {
             foreach ($kategori->pertanyaans as $pertanyaan) {
                 $pertanyaanById[$pertanyaan->id_pertanyaan] = $pertanyaan;
-                if (!empty($pertanyaan->kode_pertanyaan)) {
-                    $kode = strtoupper(trim($pertanyaan->kode_pertanyaan));
-                    if (!in_array($kode, $uniqueHeaders, true)) {
-                        $uniqueHeaders[] = $kode;
-                        $headers[] = $kode;
-                    }
-                    $pertanyaanKeys[$kode][] = $pertanyaan->id_pertanyaan;
+                $kode = !empty($pertanyaan->kode_pertanyaan)
+                    ? strtoupper(trim($pertanyaan->kode_pertanyaan))
+                    : 'P' . $pertanyaan->id_pertanyaan;
+                if (!in_array($kode, $rawHeaders, true)) {
+                    $rawHeaders[] = $kode;
                 }
+                $pertanyaanKeys[$kode][] = $pertanyaan->id_pertanyaan;
             }
         }
 
-        $col = 'A';
+        $uniqueHeaders = [];
+        foreach ($rawHeaders as $kode) {
+            if ($kode === 'F4') {
+                foreach (array_keys(TracerResponService::F4_MAP) as $subKode) {
+                    $uniqueHeaders[] = $subKode;
+                    $headers[] = $subKode;
+                }
+            } elseif ($kode === 'F16') {
+                foreach (array_keys(TracerResponService::F16_MAP) as $subKode) {
+                    $uniqueHeaders[] = $subKode;
+                    $headers[] = $subKode;
+                }
+            } else {
+                $uniqueHeaders[] = $kode;
+                $headers[] = $kode;
+            }
+        }
+
+        $colIdx = 1;
         foreach ($headers as $header) {
-            $sheet->setCellValue($col . '1', $header);
-            $sheet->getStyle($col . '1')->getFont()->setBold(true);
-            $col++;
+            $colLetter = Coordinate::stringFromColumnIndex($colIdx);
+            $sheet->setCellValue($colLetter . '1', $header);
+            $sheet->getStyle($colLetter . '1')->getFont()->setBold(true);
+            $colIdx++;
         }
 
         $rowNum = 2;
         $query->chunk(250, function ($respons) use ($sheet, &$rowNum, $uniqueHeaders, $pertanyaanKeys, $pertanyaanById) {
             foreach ($respons as $respon) {
-                $sheet->setCellValue('A' . $rowNum, $respon->mahasiswa_id);
+                $sheet->setCellValueExplicit('A' . $rowNum, (string)$respon->mahasiswa_id, DataType::TYPE_STRING);
                 $sheet->setCellValue('B' . $rowNum, optional($respon->mahasiswa)->nama);
                 $sheet->setCellValue('C' . $rowNum, $respon->status);
                 $sheet->setCellValue('D' . $rowNum, $respon->tgl_isi ? Carbon::parse($respon->tgl_isi)->format('Y-m-d H:i') : '');
@@ -375,20 +476,49 @@ class ResponImportController extends Controller
                     $detailMap[$detail->pertanyaan_id] = $detail;
                 }
 
-                $colIndex = 'E';
+                $f4Answers = null;
+                if (isset($pertanyaanKeys['F4'])) {
+                    foreach ($pertanyaanKeys['F4'] as $pId) {
+                        if (isset($detailMap[$pId])) {
+                            $f4Answers = TracerResponService::extractCheckboxAnswers($detailMap[$pId]);
+                            if ($f4Answers !== null) break;
+                        }
+                    }
+                }
+
+                $f16Answers = null;
+                if (isset($pertanyaanKeys['F16'])) {
+                    foreach ($pertanyaanKeys['F16'] as $pId) {
+                        if (isset($detailMap[$pId])) {
+                            $f16Answers = TracerResponService::extractCheckboxAnswers($detailMap[$pId]);
+                            if ($f16Answers !== null) break;
+                        }
+                    }
+                }
+
+                $colIndex = 5;
                 foreach ($uniqueHeaders as $kode) {
-                    $val = '';
-                    if (isset($pertanyaanKeys[$kode])) {
-                        foreach ($pertanyaanKeys[$kode] as $pId) {
-                            if (isset($detailMap[$pId])) {
-                                $val = TracerResponService::jawabanToNomor($pertanyaanById[$pId] ?? null, $detailMap[$pId]);
-                                if ($val !== '') {
-                                    break;
+                    $colLetter = Coordinate::stringFromColumnIndex($colIndex);
+
+                    if (isset(TracerResponService::F4_MAP[$kode])) {
+                        $val = TracerResponService::matchCheckboxSubCode($kode, $f4Answers, TracerResponService::F4_MAP);
+                    } elseif (isset(TracerResponService::F16_MAP[$kode])) {
+                        $val = TracerResponService::matchCheckboxSubCode($kode, $f16Answers, TracerResponService::F16_MAP);
+                    } else {
+                        $val = '';
+                        if (isset($pertanyaanKeys[$kode])) {
+                            foreach ($pertanyaanKeys[$kode] as $pId) {
+                                if (isset($detailMap[$pId])) {
+                                    $val = TracerResponService::jawabanToNomor($pertanyaanById[$pId] ?? null, $detailMap[$pId]);
+                                    if ($val !== '') {
+                                        break;
+                                    }
                                 }
                             }
                         }
                     }
-                    $sheet->setCellValue($colIndex . $rowNum, $val);
+
+                    $sheet->setCellValueExplicit($colLetter . $rowNum, (string)$val, DataType::TYPE_STRING);
                     $colIndex++;
                 }
 

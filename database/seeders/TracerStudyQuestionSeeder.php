@@ -6,15 +6,16 @@ use Illuminate\Database\Seeder;
 use App\Models\Kuesioner;
 use App\Models\KategoriPertanyaan;
 use App\Models\Pertanyaan;
+use Illuminate\Support\Facades\DB;
 
 class TracerStudyQuestionSeeder extends Seeder
 {
     public function run(): void
     {
-        \Illuminate\Support\Facades\DB::statement('SET FOREIGN_KEY_CHECKS=0;');
-        \Illuminate\Support\Facades\DB::table('pertanyaan')->truncate();
-        \Illuminate\Support\Facades\DB::table('kategori_pertanyaan')->truncate();
-        \Illuminate\Support\Facades\DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+        DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+        DB::table('pertanyaan')->truncate();
+        DB::table('kategori_pertanyaan')->truncate();
+        DB::statement('SET FOREIGN_KEY_CHECKS=1;');
 
         $kuesioner = Kuesioner::firstOrCreate(
             ['judul' => 'Kuesioner Tracer Study 2026'],
@@ -25,206 +26,1417 @@ class TracerStudyQuestionSeeder extends Seeder
             ]
         );
 
-        // Reordered and logic fully mapped from original tracer-lulusan
         $kategoriData = [
             'Status Saat Ini' => [
-                'syarat' => null,
+                'syarat_kode' => null,
+                'syarat_jawaban' => null,
                 'pertanyaan' => [
-                    ['teks' => 'Jelaskan status Anda saat ini?', 'kode' => 'F8', 'tipe' => 'radio', 'opsi' => ['Bekerja (penuh waktu/paruh waktu)', 'Belum memungkinkan bekerja', 'Wiraswasta/wirausaha/pekerja lepas', 'Melanjutkan Pendidikan', 'Tidak kerja tetapi sedang mencari kerja'], 'wajib' => true]
+                    [
+                        'teks' => 'Apakah status aktivitas Anda saat ini?',
+                        'kode' => 'F8',
+                        'tipe' => 'radio',
+                        'wajib' => true,
+                        'opsi' => array (
+  0 => '(1) Bekerja (penuh waktu/paruh waktu)',
+  1 => '(3) Wiraswasta/wirausaha/pekerja lepas',
+  2 => '(4) Melanjutkan pendidikan',
+  3 => '(5) Tidak bekerja tetapi sedang mencari pekerjaan',
+  4 => '(2) Belum memungkinkan bekerja (sakit, mengurus keluarga, dan/atau alasan lainnya)',
+),
+                        'syarat_kode' => null,
+                        'syarat_jawaban' => null,
+                    ],
                 ]
             ],
-            'Detail Pekerjaan' => [
-                'syarat' => [
-                    'teks' => 'Jelaskan status Anda saat ini?',
-                    'jawaban' => ['Bekerja (penuh waktu/paruh waktu)', 'Wiraswasta/wirausaha/pekerja lepas']
-                ],
+            'Bekerja (penuh waktu/paruh waktu)' => [
+                'syarat_kode' => 'F8',
+                'syarat_jawaban' => array (
+  0 => '(1) Bekerja (penuh waktu/paruh waktu)',
+),
                 'pertanyaan' => [
-                    ['teks' => 'Apakah Anda telah mendapatkan pekerjaan <= 6 bulan / termasuk bekerja sebelum lulus ?', 'kode' => 'F504', 'tipe' => 'radio', 'opsi' => ['Ya', 'Tidak'], 'wajib' => true, 'syarat' => ['teks' => 'Jelaskan status Anda saat ini?', 'jawaban' => ['Bekerja (penuh waktu/paruh waktu)', 'Wiraswasta/wirausaha/pekerja lepas']]],
-                    ['teks' => 'Berapa bulan waktu yang dihabiskan (sebelum dan sesudah lulus) untuk memperoleh pekerjaan pertama?', 'kode' => 'F502', 'tipe' => 'text', 'opsi' => null, 'wajib' => true],
-                    ['teks' => 'Berapa rata-rata pendapatan Anda per bulan ? (take home pay)', 'kode' => 'F505', 'tipe' => 'text', 'opsi' => null, 'wajib' => true],
-                    ['teks' => 'Dimana lokasi tempat Anda bekerja? (Provinsi)', 'kode' => 'F5A1', 'tipe' => 'text', 'opsi' => null, 'wajib' => true],
-                    ['teks' => 'Dimana lokasi tempat Anda bekerja? (Kabupaten/Kota)', 'kode' => 'F5A2', 'tipe' => 'text', 'opsi' => null, 'wajib' => true],
-                    ['teks' => 'Apa jenis perusahaan/instansi/institusi tempat anda bekerja sekarang?', 'kode' => 'F1101', 'tipe' => 'radio', 'opsi' => ['Instansi pemerintah (termasuk BUMN)', 'Organisasi non-profit/Lembaga Swadaya Masyarakat', 'Perusahaan swasta', 'Wiraswasta/perusahaan sendiri', 'Lainnya'], 'wajib' => true, 'syarat' => ['teks' => 'Jelaskan status Anda saat ini?', 'jawaban' => ['Bekerja (penuh waktu/paruh waktu)']]],
-                    ['teks' => 'Apa nama perusahaan/kantor tempat Anda bekerja?', 'kode' => 'F5B', 'tipe' => 'text', 'opsi' => null, 'wajib' => true],
-                    ['teks' => 'Bila berwiraswasta, apa posisi/jabatan Anda saat ini ?', 'kode' => 'F5C', 'tipe' => 'radio', 'opsi' => ['Founder', 'Co-Founder', 'Staff', 'Freelance/Kerja Lepas'], 'wajib' => false, 'syarat' => ['teks' => 'Jelaskan status Anda saat ini?', 'jawaban' => ['Wiraswasta/wirausaha/pekerja lepas']]],
-                    ['teks' => 'Apa tingkat tempat kerja Anda?', 'kode' => 'F5D', 'tipe' => 'radio', 'opsi' => ['Lokal/wilayah/wiraswasta tidak berbadan hukum', 'Nasional/wiraswasta berbadan hukum', 'Multinasional/internasional'], 'wajib' => true],
-                    ['teks' => 'Seberapa erat hubungan antara bidang studi dengan pekerjaan anda?', 'kode' => 'F14', 'tipe' => 'radio', 'opsi' => ['Sangat Erat', 'Erat', 'Cukup Erat', 'Kurang Erat', 'Tidak Sama Sekali'], 'wajib' => true, 'syarat' => ['teks' => 'Jelaskan status Anda saat ini?', 'jawaban' => ['Bekerja (penuh waktu/paruh waktu)', 'Wiraswasta/wirausaha/pekerja lepas']]],
-                    ['teks' => 'Tingkat pendidikan apa yang paling tepat/sesuai untuk pekerjaan anda saat ini?', 'kode' => 'F15', 'tipe' => 'radio', 'opsi' => ['Setingkat Lebih Tinggi', 'Tingkat yang Sama', 'Setingkat Lebih Rendah', 'Tidak Perlu Pendidikan Tinggi'], 'wajib' => true, 'syarat' => ['teks' => 'Jelaskan status Anda saat ini?', 'jawaban' => ['Bekerja (penuh waktu/paruh waktu)', 'Wiraswasta/wirausaha/pekerja lepas']]],
+                    [
+                        'teks' => 'Dalam berapa bulan Anda mendapatkan pekerjaan pertama?
+(Kelulusan dihitung berdasarkan bulan yudisium dan masa tunggu kerja dihitung 0, jika bekerja sebelum lulus)',
+                        'kode' => 'F502',
+                        'tipe' => 'number',
+                        'wajib' => true,
+                        'opsi' => null,
+                        'syarat_kode' => null,
+                        'syarat_jawaban' => null,
+                    ],
+                    [
+                        'teks' => 'Berapa rata-rata pendapatan (take home pay dalam rupiah) Anda per bulan?
+(take home pay adalah jumlah total penghasilan yang diterima ditambah tunjangan/bonus) - tulis dengan angka tanpa titik dan koma, contoh 5000000',
+                        'kode' => 'F505',
+                        'tipe' => 'number',
+                        'wajib' => true,
+                        'opsi' => null,
+                        'syarat_kode' => null,
+                        'syarat_jawaban' => null,
+                    ],
+                    [
+                        'teks' => 'Dimana Negara lokasi tempat Anda bekerja?',
+                        'kode' => 'F5A0',
+                        'tipe' => 'text',
+                        'wajib' => true,
+                        'opsi' => null,
+                        'syarat_kode' => null,
+                        'syarat_jawaban' => null,
+                    ],
+                    [
+                        'teks' => 'Provinsi lokasi tempat Anda bekerja?',
+                        'kode' => 'F5A1',
+                        'tipe' => 'text',
+                        'wajib' => true,
+                        'opsi' => null,
+                        'syarat_kode' => null,
+                        'syarat_jawaban' => null,
+                    ],
+                    [
+                        'teks' => 'Kabupaten/Kotalokasi tempat Anda bekerja?',
+                        'kode' => 'F5A2',
+                        'tipe' => 'text',
+                        'wajib' => true,
+                        'opsi' => null,
+                        'syarat_kode' => null,
+                        'syarat_jawaban' => null,
+                    ],
+                    [
+                        'teks' => 'Apa jenis perusahaan/instansi/institusi tempat Anda bekerja sekarang?',
+                        'kode' => 'F1101',
+                        'tipe' => 'radio',
+                        'wajib' => true,
+                        'opsi' => array (
+  0 => '(1) Instansi/lembaga pemerintah',
+  1 => '(6) Badan Usaha Milik Negara (BUMN)/Badan Usaha Milik Daerah (BUMD)',
+  2 => '(7) Institusi/organisasi multilateral',
+  3 => '(2) Institusi/organisasi nirlaba',
+  4 => '(3) Perusahaan swasta (perusahaan nasional, multinasional, rintisan/startup, UMKM, dan lain-lain)',
+  5 => '(5) Lainnya, tuliskan ...',
+),
+                        'syarat_kode' => null,
+                        'syarat_jawaban' => null,
+                    ],
+                    [
+                        'teks' => 'Lainnya, tuliskan ...',
+                        'kode' => 'F1102',
+                        'tipe' => 'text',
+                        'wajib' => true,
+                        'opsi' => null,
+                        'syarat_kode' => 'F1101',
+                        'syarat_jawaban' => array (
+  0 => '(5) Lainnya, tuliskan ...',
+),
+                    ],
+                    [
+                        'teks' => 'Apa nama perusahaan/kantor tempat Anda bekerja?',
+                        'kode' => 'F5B',
+                        'tipe' => 'text',
+                        'wajib' => true,
+                        'opsi' => null,
+                        'syarat_kode' => null,
+                        'syarat_jawaban' => null,
+                    ],
+                    [
+                        'teks' => 'Apa ruang lingkup tempat Anda bekerja?',
+                        'kode' => 'F5D',
+                        'tipe' => 'select',
+                        'wajib' => true,
+                        'opsi' => array (
+  0 => '(1) Lokal/Wilayah',
+  1 => '(2) Nasional',
+  2 => '(3) Multinasional/Internasional',
+),
+                        'syarat_kode' => null,
+                        'syarat_jawaban' => null,
+                    ],
+                    [
+                        'teks' => 'Seberapa relevan bidang studi dengan pekerjaan Anda saat ini?',
+                        'kode' => 'F14',
+                        'tipe' => 'radio',
+                        'wajib' => true,
+                        'opsi' => array (
+  0 => '(5) Tidak relevan',
+  1 => '(4) Kurang relevan',
+  2 => '(3) Cukup relevan',
+  3 => '(2) Relevan',
+  4 => '(1) Sangat relevan',
+),
+                        'syarat_kode' => null,
+                        'syarat_jawaban' => null,
+                    ],
+                    [
+                        'teks' => 'Tingkat kesesuaian jenjang pendidikan untuk pekerjaan Anda saat ini?',
+                        'kode' => 'F15',
+                        'tipe' => 'radio',
+                        'wajib' => true,
+                        'opsi' => array (
+  0 => '(4) Tidak perlu pendidikan tinggi',
+  1 => '(3) Setingkat lebih rendah',
+  2 => '(2) Tingkat yang sama',
+  3 => '(1) Setingkat lebih tinggi',
+),
+                        'syarat_kode' => null,
+                        'syarat_jawaban' => null,
+                    ],
+                    [
+                        'teks' => 'Kapan Anda mulai mencari pekerjaan?
+(Kelulusan dihitung berdasarkan bulan yudisium dan pekerjaan sambilan tidak dimasukkan)',
+                        'kode' => 'F301',
+                        'tipe' => 'radio',
+                        'wajib' => true,
+                        'opsi' => array (
+  0 => '(1) Perkiraan bulan sebelum lulus',
+  1 => '(2) Perkiraan bulan sesudah lulus',
+  2 => '(3) Saya tidak mencari pekerjaan (misalnya ditawari/ikatan dinas)',
+),
+                        'syarat_kode' => null,
+                        'syarat_jawaban' => null,
+                    ],
+                    [
+                        'teks' => 'Perkiraan bulan sebelum lulus',
+                        'kode' => 'F302',
+                        'tipe' => 'number',
+                        'wajib' => true,
+                        'opsi' => null,
+                        'syarat_kode' => 'F301',
+                        'syarat_jawaban' => array (
+  0 => '(1) Perkiraan bulan sebelum lulus',
+),
+                    ],
+                    [
+                        'teks' => 'Perkiraan bulan sesudah lulus',
+                        'kode' => 'F303',
+                        'tipe' => 'number',
+                        'wajib' => true,
+                        'opsi' => null,
+                        'syarat_kode' => 'F301',
+                        'syarat_jawaban' => array (
+  0 => '(2) Perkiraan bulan sesudah lulus',
+),
+                    ],
+                    [
+                        'teks' => 'Bagaimana Anda mencari pekerjaan tersebut? (Jawaban bisa lebih dari satu)',
+                        'kode' => 'F4',
+                        'tipe' => 'checkbox',
+                        'wajib' => true,
+                        'opsi' => array (
+  0 => '[F401] (0/1) Melalui iklan di koran/majalah/brosur',
+  1 => '[F402] (0/1) Melamar ke perusahaan tanpa mengetahui lowongan yang ada',
+  2 => '[F403] (0/1) Pergi ke bursa/pameran kerja',
+  3 => '[F404] (0/1) Mencari lewat internet/media sosial/job portal',
+  4 => '[F405] (0/1) Dihubungi oleh perusahaan',
+  5 => '[F406] (0/1) Menghubungi Kementerian Ketenagakerjaan',
+  6 => '[F407] (0/1) Menghubungi agen tenaga kerja komersial/swasta',
+  7 => '[F408] (0/1) Memperoleh informasi karir dari fakultas/universitas',
+  8 => '[F409] (0/1) Menghubungi kantor kemahasiswaan/hubungan alumni',
+  9 => '[F411] (0/1) Melalui jejaring/relasi (misalnya dosen, orang tua, saudara, teman, dll)',
+  10 => '[F413] (0/1) Melalui penempatan kerja atau magang',
+  11 => '[F414] (0/1) Bekerja di tempat yang sama dengan tempat kerja semasa kuliah',
+  12 => '[F415] (0/1) Lainnya, tuliskan ...',
+),
+                        'syarat_kode' => null,
+                        'syarat_jawaban' => null,
+                    ],
+                    [
+                        'teks' => 'Lainnya, tuliskan ...',
+                        'kode' => 'F416',
+                        'tipe' => 'text',
+                        'wajib' => true,
+                        'opsi' => null,
+                        'syarat_kode' => 'F4',
+                        'syarat_jawaban' => array (
+  0 => '[F415] (0/1) Lainnya, tuliskan ...',
+),
+                    ],
+                    [
+                        'teks' => 'Berapa jumlah perusahaan/instansi/institusi yang sudah Anda lamar (lewat surat atau email) sebelum Anda memperoleh pekerjaan pertama?',
+                        'kode' => 'F6',
+                        'tipe' => 'number',
+                        'wajib' => true,
+                        'opsi' => null,
+                        'syarat_kode' => null,
+                        'syarat_jawaban' => null,
+                    ],
+                    [
+                        'teks' => 'Berapa jumlah perusahaan/instansi/institusi yang merespons lamaran Anda?',
+                        'kode' => 'F7',
+                        'tipe' => 'number',
+                        'wajib' => true,
+                        'opsi' => null,
+                        'syarat_kode' => null,
+                        'syarat_jawaban' => null,
+                    ],
+                    [
+                        'teks' => 'Berapa jumlah perusahaan/instansi/institusi yang mengundang Anda untuk wawancara?',
+                        'kode' => 'F7A',
+                        'tipe' => 'number',
+                        'wajib' => true,
+                        'opsi' => null,
+                        'syarat_kode' => null,
+                        'syarat_jawaban' => null,
+                    ],
+                    [
+                        'teks' => 'Apakah Anda aktif mencari pekerjaan dalam 4 minggu terakhir?',
+                        'kode' => 'F1001',
+                        'tipe' => 'radio',
+                        'wajib' => true,
+                        'opsi' => array (
+  0 => '(1) Tidak',
+  1 => '(2) Tidak, tapi saya sedang menunggu hasil lamaran kerja',
+  2 => '(3) Ya, saya akan mulai bekerja dalam 2 minggu ke depan',
+  3 => '(4) Ya, tapi saya belum pasti akan bekerja dalam 2 minggu ke depan',
+  4 => '(5) Lainnya, tuliskan ...',
+),
+                        'syarat_kode' => null,
+                        'syarat_jawaban' => null,
+                    ],
+                    [
+                        'teks' => 'Lainnya, tuliskan ...',
+                        'kode' => 'F1002',
+                        'tipe' => 'text',
+                        'wajib' => true,
+                        'opsi' => null,
+                        'syarat_kode' => 'F1001',
+                        'syarat_jawaban' => array (
+  0 => '(5) Lainnya, tuliskan ...',
+),
+                    ],
+                    [
+                        'teks' => 'Jika menurut Anda pekerjaan saat ini tidak relevan dengan latar belakang pendidikan Anda, mengapa Anda mengambilnya? (Jawaban bisa lebih dari satu)',
+                        'kode' => 'F16',
+                        'tipe' => 'checkbox',
+                        'wajib' => true,
+                        'opsi' => array (
+  0 => '[F1601] (0/1) Pekerjaan saya saat ini sudah relevan dengan pendidikan saya.',
+  1 => '[F1602] (0/1) Saya belum mendapatkan pekerjaan yang lebih relevan.',
+  2 => '[F1603] (0/1) Di pekerjaan ini saya memperoleh prospek karier yang baik.',
+  3 => '[F1604] (0/1) Saya lebih suka bekerja di area pekerjaan yang tidak ada hubungannya dengan pendidikan saya.',
+  4 => '[F1605] (0/1) Saya dipromosikan ke posisi yang kurang berhubungan dengan pendidikan saya dibanding posisi sebelumnya.',
+  5 => '[F1606] (0/1) Saya dapat memperoleh pendapatan yang lebih tinggi pada pekerjaan saya saat ini.',
+  6 => '[F1607] (0/1) Pekerjaan saya saat ini lebih aman/terjamin.',
+  7 => '[F1608] (0/1) Pekerjaan saya saat ini lebih menarik.',
+  8 => '[F1609] (0/1) Pekerjaan saya saat ini lebih memungkinkan saya mengambil pekerjaan tambahan/jadwal yang fleksibel, dll.',
+  9 => '[F1610] (0/1) Pekerjaan saya saat ini lokasinya lebih dekat dari rumah saya.',
+  10 => '[F1612] (0/1) Pada awal meniti karir ini, saya harus menerima pekerjaan yang tidak berhubungan dengan pendidikan saya.',
+  11 => '[F1613] (0/1) Lainnya, tuliskan ...',
+),
+                        'syarat_kode' => null,
+                        'syarat_jawaban' => null,
+                    ],
+                    [
+                        'teks' => 'Lainnya, tuliskan ...',
+                        'kode' => 'F1614',
+                        'tipe' => 'text',
+                        'wajib' => true,
+                        'opsi' => null,
+                        'syarat_kode' => 'F16',
+                        'syarat_jawaban' => array (
+  0 => '[F1613] (0/1) Lainnya, tuliskan ...',
+),
+                    ],
                 ]
             ],
-            'Pencarian Kerja' => [
-                'syarat' => [
-                    'teks' => 'Jelaskan status Anda saat ini?',
-                    'jawaban' => ['Bekerja (penuh waktu/paruh waktu)', 'Wiraswasta/wirausaha/pekerja lepas', 'Tidak kerja tetapi sedang mencari kerja']
-                ],
+            'Wiraswasta/wirausaha/pekerja lepas' => [
+                'syarat_kode' => 'F8',
+                'syarat_jawaban' => array (
+  0 => '(3) Wiraswasta/wirausaha/pekerja lepas',
+),
                 'pertanyaan' => [
-                    ['teks' => 'Kapan Anda mulai mencari pekerjaan? Mohon pekerjaan sambilan tidak dimasukkan', 'kode' => 'F301', 'tipe' => 'radio', 'opsi' => ['Kira-kira ... bulan sebelum lulus', 'Kira-kira ... bulan sesudah lulus', 'Saya tidak mencari kerja'], 'wajib' => true],
-                    ['teks' => 'Kira-kira ... bulan sebelum/sesudah lulus (isikan angkanya)', 'kode' => 'F302', 'tipe' => 'text', 'opsi' => null, 'wajib' => false, 'syarat' => ['teks' => 'Kapan Anda mulai mencari pekerjaan? Mohon pekerjaan sambilan tidak dimasukkan', 'jawaban' => ['Kira-kira ... bulan sebelum lulus', 'Kira-kira ... bulan sesudah lulus']]],
-                    ['teks' => 'Bagaimana Anda mencari pekerjaan tersebut? Jawaban bisa lebih dari satu', 'kode' => 'F401', 'tipe' => 'checkbox', 'opsi' => [
-                        'Melalui iklan di koran/majalah, brosur',
-                        'Melamar ke perusahaan tanpa mengetahui lowongan yang ada',
-                        'Pergi ke bursa/pameran kerja',
-                        'Mencari lewat internet/iklan online/milis',
-                        'Dihubungi oleh perusahaan',
-                        'Menghubungi Kemenakertrans',
-                        'Menghubungi agen tenaga kerja komersial/swasta',
-                        'Memeroleh informasi dari pusat/kantor pengembangan karir fakultas/universitas',
-                        'Menghubungi kantor kemahasiswaan/hubungan alumni',
-                        'Membangun jejaring (network) sejak masih kuliah',
-                        'Melalui relasi (misalnya dosen, orang tua, saudara, teman, dll.)',
-                        'Membangun bisnis sendiri',
-                        'Melalui penempatan kerja atau magang',
-                        'Bekerja di tempat yang sama dengan tempat kerja semasa kuliah',
-                        'Lainnya'
-                    ], 'wajib' => true],
-                    ['teks' => 'Berapa perusahaan/instansi/institusi yang sudah Anda lamar (lewat surat atau e-mail) sebelum Anda memeroleh pekerjaan pertama?', 'kode' => 'F6', 'tipe' => 'text', 'opsi' => null, 'wajib' => true],
-                    ['teks' => 'Berapa banyak perusahaan/instansi/institusi yang merespons lamaran Anda?', 'kode' => 'F7', 'tipe' => 'text', 'opsi' => null, 'wajib' => true],
-                    ['teks' => 'Berapa banyak perusahaan/instansi/institusi yang mengundang Anda untuk wawancara?', 'kode' => 'F7A', 'tipe' => 'text', 'opsi' => null, 'wajib' => true],
-                    ['teks' => 'Apakah Anda aktif mencari pekerjaan dalam 4 minggu terakhir? Pilihlah Satu Jawaban', 'kode' => 'F1001', 'tipe' => 'radio', 'opsi' => [
-                        'Tidak',
-                        'Tidak, tapi saya sedang menunggu hasil lamaran kerja',
-                        'Ya, saya akan mulai bekerja dalam 2 minggu ke depan',
-                        'Ya, tapi saya belum pasti akan bekerja dalam 2 minggu ke depan',
-                        'Lainnya'
-                    ], 'wajib' => true, 'syarat' => ['teks' => 'Jelaskan status Anda saat ini?', 'jawaban' => ['Tidak kerja tetapi sedang mencari kerja']]],
-                    ['teks' => 'Jika menurut Anda pekerjaan Anda saat ini tidak sesuai dengan pendidikan Anda, mengapa Anda mengambilnya? Jawaban bisa lebih dari satu', 'kode' => 'F1601', 'tipe' => 'checkbox', 'opsi' => [
-                        'Pertanyaan tidak sesuai; pekerjaan saya sekarang sudah sesuai',
-                        'Saya belum mendapatkan pekerjaan yang lebih sesuai',
-                        'Di pekerjaan ini saya memeroleh prospek karir yang baik',
-                        'Saya lebih suka bekerja di area pekerjaan yang tidak ada hubungannya',
-                        'Saya dipromosikan ke posisi yang kurang berhubungan',
-                        'Saya dapat memeroleh pendapatan yang lebih tinggi di pekerjaan ini',
-                        'Pekerjaan saya saat ini lebih aman/terjamin/secure',
-                        'Pekerjaan saya saat ini lebih menarik',
-                        'Lebih memungkinkan saya mengambil pekerjaan tambahan/jadwal fleksibel',
-                        'Lokasinya lebih dekat dari rumah saya',
-                        'Dapat lebih menjamin kebutuhan keluarga saya',
-                        'Harus menerima pekerjaan yang tidak berhubungan di awal karir',
-                        'Lainnya'
-                    ], 'wajib' => false, 'syarat' => ['teks' => 'Jelaskan status Anda saat ini?', 'jawaban' => ['Bekerja (penuh waktu/paruh waktu)', 'Wiraswasta/wirausaha/pekerja lepas']]],
+                    [
+                        'teks' => 'Dalam berapa bulan setelah lulus Anda memulai wiraswasta/wirausaha? (tulis dalam angka)',
+                        'kode' => 'F502',
+                        'tipe' => 'number',
+                        'wajib' => true,
+                        'opsi' => null,
+                        'syarat_kode' => null,
+                        'syarat_jawaban' => null,
+                    ],
+                    [
+                        'teks' => 'Berapa rata-rata penghasilan Anda per bulan? - tulis dengan angka tanpa titik dan koma, contoh 5000000',
+                        'kode' => 'F505',
+                        'tipe' => 'number',
+                        'wajib' => true,
+                        'opsi' => null,
+                        'syarat_kode' => null,
+                        'syarat_jawaban' => null,
+                    ],
+                    [
+                        'teks' => 'Jika Anda sedang berwiraswasta/berwirausaha, apa posisi/jabatan Anda saat ini?',
+                        'kode' => 'F5C',
+                        'tipe' => 'radio',
+                        'wajib' => true,
+                        'opsi' => array (
+  0 => '(1) Founder',
+  1 => '(2) Co-Founder',
+  2 => '(4) Freelance/Kerja Lepas',
+),
+                        'syarat_kode' => null,
+                        'syarat_jawaban' => null,
+                    ],
+                    [
+                        'teks' => 'Apa nama wiraswasta/wirausaha Anda?',
+                        'kode' => 'F5B',
+                        'tipe' => 'text',
+                        'wajib' => true,
+                        'opsi' => null,
+                        'syarat_kode' => null,
+                        'syarat_jawaban' => null,
+                    ],
+                    [
+                        'teks' => 'Apakah wiraswasta/wirausaha Anda sudah berizin/terdaftar?',
+                        'kode' => 'F5E',
+                        'tipe' => 'radio',
+                        'wajib' => true,
+                        'opsi' => array (
+  0 => '(0) Belum',
+  1 => '(1) Sudah',
+),
+                        'syarat_kode' => null,
+                        'syarat_jawaban' => null,
+                    ],
+                    [
+                        'teks' => 'Apa ruang lingkup wiraswasta/wirausaha Anda?',
+                        'kode' => 'F5D',
+                        'tipe' => 'select',
+                        'wajib' => true,
+                        'opsi' => array (
+  0 => '(1) Lokal/Wilayah',
+  1 => '(2) Nasional',
+  2 => '(3) Multinasional/Internasional',
+),
+                        'syarat_kode' => null,
+                        'syarat_jawaban' => null,
+                    ],
+                    [
+                        'teks' => 'Di mana Negara lokasi tempat Anda berwiraswasta/berwirausaha?',
+                        'kode' => 'F5A0',
+                        'tipe' => 'text',
+                        'wajib' => true,
+                        'opsi' => null,
+                        'syarat_kode' => null,
+                        'syarat_jawaban' => null,
+                    ],
+                    [
+                        'teks' => 'Di mana Provinsi lokasi tempat Anda berwiraswasta/berwirausaha?',
+                        'kode' => 'F5A1',
+                        'tipe' => 'text',
+                        'wajib' => true,
+                        'opsi' => null,
+                        'syarat_kode' => null,
+                        'syarat_jawaban' => null,
+                    ],
+                    [
+                        'teks' => 'Di mana Kabupaten/Kota lokasi tempat Anda berwiraswasta/berwirausaha?',
+                        'kode' => 'F5A2',
+                        'tipe' => 'text',
+                        'wajib' => true,
+                        'opsi' => null,
+                        'syarat_kode' => null,
+                        'syarat_jawaban' => null,
+                    ],
+                    [
+                        'teks' => 'Seberapa relevan bidang studi dengan bidang wiraswasta/wirausaha Anda?',
+                        'kode' => 'F14',
+                        'tipe' => 'radio',
+                        'wajib' => true,
+                        'opsi' => array (
+  0 => '(5) Tidak relevan',
+  1 => '(4) Kurang relevan',
+  2 => '(3) Cukup relevan',
+  3 => '(2) Relevan',
+  4 => '(1) Sangat relevan',
+),
+                        'syarat_kode' => null,
+                        'syarat_jawaban' => null,
+                    ],
+                    [
+                        'teks' => 'Tingkat kesesuaian jenjang pendidikan untuk wiraswasta/wirausaha Anda saat ini?',
+                        'kode' => 'F15',
+                        'tipe' => 'radio',
+                        'wajib' => true,
+                        'opsi' => array (
+  0 => '(4) Tidak perlu pendidikan tinggi',
+  1 => '(3) Setingkat lebih rendah',
+  2 => '(2) Tingkat yang sama',
+  3 => '(1) Setingkat lebih tinggi',
+),
+                        'syarat_kode' => null,
+                        'syarat_jawaban' => null,
+                    ],
+                    [
+                        'teks' => 'Kapan Anda mulai wiraswasta/wirausaha?',
+                        'kode' => 'F301',
+                        'tipe' => 'radio',
+                        'wajib' => true,
+                        'opsi' => array (
+  0 => '(1) Perkiraan bulan sebelum lulus (bulan yudisium)',
+  1 => '(2) Perkiraan bulan sesudah lulus (bulan yudisium)',
+),
+                        'syarat_kode' => null,
+                        'syarat_jawaban' => null,
+                    ],
+                    [
+                        'teks' => 'Perkiraan bulan sebelum lulus (bulan yudisium)',
+                        'kode' => 'F302',
+                        'tipe' => 'number',
+                        'wajib' => true,
+                        'opsi' => null,
+                        'syarat_kode' => 'F301',
+                        'syarat_jawaban' => array (
+  0 => '(1) Perkiraan bulan sebelum lulus (bulan yudisium)',
+),
+                    ],
+                    [
+                        'teks' => 'Perkiraan bulan sesudah lulus (bulan yudisium)',
+                        'kode' => 'F303',
+                        'tipe' => 'number',
+                        'wajib' => true,
+                        'opsi' => null,
+                        'syarat_kode' => 'F301',
+                        'syarat_jawaban' => array (
+  0 => '(2) Perkiraan bulan sesudah lulus (bulan yudisium)',
+),
+                    ],
+                    [
+                        'teks' => 'Jika menurut Anda bidang wirausaha saat ini tidak relevan dengan latar belakang pendidikan Anda, mengapa Anda mengambilnya? (Jawaban bisa lebih dari satu)',
+                        'kode' => 'F16',
+                        'tipe' => 'checkbox',
+                        'wajib' => true,
+                        'opsi' => array (
+  0 => '[F1601] (0/1) Bidang wirausaha saya saat ini sudah relevan dengan pendidikan saya.',
+  1 => '[F1602] (0/1) Saya belum mendapatkan bidang wirausaha yang lebih relevan.',
+  2 => '[F1603] (0/1) Di bidang wirausaha ini saya mem peroleh prospek karier yang baik.',
+  3 => '[F1604] (0/1) Saya lebih suka berwirausaha di area yang tidak ada hubungannya dengan pendidikan saya.',
+  4 => '[F1606] (0/1) Saya dapat memperoleh pendapatan yang lebih tinggi pada bidang wirausaha saya saat ini.',
+  5 => '[F1607] (0/1) Bidang wirausaha saya saat ini lebih aman.',
+  6 => '[F1608] (0/1) Bidang wirausaha saya saat ini lebih menarik.',
+  7 => '[F1609] (0/1) Bidang wirausaha saya saat ini lebih memungkinkan saya memiliki jadwal yang fleksibel.',
+  8 => '[F1610] (0/1) Lokasi wirausaha saya saat ini lebih dekat dari rumah.',
+  9 => '[F1612] (0/1) Pada awal merintis wirausaha ini, saya harus memulai bidang wirausaha yang tidak berhubungan dengan pendidikan saya.',
+  10 => '[F1613] (0/1) Lainnya, tuliskan ...',
+),
+                        'syarat_kode' => null,
+                        'syarat_jawaban' => null,
+                    ],
+                    [
+                        'teks' => 'Lainnya, tuliskan ...',
+                        'kode' => 'F1614',
+                        'tipe' => 'text',
+                        'wajib' => true,
+                        'opsi' => null,
+                        'syarat_kode' => 'F16',
+                        'syarat_jawaban' => array (
+  0 => '[F1613] (0/1) Lainnya, tuliskan ...',
+),
+                    ],
                 ]
             ],
-            'Studi Lanjut' => [
-                'syarat' => [
-                    'teks' => 'Jelaskan status Anda saat ini?',
-                    'jawaban' => ['Melanjutkan Pendidikan']
-                ],
+            'Melanjutkan pendidikan' => [
+                'syarat_kode' => 'F8',
+                'syarat_jawaban' => array (
+  0 => '(4) Melanjutkan pendidikan',
+),
                 'pertanyaan' => [
-                    ['teks' => 'Siapa yang terutama membayar biaya studi Anda?', 'kode' => 'F18A', 'tipe' => 'radio', 'opsi' => ['Biaya Sendiri / Keluarga', 'Beasiswa'], 'wajib' => false],
-                    ['teks' => 'Nama Perguruan Tinggi:', 'kode' => 'F18B', 'tipe' => 'text', 'opsi' => null, 'wajib' => false],
-                    ['teks' => 'Nama Program Studi:', 'kode' => 'F18C', 'tipe' => 'text', 'opsi' => null, 'wajib' => false],
-                    ['teks' => 'Tanggal Masuk:', 'kode' => 'F18D', 'tipe' => 'text', 'opsi' => null, 'wajib' => false],
+                    [
+                        'teks' => 'Sumber biaya Studi Lanjut',
+                        'kode' => 'F18A',
+                        'tipe' => 'select',
+                        'wajib' => true,
+                        'opsi' => array (
+  0 => '(1) Biaya Sendiri',
+  1 => '(2) Beasiswa',
+),
+                        'syarat_kode' => null,
+                        'syarat_jawaban' => null,
+                    ],
+                    [
+                        'teks' => 'Nama Perguruan Tinggi studi lanjut',
+                        'kode' => 'F18B',
+                        'tipe' => 'text',
+                        'wajib' => true,
+                        'opsi' => null,
+                        'syarat_kode' => null,
+                        'syarat_jawaban' => null,
+                    ],
+                    [
+                        'teks' => 'Nama Program Studi pada studi lanjut',
+                        'kode' => 'F18C',
+                        'tipe' => 'text',
+                        'wajib' => true,
+                        'opsi' => null,
+                        'syarat_kode' => null,
+                        'syarat_jawaban' => null,
+                    ],
+                    [
+                        'teks' => 'Tanggal Masuk Studi Lanjut',
+                        'kode' => 'F18D',
+                        'tipe' => 'date',
+                        'wajib' => true,
+                        'opsi' => null,
+                        'syarat_kode' => null,
+                        'syarat_jawaban' => null,
+                    ],
+                    [
+                        'teks' => 'Di mana Negara tempat Anda melanjutkan studi lanjut?',
+                        'kode' => 'F5A0',
+                        'tipe' => 'text',
+                        'wajib' => true,
+                        'opsi' => null,
+                        'syarat_kode' => null,
+                        'syarat_jawaban' => null,
+                    ],
+                    [
+                        'teks' => 'Di mana Provinsi tempat Anda melanjutkan studi lanjut?',
+                        'kode' => 'F5A1',
+                        'tipe' => 'text',
+                        'wajib' => true,
+                        'opsi' => null,
+                        'syarat_kode' => null,
+                        'syarat_jawaban' => null,
+                    ],
+                    [
+                        'teks' => 'Di mana Kabupaten/Kota tempat Anda melanjutkan studi lanjut?',
+                        'kode' => 'F5A2',
+                        'tipe' => 'text',
+                        'wajib' => true,
+                        'opsi' => null,
+                        'syarat_kode' => null,
+                        'syarat_jawaban' => null,
+                    ],
+                    [
+                        'teks' => 'Seberapa relevan hubungan antara bidang studi lanjut dengan bidang studi pada jenjang sebelumnya?',
+                        'kode' => 'F14',
+                        'tipe' => 'radio',
+                        'wajib' => true,
+                        'opsi' => array (
+  0 => '(5) Tidak relevan',
+  1 => '(4) Kurang relevan',
+  2 => '(3) Cukup relevan',
+  3 => '(2) Relevan',
+  4 => '(1) Sangat relevan',
+),
+                        'syarat_kode' => null,
+                        'syarat_jawaban' => null,
+                    ],
+                ]
+            ],
+            'Tidak bekerja tetapi sedang mencari pekerjaan' => [
+                'syarat_kode' => 'F8',
+                'syarat_jawaban' => array (
+  0 => '(5) Tidak bekerja tetapi sedang mencari pekerjaan',
+),
+                'pertanyaan' => [
+                    [
+                        'teks' => 'Kapan Anda mulai mencari pekerjaan? (Kelulusan dihitung berdasarkan bulan yudisium dan pekerjaan sambilan tidak dimasukkan)',
+                        'kode' => 'F301',
+                        'tipe' => 'radio',
+                        'wajib' => true,
+                        'opsi' => array (
+  0 => '(1) Perkiraan bulan sebelum lulus',
+  1 => '(2) Perkiraan bulan sesudah lulus',
+),
+                        'syarat_kode' => null,
+                        'syarat_jawaban' => null,
+                    ],
+                    [
+                        'teks' => 'Perkiraan bulan sebelum lulus',
+                        'kode' => 'F302',
+                        'tipe' => 'text',
+                        'wajib' => true,
+                        'opsi' => null,
+                        'syarat_kode' => 'F301',
+                        'syarat_jawaban' => array (
+  0 => '(1) Perkiraan bulan sebelum lulus',
+),
+                    ],
+                    [
+                        'teks' => 'Perkiraan bulan sesudah lulus',
+                        'kode' => 'F303',
+                        'tipe' => 'text',
+                        'wajib' => true,
+                        'opsi' => null,
+                        'syarat_kode' => 'F301',
+                        'syarat_jawaban' => array (
+  0 => '(2) Perkiraan bulan sesudah lulus',
+),
+                    ],
+                    [
+                        'teks' => 'Bagaimana Anda mencari pekerjaan tersebut? (Jawaban bisa lebih dari satu)',
+                        'kode' => 'F4',
+                        'tipe' => 'checkbox',
+                        'wajib' => true,
+                        'opsi' => array (
+  0 => '[F401] (0/1) Melalui iklan di koran/majalah/brosur',
+  1 => '[F402] (0/1) Melamar ke perusahaan tanpa mengetahui lowongan yang ada',
+  2 => '[F403] (0/1) Pergi ke bursa/pameran kerja',
+  3 => '[F404] (0/1) Mencari lewat internet/media sosial/job portal',
+  4 => '[F405] (0/1) Dihubungi oleh perusahaan',
+  5 => '[F406] (0/1) Menghubungi Kementerian Ketenagakerjaan',
+  6 => '[F407] (0/1) Menghubungi agen tenaga kerja komersial/swasta',
+  7 => '[F408] (0/1) Memperoleh informasi karir dari fakultas/universitas',
+  8 => '[F409] (0/1) Menghubungi kantor kemahasiswaan/hubungan alumni',
+  9 => '[F411] (0/1) Melalui jejaring/relasi (misalnya dosen, orang tua, saudara, teman, dll)',
+  10 => '[F413] (0/1) Melalui penempatan kerja atau magang',
+  11 => '[F414] (0/1) Bekerja di tempat yang sama dengan tempat kerja semasa kuliah',
+  12 => '[F415] (0/1) Lainnya, tuliskan ...',
+),
+                        'syarat_kode' => null,
+                        'syarat_jawaban' => null,
+                    ],
+                    [
+                        'teks' => 'Lainnya, tuliskan ...',
+                        'kode' => 'F416',
+                        'tipe' => 'text',
+                        'wajib' => true,
+                        'opsi' => null,
+                        'syarat_kode' => 'F4',
+                        'syarat_jawaban' => array (
+  0 => '[F415] (0/1) Lainnya, tuliskan ...',
+),
+                    ],
+                    [
+                        'teks' => 'Berapa jumlah perusahaan/instansi/institusi yang sudah Anda lamar (lewat surat atau email) sebelum Anda memperoleh pekerjaan pertama?',
+                        'kode' => 'F6',
+                        'tipe' => 'number',
+                        'wajib' => true,
+                        'opsi' => null,
+                        'syarat_kode' => null,
+                        'syarat_jawaban' => null,
+                    ],
+                    [
+                        'teks' => 'Berapa jumlah perusahaan/instansi/institusi yang merespons lamaran Anda?',
+                        'kode' => 'F7',
+                        'tipe' => 'number',
+                        'wajib' => true,
+                        'opsi' => null,
+                        'syarat_kode' => null,
+                        'syarat_jawaban' => null,
+                    ],
+                    [
+                        'teks' => 'Berapa jumlah perusahaan/instansi/institusi yang mengundang Anda untuk wawancara?',
+                        'kode' => 'F7A',
+                        'tipe' => 'number',
+                        'wajib' => true,
+                        'opsi' => null,
+                        'syarat_kode' => null,
+                        'syarat_jawaban' => null,
+                    ],
+                    [
+                        'teks' => 'Apakah Anda aktif mencari pekerjaan dalam 4 minggu terakhir?',
+                        'kode' => 'F1001',
+                        'tipe' => 'radio',
+                        'wajib' => true,
+                        'opsi' => array (
+  0 => '(1) Tidak',
+  1 => '(2) Tidak, tapi saya sedang menunggu hasil lamaran kerja',
+  2 => '(3) Ya, saya akan mulai bekerja dalam 2 minggu ke depan',
+  3 => '(4) Ya, tapi saya belum pasti akan bekerja dalam 2 minggu ke depan',
+  4 => '(5) Lainnya, tuliskan ...',
+),
+                        'syarat_kode' => null,
+                        'syarat_jawaban' => null,
+                    ],
+                    [
+                        'teks' => 'Lainnya, tuliskan ...',
+                        'kode' => 'F1002',
+                        'tipe' => 'text',
+                        'wajib' => true,
+                        'opsi' => null,
+                        'syarat_kode' => 'F1001',
+                        'syarat_jawaban' => array (
+  0 => '(5) Lainnya, tuliskan ...',
+),
+                    ],
+                ]
+            ],
+            'Sumber dana dalam pembiayaan kuliah? (bukan ketika studi lanjut)' => [
+                'syarat_kode' => null,
+                'syarat_jawaban' => null,
+                'pertanyaan' => [
+                    [
+                        'teks' => 'Sebutkan sumber dana dalam pembiayaan kuliah? (bukan ketika studi lanjut)',
+                        'kode' => 'F1201',
+                        'tipe' => 'radio',
+                        'wajib' => true,
+                        'opsi' => array (
+  0 => '(1) Biaya sendiri/keluarga',
+  1 => '(2) Beasiswa ADIK',
+  2 => '(3) Beasiswa KIP-Kuliah (KIP-K)',
+  3 => '(4) Beasiswa PPA',
+  4 => '(5) Beasiswa AFIRMASI',
+  5 => '(6) Beasiswa perusahaan/swasta',
+  6 => '(8) Beasiswa pemerintah daerah',
+  7 => '(7) Lainnya, tuliskan ...',
+),
+                        'syarat_kode' => null,
+                        'syarat_jawaban' => null,
+                    ],
+                    [
+                        'teks' => 'Lainnya, tuliskan ...',
+                        'kode' => 'F1202',
+                        'tipe' => 'text',
+                        'wajib' => true,
+                        'opsi' => null,
+                        'syarat_kode' => 'F1201',
+                        'syarat_jawaban' => array (
+  0 => '(7) Lainnya, tuliskan ...',
+),
+                    ],
                 ]
             ],
             'Kompetensi' => [
-                'syarat' => null,
+                'syarat_kode' => null,
+                'syarat_jawaban' => null,
                 'pertanyaan' => [
-                    ['teks' => 'Pada saat lulus, pada tingkat mana kompetensi Etika Anda kuasai?', 'kode' => 'F1761', 'tipe' => 'radio', 'opsi' => ['1 (Sangat Rendah)', '2', '3', '4', '5 (Sangat Tinggi)'], 'wajib' => true],
-                    ['teks' => 'Pada saat ini, pada tingkat mana kompetensi Etika diperlukan dalam pekerjaan Anda?', 'kode' => 'F1762', 'tipe' => 'radio', 'opsi' => ['1 (Sangat Rendah)', '2', '3', '4', '5 (Sangat Tinggi)'], 'wajib' => true],
-                    ['teks' => 'Pada saat lulus, pada tingkat mana kompetensi Keahlian berdasarkan bidang ilmu Anda kuasai?', 'kode' => 'F1763', 'tipe' => 'radio', 'opsi' => ['1 (Sangat Rendah)', '2', '3', '4', '5 (Sangat Tinggi)'], 'wajib' => true],
-                    ['teks' => 'Pada saat ini, pada tingkat mana kompetensi Keahlian berdasarkan bidang ilmu diperlukan dalam pekerjaan Anda?', 'kode' => 'F1764', 'tipe' => 'radio', 'opsi' => ['1 (Sangat Rendah)', '2', '3', '4', '5 (Sangat Tinggi)'], 'wajib' => true],
-                    ['teks' => 'Pada saat lulus, pada tingkat mana kompetensi Bahasa Inggris Anda kuasai?', 'kode' => 'F1765', 'tipe' => 'radio', 'opsi' => ['1 (Sangat Rendah)', '2', '3', '4', '5 (Sangat Tinggi)'], 'wajib' => true],
-                    ['teks' => 'Pada saat ini, pada tingkat mana kompetensi Bahasa Inggris diperlukan dalam pekerjaan Anda?', 'kode' => 'F1766', 'tipe' => 'radio', 'opsi' => ['1 (Sangat Rendah)', '2', '3', '4', '5 (Sangat Tinggi)'], 'wajib' => true],
-                    ['teks' => 'Pada saat lulus, pada tingkat mana kompetensi Penggunaan Teknologi Informasi Anda kuasai?', 'kode' => 'F1767', 'tipe' => 'radio', 'opsi' => ['1 (Sangat Rendah)', '2', '3', '4', '5 (Sangat Tinggi)'], 'wajib' => true],
-                    ['teks' => 'Pada saat ini, pada tingkat mana kompetensi Penggunaan Teknologi Informasi diperlukan dalam pekerjaan Anda?', 'kode' => 'F1768', 'tipe' => 'radio', 'opsi' => ['1 (Sangat Rendah)', '2', '3', '4', '5 (Sangat Tinggi)'], 'wajib' => true],
-                    ['teks' => 'Pada saat lulus, pada tingkat mana kompetensi Komunikasi Anda kuasai?', 'kode' => 'F1769', 'tipe' => 'radio', 'opsi' => ['1 (Sangat Rendah)', '2', '3', '4', '5 (Sangat Tinggi)'], 'wajib' => true],
-                    ['teks' => 'Pada saat ini, pada tingkat mana kompetensi Komunikasi diperlukan dalam pekerjaan Anda?', 'kode' => 'F1770', 'tipe' => 'radio', 'opsi' => ['1 (Sangat Rendah)', '2', '3', '4', '5 (Sangat Tinggi)'], 'wajib' => true],
-                    ['teks' => 'Pada saat lulus, pada tingkat mana kompetensi Kerja Sama Tim Anda kuasai?', 'kode' => 'F1771', 'tipe' => 'radio', 'opsi' => ['1 (Sangat Rendah)', '2', '3', '4', '5 (Sangat Tinggi)'], 'wajib' => true],
-                    ['teks' => 'Pada saat ini, pada tingkat mana kompetensi Kerja Sama Tim diperlukan dalam pekerjaan Anda?', 'kode' => 'F1772', 'tipe' => 'radio', 'opsi' => ['1 (Sangat Rendah)', '2', '3', '4', '5 (Sangat Tinggi)'], 'wajib' => true],
-                    ['teks' => 'Pada saat lulus, pada tingkat mana kompetensi Pengembangan Diri Anda kuasai?', 'kode' => 'F1773', 'tipe' => 'radio', 'opsi' => ['1 (Sangat Rendah)', '2', '3', '4', '5 (Sangat Tinggi)'], 'wajib' => true],
-                    ['teks' => 'Pada saat ini, pada tingkat mana kompetensi Pengembangan Diri diperlukan dalam pekerjaan Anda?', 'kode' => 'F1774', 'tipe' => 'radio', 'opsi' => ['1 (Sangat Rendah)', '2', '3', '4', '5 (Sangat Tinggi)'], 'wajib' => true],
+                    [
+                        'teks' => 'Pada saat lulus, pada tingkat mana kompetensi Etika Anda kuasai?',
+                        'kode' => 'F1761',
+                        'tipe' => 'radio',
+                        'wajib' => true,
+                        'opsi' => array (
+  0 => '(1) Sangat rendah',
+  1 => '(2) Rendah',
+  2 => '(3) Sedang',
+  3 => '(4) Tinggi',
+  4 => '(5) Sangat tinggi',
+),
+                        'syarat_kode' => null,
+                        'syarat_jawaban' => null,
+                    ],
+                    [
+                        'teks' => 'Pada saat ini, pada tingkat mana kompetensi Etika diperlukan dalam pekerjaan Anda?',
+                        'kode' => 'F1762',
+                        'tipe' => 'radio',
+                        'wajib' => true,
+                        'opsi' => array (
+  0 => '(1) Sangat rendah',
+  1 => '(2) Rendah',
+  2 => '(3) Sedang',
+  3 => '(4) Tinggi',
+  4 => '(5) Sangat tinggi',
+),
+                        'syarat_kode' => null,
+                        'syarat_jawaban' => null,
+                    ],
+                    [
+                        'teks' => 'Pada saat lulus, pada tingkat mana kompetensi Keahlian berdasarkan bidang ilmu Anda kuasai?',
+                        'kode' => 'F1763',
+                        'tipe' => 'radio',
+                        'wajib' => true,
+                        'opsi' => array (
+  0 => '(1) Sangat rendah',
+  1 => '(2) Rendah',
+  2 => '(3) Sedang',
+  3 => '(4) Tinggi',
+  4 => '(5) Sangat tinggi',
+),
+                        'syarat_kode' => null,
+                        'syarat_jawaban' => null,
+                    ],
+                    [
+                        'teks' => 'Pada saat ini, pada tingkat mana kompetensi Keahlian berdasarkan bidang ilmu diperlukan dalam pekerjaan Anda?',
+                        'kode' => 'F1764',
+                        'tipe' => 'radio',
+                        'wajib' => true,
+                        'opsi' => array (
+  0 => '(1) Sangat rendah',
+  1 => '(2) Rendah',
+  2 => '(3) Sedang',
+  3 => '(4) Tinggi',
+  4 => '(5) Sangat tinggi',
+),
+                        'syarat_kode' => null,
+                        'syarat_jawaban' => null,
+                    ],
+                    [
+                        'teks' => 'Pada saat lulus, pada tingkat mana kompetensi Bahasa Inggris Anda kuasai?',
+                        'kode' => 'F1765',
+                        'tipe' => 'radio',
+                        'wajib' => true,
+                        'opsi' => array (
+  0 => '(1) Sangat rendah',
+  1 => '(2) Rendah',
+  2 => '(3) Sedang',
+  3 => '(4) Tinggi',
+  4 => '(5) Sangat tinggi',
+),
+                        'syarat_kode' => null,
+                        'syarat_jawaban' => null,
+                    ],
+                    [
+                        'teks' => 'Pada saat ini, pada tingkat mana kompetensi Bahasa Inggris diperlukan dalam pekerjaan Anda?',
+                        'kode' => 'F1766',
+                        'tipe' => 'radio',
+                        'wajib' => true,
+                        'opsi' => array (
+  0 => '(1) Sangat rendah',
+  1 => '(2) Rendah',
+  2 => '(3) Sedang',
+  3 => '(4) Tinggi',
+  4 => '(5) Sangat tinggi',
+),
+                        'syarat_kode' => null,
+                        'syarat_jawaban' => null,
+                    ],
+                    [
+                        'teks' => 'Pada saat lulus, pada tingkat mana kompetensi Penggunaan Teknologi Informasi Anda kuasai?',
+                        'kode' => 'F1767',
+                        'tipe' => 'radio',
+                        'wajib' => true,
+                        'opsi' => array (
+  0 => '(1) Sangat rendah',
+  1 => '(2) Rendah',
+  2 => '(3) Sedang',
+  3 => '(4) Tinggi',
+  4 => '(5) Sangat tinggi',
+),
+                        'syarat_kode' => null,
+                        'syarat_jawaban' => null,
+                    ],
+                    [
+                        'teks' => 'Pada saat ini, pada tingkat mana kompetensi Penggunaan Teknologi Informasi diperlukan dalam pekerjaan Anda?',
+                        'kode' => 'F1768',
+                        'tipe' => 'radio',
+                        'wajib' => true,
+                        'opsi' => array (
+  0 => '(1) Sangat rendah',
+  1 => '(2) Rendah',
+  2 => '(3) Sedang',
+  3 => '(4) Tinggi',
+  4 => '(5) Sangat tinggi',
+),
+                        'syarat_kode' => null,
+                        'syarat_jawaban' => null,
+                    ],
+                    [
+                        'teks' => 'Pada saat lulus, pada tingkat mana kompetensi Komunikasi Anda kuasai?',
+                        'kode' => 'F1769',
+                        'tipe' => 'radio',
+                        'wajib' => true,
+                        'opsi' => array (
+  0 => '(1) Sangat rendah',
+  1 => '(2) Rendah',
+  2 => '(3) Sedang',
+  3 => '(4) Tinggi',
+  4 => '(5) Sangat tinggi',
+),
+                        'syarat_kode' => null,
+                        'syarat_jawaban' => null,
+                    ],
+                    [
+                        'teks' => 'Pada saat ini, pada tingkat mana kompetensi Komunikasi diperlukan dalam pekerjaan Anda?',
+                        'kode' => 'F1770',
+                        'tipe' => 'radio',
+                        'wajib' => true,
+                        'opsi' => array (
+  0 => '(1) Sangat rendah',
+  1 => '(2) Rendah',
+  2 => '(3) Sedang',
+  3 => '(4) Tinggi',
+  4 => '(5) Sangat tinggi',
+),
+                        'syarat_kode' => null,
+                        'syarat_jawaban' => null,
+                    ],
+                    [
+                        'teks' => 'Pada saat lulus, pada tingkat mana kompetensi Kerja Sama Tim Anda kuasai?',
+                        'kode' => 'F1771',
+                        'tipe' => 'radio',
+                        'wajib' => true,
+                        'opsi' => array (
+  0 => '(1) Sangat rendah',
+  1 => '(2) Rendah',
+  2 => '(3) Sedang',
+  3 => '(4) Tinggi',
+  4 => '(5) Sangat tinggi',
+),
+                        'syarat_kode' => null,
+                        'syarat_jawaban' => null,
+                    ],
+                    [
+                        'teks' => 'Pada saat ini, pada tingkat mana kompetensi Kerja Sama Tim diperlukan dalam pekerjaan Anda?',
+                        'kode' => 'F1772',
+                        'tipe' => 'radio',
+                        'wajib' => true,
+                        'opsi' => array (
+  0 => '(1) Sangat rendah',
+  1 => '(2) Rendah',
+  2 => '(3) Sedang',
+  3 => '(4) Tinggi',
+  4 => '(5) Sangat tinggi',
+),
+                        'syarat_kode' => null,
+                        'syarat_jawaban' => null,
+                    ],
+                    [
+                        'teks' => 'Pada saat lulus, pada tingkat mana kompetensi Pengembangan Diri Anda kuasai?',
+                        'kode' => 'F1773',
+                        'tipe' => 'radio',
+                        'wajib' => true,
+                        'opsi' => array (
+  0 => '(1) Sangat rendah',
+  1 => '(2) Rendah',
+  2 => '(3) Sedang',
+  3 => '(4) Tinggi',
+  4 => '(5) Sangat tinggi',
+),
+                        'syarat_kode' => null,
+                        'syarat_jawaban' => null,
+                    ],
+                    [
+                        'teks' => 'Pada saat ini, pada tingkat mana kompetensi Pengembangan Diri diperlukan dalam pekerjaan Anda?',
+                        'kode' => 'F1774',
+                        'tipe' => 'radio',
+                        'wajib' => true,
+                        'opsi' => array (
+  0 => '(1) Sangat rendah',
+  1 => '(2) Rendah',
+  2 => '(3) Sedang',
+  3 => '(4) Tinggi',
+  4 => '(5) Sangat tinggi',
+),
+                        'syarat_kode' => null,
+                        'syarat_jawaban' => null,
+                    ],
+                    [
+                        'teks' => 'Pada saat lulus, pada tingkat mana kompetensi Berpikir kritis Anda kuasai?',
+                        'kode' => 'F1775',
+                        'tipe' => 'radio',
+                        'wajib' => true,
+                        'opsi' => array (
+  0 => '(1) Sangat rendah',
+  1 => '(2) Rendah',
+  2 => '(3) Sedang',
+  3 => '(4) Tinggi',
+  4 => '(5) Sangat tinggi',
+),
+                        'syarat_kode' => null,
+                        'syarat_jawaban' => null,
+                    ],
+                    [
+                        'teks' => 'Pada saat ini, pada tingkat mana kompetensi Berpikir kritis diperlukan dalam pekerjaan Anda?',
+                        'kode' => 'F1776',
+                        'tipe' => 'radio',
+                        'wajib' => true,
+                        'opsi' => array (
+  0 => '(1) Sangat rendah',
+  1 => '(2) Rendah',
+  2 => '(3) Sedang',
+  3 => '(4) Tinggi',
+  4 => '(5) Sangat tinggi',
+),
+                        'syarat_kode' => null,
+                        'syarat_jawaban' => null,
+                    ],
+                    [
+                        'teks' => 'Pada saat lulus, pada tingkat mana kompetensi Kreativitas Anda kuasai?',
+                        'kode' => 'F1777',
+                        'tipe' => 'radio',
+                        'wajib' => true,
+                        'opsi' => array (
+  0 => '(1) Sangat rendah',
+  1 => '(2) Rendah',
+  2 => '(3) Sedang',
+  3 => '(4) Tinggi',
+  4 => '(5) Sangat tinggi',
+),
+                        'syarat_kode' => null,
+                        'syarat_jawaban' => null,
+                    ],
+                    [
+                        'teks' => 'Pada saat ini, pada tingkat mana kompetensi Kreativitas diperlukan dalam pekerjaan Anda?',
+                        'kode' => 'F1778',
+                        'tipe' => 'radio',
+                        'wajib' => true,
+                        'opsi' => array (
+  0 => '(1) Sangat rendah',
+  1 => '(2) Rendah',
+  2 => '(3) Sedang',
+  3 => '(4) Tinggi',
+  4 => '(5) Sangat tinggi',
+),
+                        'syarat_kode' => null,
+                        'syarat_jawaban' => null,
+                    ],
+                    [
+                        'teks' => 'Pada saat lulus, pada tingkat mana kompetensi Kewirausahaan Anda kuasai?',
+                        'kode' => 'F1779',
+                        'tipe' => 'radio',
+                        'wajib' => true,
+                        'opsi' => array (
+  0 => '(1) Sangat rendah',
+  1 => '(2) Rendah',
+  2 => '(3) Sedang',
+  3 => '(4) Tinggi',
+  4 => '(5) Sangat tinggi',
+),
+                        'syarat_kode' => null,
+                        'syarat_jawaban' => null,
+                    ],
+                    [
+                        'teks' => 'Pada saat ini, pada tingkat mana kompetensi Kewirausahaan diperlukan dalam pekerjaan Anda?',
+                        'kode' => 'F1780',
+                        'tipe' => 'radio',
+                        'wajib' => true,
+                        'opsi' => array (
+  0 => '(1) Sangat rendah',
+  1 => '(2) Rendah',
+  2 => '(3) Sedang',
+  3 => '(4) Tinggi',
+  4 => '(5) Sangat tinggi',
+),
+                        'syarat_kode' => null,
+                        'syarat_jawaban' => null,
+                    ],
+                    [
+                        'teks' => 'Pada saat lulus, pada tingkat mana kompetensi Adaptasi Anda kuasai?',
+                        'kode' => 'F1781',
+                        'tipe' => 'radio',
+                        'wajib' => true,
+                        'opsi' => array (
+  0 => '(1) Sangat rendah',
+  1 => '(2) Rendah',
+  2 => '(3) Sedang',
+  3 => '(4) Tinggi',
+  4 => '(5) Sangat tinggi',
+),
+                        'syarat_kode' => null,
+                        'syarat_jawaban' => null,
+                    ],
+                    [
+                        'teks' => 'Pada saat ini, pada tingkat mana kompetensi Adaptasi diperlukan dalam pekerjaan Anda?',
+                        'kode' => 'F1782',
+                        'tipe' => 'radio',
+                        'wajib' => true,
+                        'opsi' => array (
+  0 => '(1) Sangat rendah',
+  1 => '(2) Rendah',
+  2 => '(3) Sedang',
+  3 => '(4) Tinggi',
+  4 => '(5) Sangat tinggi',
+),
+                        'syarat_kode' => null,
+                        'syarat_jawaban' => null,
+                    ],
                 ]
             ],
             'Metode Pembelajaran' => [
-                'syarat' => null,
+                'syarat_kode' => null,
+                'syarat_jawaban' => null,
                 'pertanyaan' => [
-                    ['teks' => 'Menurut Anda seberapa besar penekanan pada metode pembelajaran Perkuliahan dilaksanakan di program studi Anda?', 'kode' => 'F21', 'tipe' => 'radio', 'opsi' => ['Sangat Besar', 'Besar', 'Cukup Besar', 'Kurang Besar', 'Tidak Sama Sekali'], 'wajib' => true],
-                    ['teks' => 'Menurut Anda seberapa besar penekanan pada metode pembelajaran Demonstrasi dilaksanakan di program studi Anda?', 'kode' => 'F22', 'tipe' => 'radio', 'opsi' => ['Sangat Besar', 'Besar', 'Cukup Besar', 'Kurang Besar', 'Tidak Sama Sekali'], 'wajib' => true],
-                    ['teks' => 'Menurut Anda seberapa besar penekanan pada metode pembelajaran Partisipasi dalam proyek riset dilaksanakan di program studi Anda?', 'kode' => 'F23', 'tipe' => 'radio', 'opsi' => ['Sangat Besar', 'Besar', 'Cukup Besar', 'Kurang Besar', 'Tidak Sama Sekali'], 'wajib' => true],
-                    ['teks' => 'Menurut Anda seberapa besar penekanan pada metode pembelajaran Magang dilaksanakan di program studi Anda?', 'kode' => 'F24', 'tipe' => 'radio', 'opsi' => ['Sangat Besar', 'Besar', 'Cukup Besar', 'Kurang Besar', 'Tidak Sama Sekali'], 'wajib' => true],
-                    ['teks' => 'Menurut Anda seberapa besar penekanan pada metode pembelajaran Praktikum dilaksanakan di program studi Anda?', 'kode' => 'F25', 'tipe' => 'radio', 'opsi' => ['Sangat Besar', 'Besar', 'Cukup Besar', 'Kurang Besar', 'Tidak Sama Sekali'], 'wajib' => true],
-                    ['teks' => 'Menurut Anda seberapa besar penekanan pada metode pembelajaran Kerja Lapangan dilaksanakan di program studi Anda?', 'kode' => 'F26', 'tipe' => 'radio', 'opsi' => ['Sangat Besar', 'Besar', 'Cukup Besar', 'Kurang Besar', 'Tidak Sama Sekali'], 'wajib' => true],
-                    ['teks' => 'Menurut Anda seberapa besar penekanan pada metode pembelajaran Diskusi dilaksanakan di program studi Anda?', 'kode' => 'F27', 'tipe' => 'radio', 'opsi' => ['Sangat Besar', 'Besar', 'Cukup Besar', 'Kurang Besar', 'Tidak Sama Sekali'], 'wajib' => true],
-                ]
-            ],
-            'Sumber Dana Kuliah' => [
-                'syarat' => null,
-                'pertanyaan' => [
-                    ['teks' => 'Sebutkan sumber dana dalam pembiayaan kuliah? (bukan ketika Studi Lanjut)', 'kode' => 'F1201', 'tipe' => 'radio', 'opsi' => [
-                        'Biaya Sendiri / Keluarga',
-                        'Beasiswa ADIK',
-                        'Beasiswa BIDIKMISI',
-                        'Beasiswa PPA',
-                        'Beasiswa AFIRMASI',
-                        'Beasiswa Perusahaan/Swasta',
-                        'Lainnya'
-                    ], 'wajib' => true],
+                    [
+                        'teks' => 'Menurut Anda seberapa besar penekanan pada metode pembelajaran Perkuliahan dilaksanakan di program studi Anda?',
+                        'kode' => 'F21',
+                        'tipe' => 'radio',
+                        'wajib' => true,
+                        'opsi' => array (
+  0 => '(5) Tidak ada',
+  1 => '(4) Kurang',
+  2 => '(3) Cukup',
+  3 => '(2) Besar',
+  4 => '(1) Sangat besar',
+),
+                        'syarat_kode' => null,
+                        'syarat_jawaban' => null,
+                    ],
+                    [
+                        'teks' => 'Menurut Anda seberapa besar penekanan pada metode pembelajaran Demonstrasi dilaksanakan di program studi Anda?',
+                        'kode' => 'F22',
+                        'tipe' => 'radio',
+                        'wajib' => true,
+                        'opsi' => array (
+  0 => '(5) Tidak ada',
+  1 => '(4) Kurang',
+  2 => '(3) Cukup',
+  3 => '(2) Besar',
+  4 => '(1) Sangat besar',
+),
+                        'syarat_kode' => null,
+                        'syarat_jawaban' => null,
+                    ],
+                    [
+                        'teks' => 'Menurut Anda seberapa besar penekanan pada metode pembelajaran Partisipasi dalam proyek riset dilaksanakan di program studi Anda?',
+                        'kode' => 'F23',
+                        'tipe' => 'radio',
+                        'wajib' => true,
+                        'opsi' => array (
+  0 => '(5) Tidak ada',
+  1 => '(4) Kurang',
+  2 => '(3) Cukup',
+  3 => '(2) Besar',
+  4 => '(1) Sangat besar',
+),
+                        'syarat_kode' => null,
+                        'syarat_jawaban' => null,
+                    ],
+                    [
+                        'teks' => 'Menurut Anda seberapa besar penekanan pada metode pembelajaran Magang dilaksanakan di program studi Anda?',
+                        'kode' => 'F24',
+                        'tipe' => 'radio',
+                        'wajib' => true,
+                        'opsi' => array (
+  0 => '(5) Tidak ada',
+  1 => '(4) Kurang',
+  2 => '(3) Cukup',
+  3 => '(2) Besar',
+  4 => '(1) Sangat besar',
+),
+                        'syarat_kode' => null,
+                        'syarat_jawaban' => null,
+                    ],
+                    [
+                        'teks' => 'Menurut Anda seberapa besar penekanan pada metode pembelajaran Praktikum dilaksanakan di program studi Anda?',
+                        'kode' => 'F25',
+                        'tipe' => 'radio',
+                        'wajib' => true,
+                        'opsi' => array (
+  0 => '(5) Tidak ada',
+  1 => '(4) Kurang',
+  2 => '(3) Cukup',
+  3 => '(2) Besar',
+  4 => '(1) Sangat besar',
+),
+                        'syarat_kode' => null,
+                        'syarat_jawaban' => null,
+                    ],
+                    [
+                        'teks' => 'Menurut Anda seberapa besar penekanan pada metode pembelajaran Kerja Lapangan dilaksanakan di program studi Anda?',
+                        'kode' => 'F26',
+                        'tipe' => 'radio',
+                        'wajib' => true,
+                        'opsi' => array (
+  0 => '(5) Tidak ada',
+  1 => '(4) Kurang',
+  2 => '(3) Cukup',
+  3 => '(2) Besar',
+  4 => '(1) Sangat besar',
+),
+                        'syarat_kode' => null,
+                        'syarat_jawaban' => null,
+                    ],
+                    [
+                        'teks' => 'Menurut Anda seberapa besar penekanan pada metode pembelajaran Diskusi dilaksanakan di program studi Anda?',
+                        'kode' => 'F27',
+                        'tipe' => 'radio',
+                        'wajib' => true,
+                        'opsi' => array (
+  0 => '(5) Tidak ada',
+  1 => '(4) Kurang',
+  2 => '(3) Cukup',
+  3 => '(2) Besar',
+  4 => '(1) Sangat besar',
+),
+                        'syarat_kode' => null,
+                        'syarat_jawaban' => null,
+                    ],
+                    [
+                        'teks' => 'Menurut Anda seberapa besar penekanan pada metode pembelajaran Responsi/tutorial dilaksanakan di program studi Anda?',
+                        'kode' => 'F28',
+                        'tipe' => 'radio',
+                        'wajib' => true,
+                        'opsi' => array (
+  0 => '(5) Tidak ada',
+  1 => '(4) Kurang',
+  2 => '(3) Cukup',
+  3 => '(2) Besar',
+  4 => '(1) Sangat besar',
+),
+                        'syarat_kode' => null,
+                        'syarat_jawaban' => null,
+                    ],
+                    [
+                        'teks' => 'Menurut Anda seberapa besar penekanan pada metode pembelajaran Seminar dilaksanakan di program studi Anda?',
+                        'kode' => 'F29',
+                        'tipe' => 'radio',
+                        'wajib' => true,
+                        'opsi' => array (
+  0 => '(5) Tidak ada',
+  1 => '(4) Kurang',
+  2 => '(3) Cukup',
+  3 => '(2) Besar',
+  4 => '(1) Sangat besar',
+),
+                        'syarat_kode' => null,
+                        'syarat_jawaban' => null,
+                    ],
+                    [
+                        'teks' => 'Menurut Anda seberapa besar penekanan pada metode pembelajaran Studio dilaksanakan di program studi Anda?',
+                        'kode' => 'F30',
+                        'tipe' => 'radio',
+                        'wajib' => true,
+                        'opsi' => array (
+  0 => '(5) Tidak ada',
+  1 => '(4) Kurang',
+  2 => '(3) Cukup',
+  3 => '(2) Besar',
+  4 => '(1) Sangat besar',
+),
+                        'syarat_kode' => null,
+                        'syarat_jawaban' => null,
+                    ],
+                    [
+                        'teks' => 'Menurut Anda seberapa besar penekanan pada metode pembelajaran Perancangan dilaksanakan di program studi Anda?',
+                        'kode' => 'F31',
+                        'tipe' => 'radio',
+                        'wajib' => true,
+                        'opsi' => array (
+  0 => '(5) Tidak ada',
+  1 => '(4) Kurang',
+  2 => '(3) Cukup',
+  3 => '(2) Besar',
+  4 => '(1) Sangat besar',
+),
+                        'syarat_kode' => null,
+                        'syarat_jawaban' => null,
+                    ],
+                    [
+                        'teks' => 'Menurut Anda seberapa besar penekanan pada metode pembelajaran Pengembangan (misal produk/karya seni) dilaksanakan di program studi Anda?',
+                        'kode' => 'F32',
+                        'tipe' => 'radio',
+                        'wajib' => true,
+                        'opsi' => array (
+  0 => '(5) Tidak ada',
+  1 => '(4) Kurang',
+  2 => '(3) Cukup',
+  3 => '(2) Besar',
+  4 => '(1) Sangat besar',
+),
+                        'syarat_kode' => null,
+                        'syarat_jawaban' => null,
+                    ],
+                    [
+                        'teks' => 'Menurut Anda seberapa besar penekanan pada metode pembelajaran Tugas akhir dilaksanakan di program studi Anda?',
+                        'kode' => 'F33',
+                        'tipe' => 'radio',
+                        'wajib' => true,
+                        'opsi' => array (
+  0 => '(5) Tidak ada',
+  1 => '(4) Kurang',
+  2 => '(3) Cukup',
+  3 => '(2) Besar',
+  4 => '(1) Sangat besar',
+),
+                        'syarat_kode' => null,
+                        'syarat_jawaban' => null,
+                    ],
+                    [
+                        'teks' => 'Menurut Anda seberapa besar penekanan pada metode pembelajaran Pelatihan bela negara dilaksanakan di program studi Anda?',
+                        'kode' => 'F34',
+                        'tipe' => 'radio',
+                        'wajib' => true,
+                        'opsi' => array (
+  0 => '(5) Tidak ada',
+  1 => '(4) Kurang',
+  2 => '(3) Cukup',
+  3 => '(2) Besar',
+  4 => '(1) Sangat besar',
+),
+                        'syarat_kode' => null,
+                        'syarat_jawaban' => null,
+                    ],
+                    [
+                        'teks' => 'Menurut Anda seberapa besar penekanan pada metode pembelajaran Pertukaran pelajar dilaksanakan di program studi Anda?',
+                        'kode' => 'F35',
+                        'tipe' => 'radio',
+                        'wajib' => true,
+                        'opsi' => array (
+  0 => '(5) Tidak ada',
+  1 => '(4) Kurang',
+  2 => '(3) Cukup',
+  3 => '(2) Besar',
+  4 => '(1) Sangat besar',
+),
+                        'syarat_kode' => null,
+                        'syarat_jawaban' => null,
+                    ],
+                    [
+                        'teks' => 'Menurut Anda seberapa besar penekanan pada metode pembelajaran Wirausaha dilaksanakan di program studi Anda?',
+                        'kode' => 'F36',
+                        'tipe' => 'radio',
+                        'wajib' => true,
+                        'opsi' => array (
+  0 => '(5) Tidak ada',
+  1 => '(4) Kurang',
+  2 => '(3) Cukup',
+  3 => '(2) Besar',
+  4 => '(1) Sangat besar',
+),
+                        'syarat_kode' => null,
+                        'syarat_jawaban' => null,
+                    ],
+                    [
+                        'teks' => 'Menurut Anda seberapa besar penekanan pada metode pembelajaran Pengabdian kepada masyarakat dilaksanakan di program studi Anda?',
+                        'kode' => 'F37',
+                        'tipe' => 'radio',
+                        'wajib' => true,
+                        'opsi' => array (
+  0 => '(5) Tidak ada',
+  1 => '(4) Kurang',
+  2 => '(3) Cukup',
+  3 => '(2) Besar',
+  4 => '(1) Sangat besar',
+),
+                        'syarat_kode' => null,
+                        'syarat_jawaban' => null,
+                    ],
                 ]
             ],
             'Saran & Masukan' => [
-                'syarat' => null,
+                'syarat_kode' => null,
+                'syarat_jawaban' => null,
                 'pertanyaan' => [
-                    ['teks' => 'Saran dan masukan untuk pengembangan kampus/program studi', 'kode' => 'SARAN', 'tipe' => 'text', 'opsi' => null, 'wajib' => false],
+                    [
+                        'teks' => 'Saran dan masukan untuk pengembangan kampus/program studi',
+                        'kode' => 'SARAN',
+                        'tipe' => 'textarea',
+                        'wajib' => false,
+                        'opsi' => null,
+                        'syarat_kode' => null,
+                        'syarat_jawaban' => null,
+                    ],
                 ]
-            ]
+            ],
         ];
 
-        $mapPertanyaan = [];
-        $urutanKategori = 1;
-        
-        foreach ($kategoriData as $namaKategori => $data) {
-            
+        $mapPertanyaanByKode = [];
+        $urutan = 1;
+
+        foreach ($kategoriData as $namaKategori => $katInfo) {
             $katSyaratId = null;
-            $katSyaratJawaban = null;
-            
-            if ($data['syarat']) {
-                $syaratTeks = $data['syarat']['teks'];
-                if (isset($mapPertanyaan[$syaratTeks])) {
-                    $katSyaratId = $mapPertanyaan[$syaratTeks]->id_pertanyaan;
-                    $katSyaratJawaban = $data['syarat']['jawaban'];
-                }
+            if (!empty($katInfo['syarat_kode']) && isset($mapPertanyaanByKode[$katInfo['syarat_kode']])) {
+                $katSyaratId = $mapPertanyaanByKode[$katInfo['syarat_kode']]->id_pertanyaan;
             }
 
-            $kategori = KategoriPertanyaan::updateOrCreate(
-                ['kuesioner_id' => $kuesioner->id_kuesioner, 'nama_kategori' => $namaKategori],
-                [
-                    'urutan' => $urutanKategori,
-                    'syarat_pertanyaan_id' => $katSyaratId,
-                    'syarat_jawaban' => $katSyaratJawaban
-                ]
-            );
+            $kategori = KategoriPertanyaan::create([
+                'kuesioner_id'         => $kuesioner->id_kuesioner,
+                'nama_kategori'        => $namaKategori,
+                'urutan'               => $urutan++,
+                'syarat_pertanyaan_id' => $katSyaratId,
+                'syarat_jawaban'       => $katInfo['syarat_jawaban'] ?? null,
+            ]);
 
-            // Fetch existing questions to maintain them or order them
-            // Instead of deleting, we'll rely on firstOrCreate/updateOrCreate. 
-            // However, to enforce the new order, let's just use the array.
-            
-            foreach ($data['pertanyaan'] as $p) {
-                $pertSyaratId = null;
-                $pertSyaratJawaban = null;
-
-                if (isset($p['syarat'])) {
-                    $syaratTeks = $p['syarat']['teks'];
-                    if (isset($mapPertanyaan[$syaratTeks])) {
-                        $pertSyaratId = $mapPertanyaan[$syaratTeks]->id_pertanyaan;
-                        $pertSyaratJawaban = $p['syarat']['jawaban'];
-                    }
+            foreach ($katInfo['pertanyaan'] as $pInfo) {
+                $pSyaratId = null;
+                if (!empty($pInfo['syarat_kode']) && isset($mapPertanyaanByKode[$pInfo['syarat_kode']])) {
+                    $pSyaratId = $mapPertanyaanByKode[$pInfo['syarat_kode']]->id_pertanyaan;
                 }
 
-                $pertanyaan = Pertanyaan::updateOrCreate(
-                    ['kategori_id' => $kategori->id_kategori, 'teks_pertanyaan' => $p['teks']],
-                    [
-                        'kode_pertanyaan' => $p['kode'] ?? null,
-                        'tipe_jawaban' => $p['tipe'],
-                        'opsi_jawaban' => $p['opsi'],
-                        'wajib' => $p['wajib'],
-                        'syarat_pertanyaan_id' => $pertSyaratId,
-                        'syarat_jawaban' => $pertSyaratJawaban
-                    ]
-                );
+                $pertanyaan = Pertanyaan::create([
+                    'kategori_id'          => $kategori->id_kategori,
+                    'teks_pertanyaan'      => $pInfo['teks'],
+                    'kode_pertanyaan'      => $pInfo['kode'],
+                    'tipe_jawaban'         => $pInfo['tipe'],
+                    'opsi_jawaban'         => $pInfo['opsi'],
+                    'wajib'                => $pInfo['wajib'],
+                    'syarat_pertanyaan_id' => $pSyaratId,
+                    'syarat_jawaban'       => $pInfo['syarat_jawaban'] ?? null,
+                ]);
 
-                $mapPertanyaan[$p['teks']] = $pertanyaan;
+                if (!empty($pInfo['kode'])) {
+                    $mapPertanyaanByKode[$pInfo['kode']] = $pertanyaan;
+                }
             }
-            $urutanKategori++;
         }
     }
 }

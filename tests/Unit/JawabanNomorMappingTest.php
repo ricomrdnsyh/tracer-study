@@ -149,4 +149,42 @@ class JawabanNomorMappingTest extends TestCase
         $opsiF8 = ['Bekerja (penuh waktu/paruh waktu)', 'Belum memungkinkan bekerja', 'Wiraswasta/wirausaha/pekerja lepas'];
         $this->assertSame('Wiraswasta/wirausaha/pekerja lepas', TracerResponService::nomorToLabel($opsiF8, '3', 'F8'));
     }
+
+    public function test_checkbox_sub_code_matching_f4_and_f16(): void
+    {
+        $f4Answers = [
+            '[F405] (0/1) Dihubungi oleh perusahaan',
+            '[F407] (0/1) Menghubungi agen tenaga kerja komersial/swasta',
+        ];
+
+        $this->assertSame('1', TracerResponService::matchCheckboxSubCode('F405', $f4Answers, TracerResponService::F4_MAP));
+        $this->assertSame('1', TracerResponService::matchCheckboxSubCode('F407', $f4Answers, TracerResponService::F4_MAP));
+        $this->assertSame('0', TracerResponService::matchCheckboxSubCode('F401', $f4Answers, TracerResponService::F4_MAP));
+        $this->assertSame('0', TracerResponService::matchCheckboxSubCode('F415', $f4Answers, TracerResponService::F4_MAP));
+        // Bila pertanyaan dilewati / null
+        $this->assertSame('', TracerResponService::matchCheckboxSubCode('F405', null, TracerResponService::F4_MAP));
+
+        $f16Answers = [
+            'Di pekerjaan ini saya memperoleh prospek karier yang baik.',
+        ];
+        $this->assertSame('1', TracerResponService::matchCheckboxSubCode('F1603', $f16Answers, TracerResponService::F16_MAP));
+        $this->assertSame('0', TracerResponService::matchCheckboxSubCode('F1601', $f16Answers, TracerResponService::F16_MAP));
+        $this->assertSame('', TracerResponService::matchCheckboxSubCode('F1603', null, TracerResponService::F16_MAP));
+    }
+
+    public function test_opsi_berprefix_buku_panduan_langsung_dipetakan_ke_angka(): void
+    {
+        $p1101 = $this->pertanyaanBerkode([
+            '(1) Instansi/lembaga pemerintah',
+            '(6) Badan Usaha Milik Negara (BUMN)/Badan Usaha Milik Daerah (BUMD)',
+            '(7) Institusi/organisasi multilateral',
+            '(2) Institusi/organisasi nirlaba',
+            '(3) Perusahaan swasta',
+            '(5) Lainnya, tuliskan ...',
+        ], 'F1101');
+
+        $this->assertSame('6', TracerResponService::jawabanToNomor($p1101, new JawabanDetail(['jawaban_text' => '(6) Badan Usaha Milik Negara (BUMN)/Badan Usaha Milik Daerah (BUMD)'])));
+        $this->assertSame('1', TracerResponService::jawabanToNomor($p1101, new JawabanDetail(['jawaban_text' => '(1) Instansi/lembaga pemerintah'])));
+        $this->assertSame('7', TracerResponService::jawabanToNomor($p1101, new JawabanDetail(['jawaban_text' => '(7) Institusi/organisasi multilateral'])));
+    }
 }

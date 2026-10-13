@@ -201,10 +201,57 @@ class TracerResponService
      */
     public static function jawabanToNomor($pertanyaan, $detail): string
     {
+        $kode = $pertanyaan ? strtoupper(trim($pertanyaan->kode_pertanyaan ?? '')) : '';
         $label = null;
         $labels = null;
 
         $rawJson = $detail->jawaban_json;
+        $val = $detail->jawaban_text;
+
+        // Khusus lokasi wilayah (F5A1, F5A2): Prioritaskan kode wilayah angka!
+        if ($kode === 'F5A1') {
+            if ($val !== null && $val !== '' && preg_match('/^\d+$/', (string) $val)) {
+                return (string) $val;
+            }
+            $search = $val;
+            if ($rawJson) {
+                $decoded = is_string($rawJson) ? json_decode($rawJson, true) : $rawJson;
+                if (is_array($decoded) && isset($decoded['label'])) {
+                    $search = $decoded['label'];
+                }
+            }
+            if (!empty($search)) {
+                $provKode = DB::table('master_provinsi')->where('provinsi', $search)->orWhere('provinsi', 'like', "%{$search}%")->value('kode_wilayah_provinsi');
+                if ($provKode) return (string) $provKode;
+            }
+            return (string) ($val ?? '');
+        }
+
+        if ($kode === 'F5A2') {
+            if ($val !== null && $val !== '' && preg_match('/^\d+$/', (string) $val)) {
+                return (string) $val;
+            }
+            $search = $val;
+            if ($rawJson) {
+                $decoded = is_string($rawJson) ? json_decode($rawJson, true) : $rawJson;
+                if (is_array($decoded) && isset($decoded['label'])) {
+                    $search = $decoded['label'];
+                }
+            }
+            if (!empty($search)) {
+                $kabKode = DB::table('master_kota_kabupaten')->where('kota_kabupaten', $search)->orWhere('kota_kabupaten', 'like', "%{$search}%")->value('kode_wilayah_kota_kabupaten');
+                if ($kabKode) return (string) $kabKode;
+            }
+            return (string) ($val ?? '');
+        }
+
+        if ($kode === 'F5A0') {
+            if ($val === 'ID' || $val === 'Indonesia' || strtolower((string)$val) === 'indonesia') {
+                return 'ID';
+            }
+            return (string) ($val ?? 'ID');
+        }
+
         if ($rawJson) {
             $decoded = is_string($rawJson) ? json_decode($rawJson, true) : $rawJson;
             if (is_array($decoded) && isset($decoded['label'])) {
@@ -215,7 +262,6 @@ class TracerResponService
                 $label = $decoded;
             }
         } else {
-            $val = $detail->jawaban_text;
             if ($pertanyaan && $pertanyaan->tipe_jawaban === 'checkbox' && is_string($val)) {
                 $labels = array_map('trim', explode(',', $val));
             } else {
@@ -224,7 +270,6 @@ class TracerResponService
         }
 
         $opsi = $pertanyaan ? ($pertanyaan->opsi_jawaban ?? null) : null;
-        $kode = $pertanyaan ? ($pertanyaan->kode_pertanyaan ?? null) : null;
         if (is_array($opsi) && count($opsi) > 0) {
             if ($labels !== null) {
                 return implode(',', array_map(fn($l) => self::labelToNomor($opsi, $l, $kode), $labels));
@@ -236,10 +281,88 @@ class TracerResponService
         }
 
         if ($labels !== null) {
-            return implode(', ', array_map(fn($l) => (string) $l, $labels));
+            return implode(',', array_map(fn($l) => (string) $l, $labels));
         }
 
         return (string) ($label ?? '');
+    }
+
+    /**
+     * Peta sub-kode untuk instrumen F4 (pencarian kerja).
+     */
+    public const F4_MAP = [
+        'F401' => 'Melalui iklan di koran/majalah/brosur',
+        'F402' => 'Melamar ke perusahaan tanpa mengetahui lowongan yang ada',
+        'F403' => 'Pergi ke bursa/pameran kerja',
+        'F404' => 'Mencari lewat internet/media sosial',
+        'F405' => 'Dihubungi oleh perusahaan',
+        'F406' => 'Menghubungi Kementerian Ketenagakerjaan',
+        'F407' => 'Menghubungi agen tenaga kerja komersial/swasta',
+        'F408' => 'Memperoleh informasi karir dari fakultas/universitas',
+        'F409' => 'Menghubungi kantor kemahasiswaan/hubungan alumni',
+        'F411' => 'Melalui jejaring/relasi',
+        'F413' => 'Melalui penempatan kerja atau magang',
+        'F414' => 'Bekerja di tempat yang sama dengan tempat kerja semasa kuliah',
+        'F415' => 'Lainnya',
+    ];
+
+    /**
+     * Peta sub-kode untuk instrumen F16 (alasan pekerjaan tidak sesuai).
+     */
+    public const F16_MAP = [
+        'F1601' => 'sudah relevan dengan pendidikan saya',
+        'F1602' => 'belum mendapatkan',
+        'F1603' => 'prospek karier yang baik',
+        'F1604' => 'lebih suka bekerja di area pekerjaan yang tidak ada hubungannya',
+        'F1605' => 'dipromosikan ke posisi yang kurang berhubungan',
+        'F1606' => 'pendapatan yang lebih tinggi',
+        'F1607' => 'lebih aman',
+        'F1608' => 'lebih menarik',
+        'F1609' => 'jadwal yang fleksibel',
+        'F1610' => 'lebih dekat dari rumah',
+        'F1612' => 'pada awal meniti karir ini',
+        'F1613' => 'Lainnya',
+    ];
+
+    /**
+     * Ekstrak array opsi jawaban checkbox dari JawabanDetail.
+     */
+    public static function extractCheckboxAnswers(?JawabanDetail $detail): ?array
+    {
+        if (!$detail) return null;
+        if ($detail->jawaban_json) {
+            $dec = is_string($detail->jawaban_json) ? json_decode($detail->jawaban_json, true) : $detail->jawaban_json;
+            if (is_array($dec)) {
+                return $dec;
+            }
+            if (!empty($dec)) return [$dec];
+        }
+        if (!empty($detail->jawaban_text)) {
+            return array_map('trim', explode(',', $detail->jawaban_text));
+        }
+        return null;
+    }
+
+    /**
+     * Cocokkan sub-kode checkbox F4 / F16 untuk export: menghasilkan '1' bila dipilih, '0' bila tidak dipilih, '' bila kuesioner dilewati.
+     */
+    public static function matchCheckboxSubCode(string $subKode, ?array $answers, array $subCodeMap): string
+    {
+        if ($answers === null) {
+            return '';
+        }
+        if (!isset($subCodeMap[$subKode])) {
+            return '0';
+        }
+        $needle = self::norm($subCodeMap[$subKode]);
+        $subKodeNorm = strtolower($subKode);
+        foreach ($answers as $ans) {
+            $cleanAns = self::norm((string)$ans);
+            if (str_contains($cleanAns, $subKodeNorm) || str_contains($cleanAns, $needle) || str_contains($needle, $cleanAns)) {
+                return '1';
+            }
+        }
+        return '0';
     }
 
     /**
@@ -274,8 +397,10 @@ class TracerResponService
             'founder' => '1',
             'co-founder' => '2',
             'freelance/kerjalepas' => '4',
+            'freelance/pekerjalepas' => '4',
         ],
         'F5D' => [
+            'lokal' => '1',
             'lokal/wilayah' => '1',
             'lokal/wilayah/wiraswastatidakberbadanhukum' => '1',
             'nasional' => '2',
@@ -317,6 +442,8 @@ class TracerResponService
         'F1001' => [
             'tidak' => '1',
             'tidak,tapisayasedangmenungguhasillamarankerja' => '2',
+            'ya,sayaakanmulaibekerjadalam2minggukedepan' => '3',
+            'ya,tapisayabelumpastiakanbekerjadalam2minggukedepan' => '4',
             'ya,sayaakanmulaibekerdadalam2minggukedepan' => '3',
             'ya,tapisayabelumpastiakanbekerdadalam2minggukedepan' => '4',
             'lainnya' => '5',
@@ -360,6 +487,15 @@ class TracerResponService
         if (isset(self::PANDUAN[$kode])) {
             return self::PANDUAN[$kode];
         }
+        if (preg_match('/^F17(6[1-9]|7[0-9]|8[0-2])$/', $kode)) {
+            return [
+                'sangatrendah' => '1',
+                'rendah' => '2',
+                'sedang' => '3',
+                'tinggi' => '4',
+                'sangattinggi' => '5',
+            ];
+        }
         if (preg_match('/^F(2[1-9]|3[0-7])$/', $kode)) {
             return [
                 'tidakada' => '5',
@@ -378,6 +514,22 @@ class TracerResponService
     {
         $opsi = array_values($opsi);
         $labelStr = trim((string) $label);
+
+        // Jika sudah berupa angka murni (termasuk 0)
+        if (preg_match('/^\d+$/', $labelStr)) {
+            return $labelStr;
+        }
+
+        // Jika label diawali kode angka panduan, mis. "(1) Bekerja...", "(6) BUMN...", "(0) Belum"
+        if (preg_match('/^\((\d+)\)/', $labelStr, $m)) {
+            return $m[1];
+        }
+
+        // Jika label diawali kode instrumen checkbox, mis. "[F401] (0/1)..." atau "[F1601]..."
+        if (preg_match('/^\[(F\d+)\]/i', $labelStr)) {
+            return '1';
+        }
+
         $labelStripped = self::stripNomor($labelStr);
 
         foreach ($opsi as $o) {

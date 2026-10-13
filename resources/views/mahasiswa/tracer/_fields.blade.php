@@ -1,3 +1,27 @@
+@php
+    $isSelectedRadio = function($ans, $opt) {
+        if ($ans === null || $ans === '') return false;
+        if ($ans === $opt) return true;
+        $c1 = preg_replace('/^\s*(\[\w+\])?\s*(\(0\/1\))?\s*(\(\d+\))?\s*/', '', trim((string)$ans));
+        $c2 = preg_replace('/^\s*(\[\w+\])?\s*(\(0\/1\))?\s*(\(\d+\))?\s*/', '', trim((string)$opt));
+        if ($c1 !== '' && strcasecmp($c1, $c2) === 0) return true;
+        if (preg_match('/^\((\d+)\)/', $opt, $m) && (string)$ans === $m[1]) return true;
+        return false;
+    };
+
+    $isCheckedBox = function($ansList, $opt) {
+        if (empty($ansList)) return false;
+        $arr = is_array($ansList) ? $ansList : [ $ansList ];
+        foreach ($arr as $item) {
+            if ($item === $opt) return true;
+            $c1 = preg_replace('/^\s*(\[\w+\])?\s*(\(0\/1\))?\s*(\(\d+\))?\s*/', '', trim((string)$item));
+            $c2 = preg_replace('/^\s*(\[\w+\])?\s*(\(0\/1\))?\s*(\(\d+\))?\s*/', '', trim((string)$opt));
+            if ($c1 !== '' && strcasecmp($c1, $c2) === 0) return true;
+            if (preg_match('/^\[(F\d+)\]/i', $opt, $m) && strcasecmp((string)$item, $m[1]) === 0) return true;
+        }
+        return false;
+    };
+@endphp
                                 @foreach ($kuesioner->kategoriPertanyaans as $kategori)
                                     <div class="kategori-container"
                                         data-syarat-pertanyaan="{{ $kategori->syarat_pertanyaan_id }}"
@@ -96,7 +120,7 @@
                                                                                 type="radio" value="{{ $opsi }}"
                                                                                 name="jawaban[{{ $pertanyaan->id_pertanyaan }}]"
                                                                                 id="opt_{{ $pertanyaan->id_pertanyaan }}_{{ $idx }}"
-                                                                                {{ $answer == $opsi ? 'checked' : '' }}
+                                                                                {{ $isSelectedRadio($answer, $opsi) ? 'checked' : '' }}
                                                                                 {{ $pertanyaan->wajib ? 'required' : '' }}>
                                                                         </div>
                                                                         <span
@@ -122,7 +146,7 @@
                                                                                 type="checkbox" value="{{ $opsi }}"
                                                                                 name="jawaban[{{ $pertanyaan->id_pertanyaan }}][]"
                                                                                 id="opt_{{ $pertanyaan->id_pertanyaan }}_{{ $idx }}"
-                                                                                {{ is_array($answer) && in_array($opsi, $answer) ? 'checked' : '' }}>
+                                                                                {{ $isCheckedBox($answer, $opsi) ? 'checked' : '' }}>
                                                                         </div>
                                                                         <span
                                                                             class="text-gray-700 fw-semibold fs-7 {{ $isCompact ? 'text-center mt-1' : 'text-start' }}">
@@ -140,7 +164,7 @@
                                                             <option value=""></option>
                                                             @foreach ($pertanyaan->opsi_jawaban as $opsi)
                                                                 <option value="{{ $opsi }}"
-                                                                    {{ $answer == $opsi ? 'selected' : '' }}>
+                                                                    {{ $isSelectedRadio($answer, $opsi) ? 'selected' : '' }}>
                                                                     {{ $opsi }}
                                                                 </option>
                                                             @endforeach
