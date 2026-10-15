@@ -27,6 +27,8 @@ class DashboardController extends Controller
                 }
             })
             ->orderByRaw('akademik_id IS NULL ASC')
+            ->orderByDesc('tgl_mulai')
+            ->orderByDesc('id_kuesioner')
             ->first();
 
         $sudahMengisi = false;

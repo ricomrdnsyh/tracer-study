@@ -72,16 +72,6 @@ class AdminKuesionerController extends Controller
 
     public function store(KuesionerRequest $request)
     {
-        if ($request->status === 'Published') {
-            $closeQuery = Kuesioner::where('status', 'Published');
-            if ($request->filled('akademik_id')) {
-                $closeQuery->where('akademik_id', $request->akademik_id);
-            } else {
-                $closeQuery->whereNull('akademik_id');
-            }
-            $closeQuery->update(['status' => 'Closed']);
-        }
-
         Kuesioner::create($request->validated());
 
         return redirect()->route('admin.kuesioner.index')->with('success', 'Kuesioner berhasil ditambahkan.');
@@ -95,16 +85,6 @@ class AdminKuesionerController extends Controller
 
     public function update(KuesionerRequest $request, $id)
     {
-        if ($request->status === 'Published') {
-            $closeQuery = Kuesioner::where('id_kuesioner', '!=', $id)->where('status', 'Published');
-            if ($request->filled('akademik_id')) {
-                $closeQuery->where('akademik_id', $request->akademik_id);
-            } else {
-                $closeQuery->whereNull('akademik_id');
-            }
-            $closeQuery->update(['status' => 'Closed']);
-        }
-
         $kuesioner = Kuesioner::findOrFail($id);
         $kuesioner->update($request->validated());
 
