@@ -33,7 +33,7 @@
 
                                     <div class="row g-6">
 
-                                        <div class="col-md-6">
+                                        <div class="{{ $isFakultas ? 'col-md-6' : 'col-md-4' }}">
                                             <label class="form-label fw-bold text-gray-700 fs-7 mb-2">
                                                 <i class="fa-solid fa-clipboard-list text-primary me-2"></i>Kuesioner
                                             </label>
@@ -47,24 +47,10 @@
                                             </select>
                                         </div>
 
-                                        <div class="col-md-6">
-                                            <label class="form-label fw-bold text-gray-700 fs-7 mb-2">
-                                                <i class="fa-solid fa-calendar-alt text-success me-2"></i>Tahun Kelulusan
-                                            </label>
-                                            <select
-                                                class="form-select form-select-sm form-select-solid fw-bold bg-body border border-gray-300"
-                                                name="akademik_id" data-control="select2">
-                                                <option value="all">Semua Tahun Kelulusan</option>
-                                                @foreach ($listTahunLulus as $item)
-                                                    <option value="{{ $item['tahun_lulus'] }}">{{ $item['label'] }}</option>
-                                                @endforeach
-                                            </select>
-                                        </div>
-
                                         @if($isFakultas)
                                             <input type="hidden" name="fakultas_id" id="laporan_fakultas" value="{{ $userFakultasId }}">
                                         @else
-                                        <div class="col-md-6">
+                                        <div class="col-md-4">
                                             <label class="form-label fw-bold text-gray-700 fs-7 mb-2">
                                                 <i class="fa-solid fa-building text-warning me-2"></i>Fakultas
                                             </label>
@@ -79,7 +65,7 @@
                                         </div>
                                         @endif
 
-                                        <div class="{{ $isFakultas ? 'col-md-12' : 'col-md-6' }}">
+                                        <div class="{{ $isFakultas ? 'col-md-6' : 'col-md-4' }}">
                                             <label class="form-label fw-bold text-gray-700 fs-7 mb-2">
                                                 <i class="fa-solid fa-graduation-cap text-info me-2"></i>Program Studi
                                             </label>

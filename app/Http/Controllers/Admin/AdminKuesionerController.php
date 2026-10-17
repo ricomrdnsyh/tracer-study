@@ -26,7 +26,7 @@ class AdminKuesionerController extends Controller
     {
         $query = Kuesioner::with('tahunAkademik')
             ->select(['id_kuesioner', 'akademik_id', 'judul', 'status'])
-            ->orderByDesc('id_kuesioner');
+            ->orderByTahunTerbaru();
 
         return DataTables::of($query)
             ->addColumn('target_lulusan', function ($row) {

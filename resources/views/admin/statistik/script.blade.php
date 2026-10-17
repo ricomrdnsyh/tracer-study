@@ -1506,7 +1506,6 @@
 
             var params = {
                 kuesioner_id: $('#filter_kuesioner').val() || 'all',
-                akademik_id: $('#filter_akademik').val() || 'all',
                 fakultas_id: $('#filter_fakultas').val() || 'all',
                 prodi_id: $('#filter_prodi').val() || 'all'
             };
@@ -1820,7 +1819,6 @@
             $('#btn_reset_filter').on('click', function(e) {
                 e.preventDefault();
                 $('#filter_kuesioner').val('all').trigger('change.select2');
-                $('#filter_akademik').val('all').trigger('change.select2');
 
                 if (!$('#filter_fakultas').prop('disabled')) {
                     $('#filter_fakultas').val('all').trigger('change.select2');

@@ -45,7 +45,7 @@ class TracerController extends Controller
             }
         })
         ->orderByRaw('akademik_id IS NULL ASC')
-        ->orderByDesc('id_kuesioner')
+        ->orderByTahunTerbaru()
         ->first();
 
         if (!$kuesioner) {

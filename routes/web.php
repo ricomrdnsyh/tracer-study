@@ -30,7 +30,7 @@ Route::get('/', function () {
     $kuesionerAktif = App\Models\Kuesioner::with('tahunAkademik')
         ->where('status', 'Published')
         ->orderByRaw('akademik_id IS NULL ASC')
-        ->orderByDesc('id_kuesioner')
+        ->orderByTahunTerbaru()
         ->first();
 
     return view('landing', compact('kuesionerAktif'));

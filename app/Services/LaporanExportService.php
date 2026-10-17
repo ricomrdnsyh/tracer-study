@@ -72,7 +72,16 @@ class LaporanExportService
         }
 
         $lulusanTahun = 'SEMUA LULUSAN';
-        if (isset($filters['akademik_id']) && $filters['akademik_id'] !== 'all' && $filters['akademik_id'] !== '') {
+        if (isset($filters['kuesioner_id']) && $filters['kuesioner_id'] !== 'all' && $filters['kuesioner_id'] !== '') {
+            $kuesionerObj = Kuesioner::find($filters['kuesioner_id']);
+            if ($kuesionerObj) {
+                if ($kuesionerObj->target_tahun_lulus) {
+                    $lulusanTahun = 'LULUSAN ' . $kuesionerObj->target_tahun_lulus;
+                } else {
+                    $lulusanTahun = strtoupper($kuesionerObj->judul);
+                }
+            }
+        } elseif (isset($filters['akademik_id']) && $filters['akademik_id'] !== 'all' && $filters['akademik_id'] !== '') {
             $fAkademik = trim((string) $filters['akademik_id']);
             if (strlen($fAkademik) === 4 && is_numeric($fAkademik)) {
                 $lulusanTahun = 'LULUSAN ' . $fAkademik;

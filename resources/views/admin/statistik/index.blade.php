@@ -443,25 +443,13 @@
 
                             <div class="row g-4 align-items-end">
 
-                                <div class="col-xl-2 col-lg-3 col-md-6 col-sm-12">
+                                <div class="{{ $isFakultas ? 'col-xl-5 col-lg-5' : 'col-xl-3 col-lg-3' }} col-md-6 col-sm-12">
                                     <label class="form-label fw-bold fs-7 mb-2 text-gray-700">Kuesioner Tracer:</label>
                                     <select id="filter_kuesioner" class="form-select form-select-sm" data-control="select2"
                                         data-placeholder="Semua Kuesioner" data-allow-clear="true">
                                         <option value="all">Semua Kuesioner</option>
                                         @foreach ($kuesionerList as $k)
                                             <option value="{{ $k->id_kuesioner }}">{{ $k->judul }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
-
-                                <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12">
-                                    <label class="form-label fw-bold fs-7 mb-2 text-gray-700">Tahun Kelulusan:</label>
-                                    <select id="filter_akademik" class="form-select form-select-sm" data-control="select2"
-                                        data-placeholder="Semua Tahun" data-allow-clear="true">
-                                        <option value="all">Semua Tahun Kelulusan</option>
-                                        @foreach ($listTahunLulus as $item)
-                                            <option value="{{ $item['tahun_lulus'] }}">{{ $item['label'] }}
-                                            </option>
                                         @endforeach
                                     </select>
                                 </div>
@@ -484,8 +472,7 @@
                                     </div>
                                 @endif
 
-                                <div
-                                    class="{{ $isFakultas ? 'col-xl-5 col-lg-6' : 'col-xl-2 col-lg-3' }} col-md-6 col-sm-12">
+                                <div class="{{ $isFakultas ? 'col-xl-5 col-lg-5' : 'col-xl-4 col-lg-4' }} col-md-6 col-sm-12">
                                     <label class="form-label fw-bold fs-7 mb-2 text-gray-700">Program Studi:</label>
                                     <select id="filter_prodi" class="form-select form-select-sm" data-control="select2"
                                         data-placeholder="Semua Prodi" data-allow-clear="true">
@@ -498,7 +485,7 @@
                                     </select>
                                 </div>
 
-                                <div class="col-xl-2 col-lg-12 col-md-12 col-sm-12 d-flex justify-content-xl-end">
+                                <div class="col-xl-2 col-lg-2 col-md-12 col-sm-12 d-flex justify-content-xl-end">
                                     <button type="button" class="btn btn-sm btn-primary fw-bold w-100"
                                         id="btn_apply_filter">
                                         <span class="indicator-label">

@@ -20,7 +20,7 @@ class AdminResponController extends Controller
 {
     public function index()
     {
-        $kuesioner = Kuesioner::orderByDesc('id_kuesioner')->get();
+        $kuesioner = Kuesioner::orderByTahunTerbaru()->get();
         $fakultas = Fakultas::orderBy('nama_fakultas')->get();
 
         if (auth()->user()->role === 'Fakultas') {
@@ -186,7 +186,7 @@ class AdminResponController extends Controller
 
     public function create(Request $request)
     {
-        $kuesionerList = Kuesioner::orderByDesc('id_kuesioner')->get();
+        $kuesionerList = Kuesioner::orderByTahunTerbaru()->get();
 
         $kuesionerAktif = null;
         $mahasiswaTarget = null;

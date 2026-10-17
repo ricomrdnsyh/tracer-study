@@ -15,7 +15,7 @@ class DashboardController extends Controller
 {
     public function index(Request $request)
     {
-        $kuesionerList = Kuesioner::orderByDesc('id_kuesioner')->get();
+        $kuesionerList = Kuesioner::orderByTahunTerbaru()->get();
 
         $selectedKuesioner = $this->resolveSelectedKuesioner($request, $kuesionerList);
         $kuesionerId = $selectedKuesioner?->id_kuesioner;
@@ -62,13 +62,6 @@ class DashboardController extends Controller
             }
         }
 
-        if ($selectedId && $selectedId === 'all') {
-            return null;
-        }
-
-        return $kuesionerList
-            ->filter(fn ($k) => $k->status === 'Published')
-            ->first()
-            ?? $kuesionerList->first();
+        return null;
     }
 }

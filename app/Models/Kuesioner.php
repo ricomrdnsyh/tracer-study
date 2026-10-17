@@ -111,4 +111,23 @@ class Kuesioner extends Model
 
         return in_array((string) $mahasiswa->akademik_id, $this->getMatchingAkademikIds(), true);
     }
+
+    /**
+     * Scope untuk mengurutkan kuesioner berdasarkan tahun target kelulusan terbaru di atas,
+     * lalu id_kuesioner terbaru.
+     */
+    public function scopeOrderByTahunTerbaru($query)
+    {
+        return $query->orderByRaw("
+            CASE 
+                WHEN LENGTH(TRIM(COALESCE(akademik_id, ''))) = 5 AND akademik_id REGEXP '^[0-9]+$' 
+                    THEN CAST(LEFT(TRIM(akademik_id), 4) AS UNSIGNED) + 1
+                WHEN LENGTH(TRIM(COALESCE(akademik_id, ''))) = 4 AND akademik_id REGEXP '^[0-9]+$' 
+                    THEN CAST(TRIM(akademik_id) AS UNSIGNED)
+                WHEN judul REGEXP '20[0-9]{2}' 
+                    THEN CAST(SUBSTRING(judul, REGEXP_INSTR(judul, '20[0-9]{2}'), 4) AS UNSIGNED)
+                ELSE 0
+            END DESC, id_kuesioner DESC
+        ");
+    }
 }

@@ -25,9 +25,7 @@ class AdminStatistikController extends Controller
 
     public function index(Request $request)
     {
-        $kuesionerList = Kuesioner::orderByDesc('id_kuesioner')->get();
-        $tahunAkademikList = TahunAkademik::orderByDesc('id_smt')->get();
-        $listTahunLulus = TahunAkademik::getListTahunLulus();
+        $kuesionerList = Kuesioner::orderByTahunTerbaru()->get();
 
         $user = auth()->user();
         $isFakultas = $user && $user->role === 'Fakultas';
@@ -49,8 +47,6 @@ class AdminStatistikController extends Controller
 
         return view('admin.statistik.index', compact(
             'kuesionerList',
-            'tahunAkademikList',
-            'listTahunLulus',
             'fakultasList',
             'prodiList',
             'isFakultas',
