@@ -138,107 +138,30 @@ class TracerController extends Controller
 
         $request->validate([
             'kuesioner_id' => 'required|exists:kuesioner,id_kuesioner',
-
         ]);
 
-        DB::beginTransaction();
+        $kuesioner = Kuesioner::findOrFail($request->kuesioner_id);
+
+        $wajibErrors = TracerResponService::validateWajibJawaban($kuesioner, $request->input('jawaban', []));
+        if (!empty($wajibErrors)) {
+            return redirect()->back()
+                ->with('error', 'Terdapat ' . count($wajibErrors) . ' pertanyaan wajib yang belum diisi. Mohon periksa kembali formulir Anda.')
+                ->with('wajib_errors', $wajibErrors)
+                ->withErrors($wajibErrors)
+                ->withInput();
+        }
 
         try {
-
-            $respon = ResponTracer::updateOrCreate(
-                [
-                    'kuesioner_id' => $request->kuesioner_id,
-                    'mahasiswa_id' => $mahasiswa->nim,
-                ],
-                [
-                    'status' => 'Selesai',
-                    'tgl_isi' => now(),
-                ]
+            TracerResponService::save(
+                $request->kuesioner_id,
+                $mahasiswa->nim,
+                $request->input('jawaban', []),
+                $request->input('jawaban_label', [])
             );
-
-            JawabanDetail::where('respon_id', $respon->id_respon)->delete();
-
-            $jawabanData = [];
-            if ($request->has('jawaban') && is_array($request->jawaban)) {
-                foreach ($request->jawaban as $pertanyaan_id => $jawaban) {
-                    $isRemoteSelect = isset($request->jawaban_label[$pertanyaan_id]);
-                    $jsonValue = is_array($jawaban) ? json_encode($jawaban) : ($isRemoteSelect ? json_encode(['label' => $request->jawaban_label[$pertanyaan_id]]) : null);
-
-                    $jawabanData[] = [
-                        'respon_id' => $respon->id_respon,
-                        'pertanyaan_id' => $pertanyaan_id,
-                        'jawaban_text' => is_array($jawaban) ? null : $jawaban,
-                        'jawaban_json' => $jsonValue,
-                        'created_at' => now(),
-                        'updated_at' => now(),
-                    ];
-                }
-            }
-            if (count($jawabanData) > 0) {
-                JawabanDetail::insert($jawabanData);
-            }
-
-            $pertanyaans = \App\Models\Pertanyaan::whereIn('kode_pertanyaan', ['F5B', 'F1101', 'F5A1', 'F5A2', 'f5b', 'f1101', 'f5a1', 'f5a2'])->get();
-
-            $nama = null;
-            $jenis_instansi = null;
-            $kode_provinsi = null;
-            $kode_kabupaten = null;
-            $provinsi_label = null;
-            $kabupaten_label = null;
-
-            foreach ($pertanyaans as $p) {
-                $id = $p->id_pertanyaan;
-                $kode = strtolower($p->kode_pertanyaan);
-
-                if ($kode === 'f5b' && isset($request->jawaban[$id]) && !empty($request->jawaban[$id])) {
-                    $nama = !empty($request->jawaban_label[$id]) ? $request->jawaban_label[$id] : $request->jawaban[$id];
-                } elseif ($kode === 'f1101' && isset($request->jawaban[$id]) && !empty($request->jawaban[$id])) {
-                    $jenis_instansi = $request->jawaban[$id];
-                } elseif ($kode === 'f5a1' && isset($request->jawaban[$id]) && !empty($request->jawaban[$id])) {
-                    $kode_provinsi = $request->jawaban[$id];
-                    $provinsi_label = !empty($request->jawaban_label[$id]) ? $request->jawaban_label[$id] : null;
-                    if (empty($provinsi_label)) {
-                        $prov = Cache::remember("master_provinsi_{$kode_provinsi}", 86400, function () use ($kode_provinsi) {
-                            return DB::table('master_provinsi')->where('kode_wilayah_provinsi', $kode_provinsi)->value('provinsi');
-                        });
-                        if ($prov) $provinsi_label = $prov;
-                    }
-                } elseif ($kode === 'f5a2' && isset($request->jawaban[$id]) && !empty($request->jawaban[$id])) {
-                    $kode_kabupaten = $request->jawaban[$id];
-                    $kabupaten_label = !empty($request->jawaban_label[$id]) ? $request->jawaban_label[$id] : null;
-                    if (empty($kabupaten_label)) {
-                        $kab = Cache::remember("master_kab_{$kode_kabupaten}", 86400, function () use ($kode_kabupaten) {
-                            return DB::table('master_kota_kabupaten')->where('kode_wilayah_kota_kabupaten', $kode_kabupaten)->value('kota_kabupaten');
-                        });
-                        if ($kab) $kabupaten_label = $kab;
-                    }
-                }
-            }
-
-            if ($nama) {
-                PekerjaanAlumni::updateOrCreate(
-                    ['respon_id' => $respon->id_respon],
-                    [
-                        'nama' => is_array($nama) ? implode(', ', $nama) : $nama,
-                        'jenis_instansi' => is_array($jenis_instansi) ? implode(', ', $jenis_instansi) : $jenis_instansi,
-                        'kode_provinsi' => is_array($kode_provinsi) ? implode(', ', $kode_provinsi) : $kode_provinsi,
-                        'kode_kabupaten' => is_array($kode_kabupaten) ? implode(', ', $kode_kabupaten) : $kode_kabupaten,
-                        'provinsi' => $provinsi_label,
-                        'kabupaten' => $kabupaten_label,
-                        'nama_normalized' => strtolower(is_array($nama) ? implode(', ', $nama) : $nama),
-                    ]
-                );
-            } else {
-                PekerjaanAlumni::where('respon_id', $respon->id_respon)->delete();
-            }
-
-            DB::commit();
 
             return redirect()->route('mahasiswa.tracer.index')->with('success', 'Jawaban Tracer Study Anda berhasil disimpan!');
         } catch (\Exception $e) {
-            DB::rollBack();
-            return redirect()->back()->with('error', 'Terjadi kesalahan saat menyimpan data: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Terjadi kesalahan saat menyimpan data: ' . $e->getMessage())->withInput();
         }
     }
 

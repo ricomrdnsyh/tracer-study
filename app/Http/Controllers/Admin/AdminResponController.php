@@ -242,6 +242,15 @@ class AdminResponController extends Controller
             return back()->with('error', "Mahasiswa {$nim} ({$mahasiswa->tahun_keluar_label}) tidak termasuk sasaran kuesioner ini ({$kuesioner->target_lulusan_label}).");
         }
 
+        $wajibErrors = TracerResponService::validateWajibJawaban($kuesioner, $request->input('jawaban', []));
+        if (!empty($wajibErrors)) {
+            return back()
+                ->with('error', 'Terdapat ' . count($wajibErrors) . ' pertanyaan wajib yang belum diisi. Mohon periksa kembali formulir.')
+                ->with('wajib_errors', $wajibErrors)
+                ->withErrors($wajibErrors)
+                ->withInput();
+        }
+
         try {
             TracerResponService::save(
                 $request->kuesioner_id,
@@ -250,7 +259,7 @@ class AdminResponController extends Controller
                 $request->input('jawaban_label', [])
             );
         } catch (\Throwable $e) {
-            return back()->with('error', 'Terjadi kesalahan saat menyimpan data: ' . $e->getMessage());
+            return back()->with('error', 'Terjadi kesalahan saat menyimpan data: ' . $e->getMessage())->withInput();
         }
 
         return redirect()->route('admin.respon.index')

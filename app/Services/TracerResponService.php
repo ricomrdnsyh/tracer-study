@@ -96,6 +96,100 @@ class TracerResponService
     }
 
     /**
+     * Validasi apakah seluruh pertanyaan wajib yang aktif (memenuhi syarat skip logic) sudah dijawab.
+     *
+     * @return array Daftar pesan error untuk pertanyaan wajib yang belum dijawab.
+     */
+    public static function validateWajibJawaban(Kuesioner $kuesioner, ?array $jawaban = []): array
+    {
+        $jawaban = $jawaban ?? [];
+        $errors = [];
+
+        $kuesioner->loadMissing(['kategoriPertanyaans' => function ($q) {
+            $q->orderBy('urutan');
+        }, 'kategoriPertanyaans.pertanyaans']);
+
+        foreach ($kuesioner->kategoriPertanyaans as $kategori) {
+            if (!self::checkCondition($kategori->syarat_pertanyaan_id, $kategori->syarat_jawaban, $jawaban)) {
+                continue;
+            }
+
+            foreach ($kategori->pertanyaans as $pertanyaan) {
+                if (!self::checkCondition($pertanyaan->syarat_pertanyaan_id, $pertanyaan->syarat_jawaban, $jawaban)) {
+                    continue;
+                }
+
+                if ($pertanyaan->wajib) {
+                    $id = $pertanyaan->id_pertanyaan;
+                    $val = $jawaban[$id] ?? null;
+
+                    $isEmpty = false;
+                    if ($val === null || $val === '') {
+                        $isEmpty = true;
+                    } elseif (is_array($val) && count(array_filter($val, fn($v) => $v !== null && $v !== '')) === 0) {
+                        $isEmpty = true;
+                    } elseif (is_string($val) && trim($val) === '') {
+                        $isEmpty = true;
+                    }
+
+                    if ($isEmpty) {
+                        $kode = strtoupper($pertanyaan->kode_pertanyaan ?? 'P');
+                        $errors[$id] = "Pertanyaan [{$kode}] \"{$pertanyaan->teks_pertanyaan}\" wajib diisi.";
+                    }
+                }
+            }
+        }
+
+        return $errors;
+    }
+
+    /**
+     * Helper evaluasi apakah jawaban memenuhi syarat skip logic.
+     */
+    private static function checkCondition($syaratId, $syaratJawaban, array $jawaban): bool
+    {
+        if (empty($syaratId)) return true;
+        if (!isset($jawaban[$syaratId])) return false;
+
+        $userVal = $jawaban[$syaratId];
+        if ($userVal === null || $userVal === '' || (is_array($userVal) && count($userVal) === 0)) {
+            return false;
+        }
+
+        if (!is_array($syaratJawaban)) {
+            $syaratJawaban = [$syaratJawaban];
+        }
+
+        $userVals = is_array($userVal) ? $userVal : [$userVal];
+
+        foreach ($userVals as $uv) {
+            $rawUv = strtolower(trim((string)$uv));
+            $cleanUv = self::cleanConditionText($uv);
+
+            foreach ($syaratJawaban as $sj) {
+                $rawSj = strtolower(trim((string)$sj));
+                $cleanSj = self::cleanConditionText($sj);
+
+                if ($rawUv === $rawSj || ($cleanUv !== '' && $cleanUv === $cleanSj)) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Bersihkan teks syarat untuk pencocokan toleran prefix [code], (0/1), nomor.
+     */
+    private static function cleanConditionText($str): string
+    {
+        if (!$str) return '';
+        $clean = preg_replace('/^\s*(\[\w+\])?\s*(\(0\/1\))?\s*(\(\d+\))?\s*/', '', trim((string)$str));
+        return strtolower(preg_replace('/\s+/', ' ', $clean));
+    }
+
+    /**
      * Simpan (buat/perbarui) respon beserta detail jawaban dan data pekerjaan alumni.
      */
     public static function save(string $kuesionerId, string $nim, ?array $jawaban = [], ?array $jawabanLabel = []): ResponTracer

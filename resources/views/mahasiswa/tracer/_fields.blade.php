@@ -42,11 +42,16 @@
                                                     $colClass = $isKompetensi ? 'col-12 col-md-6' : 'col-12';
                                                 @endphp
                                                 <div class="{{ $colClass }} mb-6 pertanyaan-container"
+                                                    id="pertanyaan_container_{{ $pertanyaan->id_pertanyaan }}"
                                                     data-syarat-pertanyaan="{{ $pertanyaan->syarat_pertanyaan_id }}"
-                                                    data-syarat-jawaban='@json($pertanyaan->syarat_jawaban)'>
+                                                    data-syarat-jawaban='@json($pertanyaan->syarat_jawaban)'
+                                                    data-wajib="{{ $pertanyaan->wajib ? 'true' : 'false' }}"
+                                                    data-id-pertanyaan="{{ $pertanyaan->id_pertanyaan }}"
+                                                    data-tipe="{{ $pertanyaan->tipe_jawaban }}"
+                                                    data-kode="{{ strtoupper($pertanyaan->kode_pertanyaan) }}">
                                                     @php
-                                                        $answer = $jawabanUser[$pertanyaan->id_pertanyaan] ?? null;
-                                                        $lbl = $jawabanLabel[$pertanyaan->id_pertanyaan] ?? '';
+                                                        $answer = old('jawaban.' . $pertanyaan->id_pertanyaan, $jawabanUser[$pertanyaan->id_pertanyaan] ?? null);
+                                                        $lbl = old('jawaban_label.' . $pertanyaan->id_pertanyaan, $jawabanLabel[$pertanyaan->id_pertanyaan] ?? '');
 
                                                         if (strtolower($pertanyaan->kode_pertanyaan) === 'f5a0' && empty($answer)) {
                                                             $answer = 'ID';

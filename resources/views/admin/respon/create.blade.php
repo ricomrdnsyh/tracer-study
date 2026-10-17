@@ -130,7 +130,7 @@
                                         </span>
                                     </div>
                                 </div>
-                                <form action="{{ route('admin.respon.store') }}" method="POST">
+                                <form action="{{ route('admin.respon.store') }}" method="POST" id="form_tracer_admin" novalidate>
                                     @csrf
                                     <input type="hidden" name="kuesioner_id" value="{{ $kuesionerAktif->id_kuesioner }}">
                                     <input type="hidden" name="nim" value="{{ $mahasiswaTarget->nim }}">

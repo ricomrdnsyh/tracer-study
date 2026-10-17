@@ -39,7 +39,7 @@
                         </div>
                         <div class="separator my-2"></div>
                         <div class="card-body">
-                            <form action="{{ route('mahasiswa.tracer.store') }}" method="POST">
+                            <form action="{{ route('mahasiswa.tracer.store') }}" method="POST" id="form_tracer_study" novalidate>
                                 @csrf
                                 <input type="hidden" name="kuesioner_id" value="{{ $kuesioner->id_kuesioner }}">
 
