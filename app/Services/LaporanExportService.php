@@ -73,23 +73,25 @@ class LaporanExportService
 
         $lulusanTahun = 'SEMUA LULUSAN';
         if (isset($filters['akademik_id']) && $filters['akademik_id'] !== 'all' && $filters['akademik_id'] !== '') {
-            $tahunAkademikObj = \App\Models\TahunAkademik::find($filters['akademik_id']);
-            if ($tahunAkademikObj) {
+            $fAkademik = trim((string) $filters['akademik_id']);
+            if (strlen($fAkademik) === 4 && is_numeric($fAkademik)) {
+                $lulusanTahun = 'LULUSAN ' . $fAkademik;
+            } else {
+                $tahunAkademikObj = \App\Models\TahunAkademik::find($fAkademik);
+                if ($tahunAkademikObj) {
+                    if (preg_match('/^(\d{4})\/(\d{4})\s+(.*)$/i', trim($tahunAkademikObj->nm_smt), $matches)) {
+                        $tahun1 = $matches[1];
+                        $tahun2 = $matches[2];
+                        $semester = strtolower(trim($matches[3]));
 
-                if (preg_match('/^(\d{4})\/(\d{4})\s+(.*)$/i', trim($tahunAkademikObj->nm_smt), $matches)) {
-                    $tahun1 = $matches[1];
-                    $tahun2 = $matches[2];
-                    $semester = strtolower(trim($matches[3]));
-
-                    if ($semester === 'genap' || $semester === 'pendek') {
-                        $lulusanTahun = 'LULUSAN ' . $tahun2;
+                        if ($semester === 'genap' || $semester === 'pendek') {
+                            $lulusanTahun = 'LULUSAN ' . $tahun2;
+                        } else {
+                            $lulusanTahun = 'LULUSAN ' . $tahun1;
+                        }
                     } else {
-
-                        $lulusanTahun = 'LULUSAN ' . $tahun1;
+                        $lulusanTahun = 'LULUSAN ' . $tahunAkademikObj->nm_smt;
                     }
-                } else {
-
-                    $lulusanTahun = 'LULUSAN ' . $tahunAkademikObj->nm_smt;
                 }
             }
         }

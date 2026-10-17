@@ -26,7 +26,8 @@ class AdminMahasiswaController extends Controller
 
         $prodi = $prodi->get();
         $tahunAkademik = TahunAkademik::orderByDesc('id_smt')->get();
-        return view('admin.mahasiswa.index', compact('prodi', 'tahunAkademik', 'fakultas'));
+        $listTahunLulus = TahunAkademik::getListTahunLulus();
+        return view('admin.mahasiswa.index', compact('prodi', 'tahunAkademik', 'listTahunLulus', 'fakultas'));
     }
 
     public function getMahasiswa(Request $request)
@@ -43,10 +44,9 @@ class AdminMahasiswaController extends Controller
             $query->whereIn('prodi_id', $facultyProdiIds);
         }
 
-        if ($request->filled('akademik_id') && $request->akademik_id !== 'all') {
-            $query->where('akademik_id', $request->akademik_id);
-        } elseif ($request->filled('tahun_keluar') && $request->tahun_keluar !== 'all') {
-            $query->where('akademik_id', $request->tahun_keluar);
+        $targetAkademik = $request->filled('akademik_id') ? $request->akademik_id : ($request->filled('tahun_keluar') ? $request->tahun_keluar : null);
+        if ($targetAkademik && $targetAkademik !== 'all') {
+            $query->filterAkademik($targetAkademik, 'akademik_id');
         }
 
         if ($request->filled('prodi_id') && $request->prodi_id !== 'all') {
@@ -62,10 +62,7 @@ class AdminMahasiswaController extends Controller
                 return $row->prodi ? $row->prodi->nama_prodi : '-';
             })
             ->addColumn('tahun_keluar_label', function ($row) {
-                if ($row->tahunAkademik) {
-                    return $row->tahunAkademik->nm_smt;
-                }
-                return $row->akademik_id ?: '-';
+                return $row->tahun_keluar_label;
             })
             ->addColumn('action', function ($row) {
                 $showBtn = '<a href="javascript:void(0)"
@@ -94,28 +91,50 @@ class AdminMahasiswaController extends Controller
         }
 
         try {
-            $selectedTahun = $request->input('tahun_keluar') ?: $request->input('tahun_akademik') ?: $request->input('akademik_id');
-
-            $data = $clientSSO->getAlumniFromApi($selectedTahun);
-
-            if (empty($data)) {
-                $taInfo = !empty($selectedTahun) ? " untuk Tahun Akademik {$selectedTahun}" : "";
-                return response()->json(['success' => false, 'message' => "Data dari API kosong{$taInfo}."]);
-            }
+            $selectedTahun = $request->input('tahun_keluar') ?: $request->input('tahun_akademik') ?: $request->input('akademik_id') ?: $request->input('sync_tahun_akademik');
+            $data = [];
+            $taLabelInfo = '';
 
             if (!empty($selectedTahun)) {
-                $data = array_values(array_filter($data, function ($item) use ($selectedTahun) {
-                    return isset($item['tahun_keluar']) && trim((string)$item['tahun_keluar']) === trim((string)$selectedTahun);
-                }));
+                $selectedTahun = trim((string) $selectedTahun);
+                if (strlen($selectedTahun) === 4 && is_numeric($selectedTahun)) {
+                    $taPrefix = (int) $selectedTahun - 1;
+                    $semesters = [$taPrefix . '1', $taPrefix . '2', $taPrefix . '3'];
+                    $taLabelInfo = " (Lulusan {$selectedTahun} - TA {$taPrefix}/{$selectedTahun})";
 
-                if (empty($data)) {
+                    foreach ($semesters as $smt) {
+                        try {
+                            $smtData = $clientSSO->getAlumniFromApi($smt);
+                            if (!empty($smtData) && is_array($smtData)) {
+                                $data = array_merge($data, $smtData);
+                            }
+                        } catch (\Throwable $e) {
+                            // Abaikan jika salah satu semester kosong dari API
+                        }
+                    }
+
+                    $data = array_values(array_filter($data, function ($item) use ($semesters) {
+                        return isset($item['tahun_keluar']) && in_array(trim((string)$item['tahun_keluar']), $semesters, true);
+                    }));
+                } else {
                     $taModel = TahunAkademik::where('id_smt', $selectedTahun)->first();
-                    $taLabel = $taModel ? $taModel->nm_smt : $selectedTahun;
-                    return response()->json([
-                        'success' => true,
-                        'message' => "Tidak ada data alumni dari API untuk Tahun Akademik {$taLabel} ({$selectedTahun})."
-                    ]);
+                    $taLabelInfo = ' (' . ($taModel ? $taModel->nm_smt : $selectedTahun) . ')';
+                    $data = $clientSSO->getAlumniFromApi($selectedTahun);
+
+                    $data = array_values(array_filter($data, function ($item) use ($selectedTahun) {
+                        return isset($item['tahun_keluar']) && trim((string)$item['tahun_keluar']) === trim((string)$selectedTahun);
+                    }));
                 }
+            } else {
+                $taLabelInfo = ' (Semua Tahun Kelulusan)';
+                $data = $clientSSO->getAlumniFromApi(null);
+            }
+
+            // Deduplikasi berdasarkan NIM
+            $data = collect($data)->unique('nim')->values()->all();
+
+            if (empty($data)) {
+                return response()->json(['success' => false, 'message' => "Tidak ada data alumni dari API SIM PT{$taLabelInfo}."]);
             }
 
             $newCount = 0;
@@ -184,12 +203,6 @@ class AdminMahasiswaController extends Controller
                         ]
                     );
                 }
-            }
-
-            $taLabelInfo = '';
-            if (!empty($selectedTahun)) {
-                $taModel = TahunAkademik::where('id_smt', $selectedTahun)->first();
-                $taLabelInfo = ' (' . ($taModel ? $taModel->nm_smt : $selectedTahun) . ')';
             }
 
             $message = "Sinkronisasi Alumni Selesai{$taLabelInfo}. Total Diproses: " . count($upsertBatch) . " (Baru: {$newCount}, Diperbarui: {$updatedCount}).";

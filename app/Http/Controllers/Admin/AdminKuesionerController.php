@@ -18,31 +18,22 @@ class AdminKuesionerController extends Controller
     public function index()
     {
         $tahunAkademik = TahunAkademik::orderByDesc('id_smt')->get();
-        return view('admin.kuesioner.index', compact('tahunAkademik'));
+        $listTahunLulus = TahunAkademik::getListTahunLulus();
+        return view('admin.kuesioner.index', compact('tahunAkademik', 'listTahunLulus'));
     }
 
     public function getKuesioner(Request $request)
     {
-        // Otomatis ubah status menjadi Closed jika tanggal selesai sudah lewat
-        Kuesioner::where('status', 'Published')
-            ->whereDate('tgl_selesai', '<', now())
-            ->update(['status' => 'Closed']);
         $query = Kuesioner::with('tahunAkademik')
-            ->select(['id_kuesioner', 'akademik_id', 'judul', 'tgl_mulai', 'tgl_selesai', 'status'])
+            ->select(['id_kuesioner', 'akademik_id', 'judul', 'status'])
             ->orderByDesc('id_kuesioner');
 
         return DataTables::of($query)
             ->addColumn('target_lulusan', function ($row) {
-                if ($row->tahunAkademik) {
-                    return '<span class="badge badge-light-primary fw-bold">' . $row->tahunAkademik->nm_smt . '</span>';
+                if (!empty($row->akademik_id)) {
+                    return '<span class="badge badge-light-primary fw-bold">' . e($row->target_lulusan_label) . '</span>';
                 }
-                return $row->akademik_id ? '<span class="badge badge-light-primary fw-bold">' . $row->akademik_id . '</span>' : '<span class="badge badge-light-secondary text-dark fw-bold">Semua Lulusan</span>';
-            })
-            ->addColumn('periode_nama', function ($row) {
-                if (!$row->tgl_mulai || !$row->tgl_selesai) return '-';
-                $mulai = Carbon::parse($row->tgl_mulai)->translatedFormat('d F Y');
-                $selesai = Carbon::parse($row->tgl_selesai)->translatedFormat('d F Y');
-                return $mulai . ' s/d ' . $selesai;
+                return '<span class="badge badge-light-secondary text-dark fw-bold">Semua Lulusan</span>';
             })
             ->addColumn('action', function ($row) {
                 $showBtn = '<a href="' . route('admin.kuesioner.show', $row->id_kuesioner) . '"
@@ -80,7 +71,9 @@ class AdminKuesionerController extends Controller
     public function edit($id)
     {
         $kuesioner = Kuesioner::findOrFail($id);
-        return response()->json($kuesioner);
+        $data = $kuesioner->toArray();
+        $data['target_tahun_lulus'] = $kuesioner->target_tahun_lulus;
+        return response()->json($data);
     }
 
     public function update(KuesionerRequest $request, $id)

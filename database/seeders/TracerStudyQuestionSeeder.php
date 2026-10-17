@@ -20,8 +20,6 @@ class TracerStudyQuestionSeeder extends Seeder
         $kuesioner = Kuesioner::firstOrCreate(
             ['judul' => 'Kuesioner Tracer Study 2026'],
             [
-                'tgl_mulai' => now(),
-                'tgl_selesai' => now()->addMonths(3),
                 'status' => 'Published'
             ]
         );

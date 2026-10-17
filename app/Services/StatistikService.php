@@ -33,11 +33,12 @@ class StatistikService
 
         $mahasiswaQuery = Mahasiswa::query();
         if ($akademikId) {
-            $mahasiswaQuery->where('akademik_id', $akademikId);
+            $mahasiswaQuery->filterAkademik($akademikId, 'akademik_id');
         } elseif ($kuesionerId) {
             $kuesioner = Kuesioner::find($kuesionerId);
             if ($kuesioner && $kuesioner->akademik_id) {
-                $mahasiswaQuery->where('akademik_id', $kuesioner->akademik_id);
+                $matchingIds = $kuesioner->getMatchingAkademikIds();
+                $mahasiswaQuery->whereIn('akademik_id', $matchingIds);
             }
         }
 
@@ -53,7 +54,7 @@ class StatistikService
             $responQuery->where('kuesioner_id', $kuesionerId);
         }
         if ($akademikId) {
-            $responQuery->whereHas('mahasiswa', fn($q) => $q->where('akademik_id', $akademikId));
+            $responQuery->whereHas('mahasiswa', fn($q) => $q->filterAkademik($akademikId, 'akademik_id'));
         }
         if ($prodiId) {
             $responQuery->whereHas('mahasiswa', fn($q) => $q->where('prodi_id', $prodiId));
@@ -970,7 +971,7 @@ class StatistikService
         $prodiIds = $prodis->pluck('id_prodi')->toArray();
 
         $targetCounts = Mahasiswa::whereIn('prodi_id', $prodiIds)
-            ->when($akademikId, fn($q) => $q->where('akademik_id', $akademikId))
+            ->when($akademikId, fn($q) => $q->filterAkademik($akademikId, 'akademik_id'))
             ->groupBy('prodi_id')
             ->select('prodi_id', DB::raw('count(*) as total'))
             ->pluck('total', 'prodi_id')
@@ -980,7 +981,7 @@ class StatistikService
             ->where('respon_tracer.status', 'Selesai')
             ->whereIn('mahasiswa.prodi_id', $prodiIds)
             ->when($kuesionerId, fn($q) => $q->where('respon_tracer.kuesioner_id', $kuesionerId))
-            ->when($akademikId, fn($q) => $q->where('mahasiswa.akademik_id', $akademikId))
+            ->when($akademikId, fn($q) => $q->filterAkademik($akademikId, 'mahasiswa.akademik_id'))
             ->groupBy('mahasiswa.prodi_id')
             ->select('mahasiswa.prodi_id', DB::raw('count(*) as total'))
             ->pluck('total', 'prodi_id')
@@ -994,7 +995,17 @@ class StatistikService
             ->where('respon_tracer.status', 'Selesai')
             ->whereIn('mahasiswa.prodi_id', $prodiIds)
             ->when($kuesionerId, fn($q) => $q->where('respon_tracer.kuesioner_id', $kuesionerId))
-            ->when($akademikId, fn($q) => $q->where('mahasiswa.akademik_id', $akademikId))
+            ->when($akademikId, function ($q) use ($akademikId) {
+                if (strlen($akademikId) === 4 && is_numeric($akademikId)) {
+                    $taPrefix = (int) $akademikId - 1;
+                    $q->where(function ($sq) use ($akademikId, $taPrefix) {
+                        $sq->where('mahasiswa.akademik_id', $akademikId)
+                           ->orWhere('mahasiswa.akademik_id', 'like', $taPrefix . '%');
+                    });
+                } else {
+                    $q->where('mahasiswa.akademik_id', $akademikId);
+                }
+            })
             ->select('mahasiswa.prodi_id', 'jawaban_detail.jawaban_text')
             ->get();
 
@@ -1019,7 +1030,17 @@ class StatistikService
             ->where('respon_tracer.status', 'Selesai')
             ->whereIn('mahasiswa.prodi_id', $prodiIds)
             ->when($kuesionerId, fn($q) => $q->where('respon_tracer.kuesioner_id', $kuesionerId))
-            ->when($akademikId, fn($q) => $q->where('mahasiswa.akademik_id', $akademikId))
+            ->when($akademikId, function ($q) use ($akademikId) {
+                if (strlen($akademikId) === 4 && is_numeric($akademikId)) {
+                    $taPrefix = (int) $akademikId - 1;
+                    $q->where(function ($sq) use ($akademikId, $taPrefix) {
+                        $sq->where('mahasiswa.akademik_id', $akademikId)
+                           ->orWhere('mahasiswa.akademik_id', 'like', $taPrefix . '%');
+                    });
+                } else {
+                    $q->where('mahasiswa.akademik_id', $akademikId);
+                }
+            })
             ->select('mahasiswa.prodi_id', 'jawaban_detail.jawaban_text')
             ->get();
 

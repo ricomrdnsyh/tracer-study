@@ -458,9 +458,9 @@
                                     <label class="form-label fw-bold fs-7 mb-2 text-gray-700">Tahun Kelulusan:</label>
                                     <select id="filter_akademik" class="form-select form-select-sm" data-control="select2"
                                         data-placeholder="Semua Tahun" data-allow-clear="true">
-                                        <option value="all">Semua Tahun Akademik</option>
-                                        @foreach ($tahunAkademikList as $ta)
-                                            <option value="{{ $ta->id_smt }}">{{ $ta->nm_smt }} ({{ $ta->id_smt }})
+                                        <option value="all">Semua Tahun Kelulusan</option>
+                                        @foreach ($listTahunLulus as $item)
+                                            <option value="{{ $item['tahun_lulus'] }}">{{ $item['label'] }}
                                             </option>
                                         @endforeach
                                     </select>

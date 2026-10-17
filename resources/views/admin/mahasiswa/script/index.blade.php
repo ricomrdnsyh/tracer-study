@@ -176,7 +176,7 @@
             let selectedTaText = $('#sync_tahun_akademik option:selected').text().trim();
 
             let confirmText = selectedTa 
-                ? "Sinkronkan data alumni untuk Tahun Akademik " + selectedTaText + "?" 
+                ? "Sinkronkan data alumni untuk " + selectedTaText + " (mencakup semester Ganjil, Genap, & Pendek)?" 
                 : "Sinkronkan SEMUA data alumni dari SIM PT?";
 
             Swal.fire({

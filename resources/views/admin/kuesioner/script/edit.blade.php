@@ -7,21 +7,7 @@
             success: function(response) {
                 $('#form_edit_action').attr('action', '/admin/kuesioner/' + id);
                 $('#edit_judul').val(response.judul);
-                $('#edit_akademik_id').val(response.akademik_id || '').trigger('change');
-
-                let fpMulai = document.querySelector("#edit_tgl_mulai") ? document.querySelector("#edit_tgl_mulai")._flatpickr : null;
-                if (fpMulai) {
-                    fpMulai.setDate(response.tgl_mulai || '', true);
-                } else {
-                    $('#edit_tgl_mulai').val(response.tgl_mulai || '');
-                }
-
-                let fpSelesai = document.querySelector("#edit_tgl_selesai") ? document.querySelector("#edit_tgl_selesai")._flatpickr : null;
-                if (fpSelesai) {
-                    fpSelesai.setDate(response.tgl_selesai || '', true);
-                } else {
-                    $('#edit_tgl_selesai').val(response.tgl_selesai || '');
-                }
+                $('#edit_akademik_id').val(response.target_tahun_lulus || response.akademik_id || '').trigger('change');
 
                 $('#edit_status').val(response.status).trigger('change');
                 $('#form_edit').modal('show');
@@ -32,14 +18,12 @@
     $('#form_edit_action').on('submit', function(e) {
         e.preventDefault();
         let form = $(this)[0];
-        let tglMulai = $('#edit_tgl_mulai').val();
-        let tglSelesai = $('#edit_tgl_selesai').val();
 
-        if (!tglMulai || !tglSelesai || form.checkValidity() === false) {
+        if (form.checkValidity() === false) {
             e.stopPropagation();
             $(form).addClass('was-validated');
             Swal.fire({
-                text: "Silakan lengkapi semua form yang wajib diisi (Judul, Tanggal Mulai, Tanggal Selesai).",
+                text: "Silakan lengkapi semua form yang wajib diisi (Judul dan Status).",
                 icon: "warning",
                 buttonsStyling: false,
                 confirmButtonText: "Ok, Mengerti!",
@@ -60,10 +44,5 @@
         $(this).find('form')[0].reset();
         $(this).find('form').removeClass('was-validated');
         $(this).find('select').val('').trigger('change');
-        $('#edit_tgl_mulai, #edit_tgl_selesai').each(function() {
-            if (this._flatpickr) {
-                this._flatpickr.clear();
-            }
-        });
     });
 </script>

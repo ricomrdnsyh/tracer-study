@@ -76,10 +76,6 @@
                     name: 'akademik_id'
                 },
                 {
-                    data: 'periode_nama',
-                    name: 'tgl_mulai'
-                },
-                {
                     data: 'status',
                     name: 'status',
                     render: function(data, type, row) {

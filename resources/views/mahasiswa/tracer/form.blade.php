@@ -32,8 +32,7 @@
                                 <div class="d-flex flex-column">
                                     <span class="card-label fw-bolder fs-2 m-0 mb-2">{{ $kuesioner->judul }}</span>
                                     <span class="text-muted fw-bold fs-7 d-flex align-items-center m-0">
-                                        Masa Berlaku:
-                                        {{ $kuesioner->tgl_mulai ? \Carbon\Carbon::parse($kuesioner->tgl_mulai)->locale('id')->translatedFormat('d F Y') . ' - ' . \Carbon\Carbon::parse($kuesioner->tgl_selesai)->locale('id')->translatedFormat('d F Y') : 'Tanpa batas waktu' }}
+                                        Target: {{ $kuesioner->target_lulusan_label ?? 'Semua Lulusan' }}
                                     </span>
                                 </div>
                             </h3>

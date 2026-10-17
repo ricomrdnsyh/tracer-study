@@ -55,4 +55,57 @@ class Mahasiswa extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    /**
+     * Dapatkan tahun kalender kelulusan (4 digit).
+     * Contoh: 20241 / 20242 -> '2025'
+     *         20251 / 20252 -> '2026'
+     */
+    public function getTahunLulusAttribute(): ?string
+    {
+        if (empty($this->akademik_id)) return null;
+        $smt = trim((string) $this->akademik_id);
+        if (strlen($smt) === 5) {
+            $prefix = (int) substr($smt, 0, 4);
+            return (string) ($prefix + 1);
+        }
+        if (strlen($smt) === 4) {
+            return $smt;
+        }
+        return $smt;
+    }
+
+    /**
+     * Dapatkan label tahun kelulusan untuk UI mahasiswa.
+     * Contoh: "Lulusan 2025 (TA 2024/2025)"
+     */
+    public function getTahunKeluarLabelAttribute(): string
+    {
+        $tahunLulus = $this->tahun_lulus;
+        if ($this->tahunAkademik) {
+            return "Lulusan {$tahunLulus} ({$this->tahunAkademik->nm_smt})";
+        }
+        return $tahunLulus ? "Lulusan {$tahunLulus}" : '-';
+    }
+
+    /**
+     * Scope untuk memfilter mahasiswa berdasarkan akademik_id atau tahun kelulusan 4 digit
+     */
+    public function scopeFilterAkademik($query, ?string $akademikId, string $column = 'mahasiswa.akademik_id')
+    {
+        if (empty($akademikId) || $akademikId === 'all') {
+            return $query;
+        }
+
+        $akademikId = trim((string) $akademikId);
+        if (strlen($akademikId) === 4 && is_numeric($akademikId)) {
+            $taPrefix = (int) $akademikId - 1; // 2025 -> prefix 2024
+            return $query->where(function ($q) use ($column, $akademikId, $taPrefix) {
+                $q->where($column, $akademikId)
+                  ->orWhere($column, 'like', $taPrefix . '%');
+            });
+        }
+
+        return $query->where($column, $akademikId);
+    }
 }

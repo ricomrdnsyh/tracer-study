@@ -16,6 +16,7 @@ class AdminLaporanController extends Controller
     {
         $kuesioner = Kuesioner::orderByDesc('id_kuesioner')->get();
         $tahunAkademik = TahunAkademik::orderByDesc('id_smt')->get();
+        $listTahunLulus = TahunAkademik::getListTahunLulus();
         $user = auth()->user();
         $isFakultas = $user && $user->role === 'Fakultas';
         $userFakultasId = $isFakultas ? $user->fakultas_id : null;
@@ -30,6 +31,6 @@ class AdminLaporanController extends Controller
 
         $hasCustomTemplate = Storage::exists('templates/laporan_prodi.docx');
 
-        return view('admin.laporan.index', compact('kuesioner', 'tahunAkademik', 'fakultas', 'prodi', 'hasCustomTemplate', 'isFakultas', 'userFakultasId'));
+        return view('admin.laporan.index', compact('kuesioner', 'tahunAkademik', 'listTahunLulus', 'fakultas', 'prodi', 'hasCustomTemplate', 'isFakultas', 'userFakultasId'));
     }
 }

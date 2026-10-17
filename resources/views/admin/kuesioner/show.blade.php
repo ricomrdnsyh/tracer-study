@@ -32,8 +32,7 @@
                                         @endif
                                     </div>
                                     <span class="text-muted mt-2 fw-bold fs-8 fs-md-7">
-                                        <i class="fas fa-calendar-alt me-1 text-muted"></i> Masa Berlaku:
-                                        {{ $kuesioner->tgl_mulai ? \Carbon\Carbon::parse($kuesioner->tgl_mulai)->format('d M Y') : '-' }} s/d {{ $kuesioner->tgl_selesai ? \Carbon\Carbon::parse($kuesioner->tgl_selesai)->format('d M Y') : '-' }}
+                                        <i class="fas fa-bullseye me-1 text-muted"></i> Target: {{ $kuesioner->target_lulusan_label ?? 'Semua Tahun Kelulusan' }}
                                     </span>
                                 </h3>
                             </div>

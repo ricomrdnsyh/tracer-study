@@ -516,13 +516,13 @@
                         <div class="col-md-4">
                             <div class="info-chip p-4">
                                 <div class="icon-box" style="background: var(--info-soft); color: var(--info-color);">
-                                    <i class="fas fa-calendar-alt"></i>
+                                    <i class="fas fa-clipboard-check"></i>
                                 </div>
                                 <div>
-                                    <div class="text-muted fs-8 fw-bolder text-uppercase tracking-wider mb-1">Masa Berlaku
+                                    <div class="text-muted fs-8 fw-bolder text-uppercase tracking-wider mb-1">Status Kuesioner
                                     </div>
                                     <div class="text-main fs-5 fw-bolder">
-                                        {{ $kuesionerAktif && $kuesionerAktif->tgl_mulai ? \Carbon\Carbon::parse($kuesionerAktif->tgl_mulai)->locale('id')->translatedFormat('d F Y') . ' - ' . \Carbon\Carbon::parse($kuesionerAktif->tgl_selesai)->locale('id')->translatedFormat('d F Y') : 'Belum Tersedia' }}
+                                        {{ $kuesionerAktif ? ($kuesionerAktif->status === 'Published' ? 'Aktif' : $kuesionerAktif->status) : 'Belum Tersedia' }}
                                     </div>
                                 </div>
                             </div>

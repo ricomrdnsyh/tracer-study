@@ -23,10 +23,8 @@ class KuesionerRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'akademik_id' => 'nullable|string|exists:tahun_akademik,id_smt',
-            'tgl_mulai' => 'required|date',
-            'tgl_selesai' => 'required|date|after_or_equal:tgl_mulai',
             'judul' => 'required|string|max:255',
+            'akademik_id' => 'nullable|string|max:20',
             'status' => 'required|in:Draft,Published,Closed',
         ];
     }

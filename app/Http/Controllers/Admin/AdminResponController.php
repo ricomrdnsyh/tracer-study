@@ -208,7 +208,7 @@ class AdminResponController extends Controller
 
             if (!$this->akademikCocok($kuesionerAktif, $mahasiswaTarget)) {
                 return redirect()->route('admin.respon.create', ['kuesioner_id' => $kuesionerAktif->id_kuesioner])
-                    ->with('error', "Mahasiswa {$mahasiswaTarget->nim} (lulus {$mahasiswaTarget->akademik_id}) tidak termasuk sasaran kuesioner ini (tahun akademik {$kuesionerAktif->akademik_id}).");
+                    ->with('error', "Mahasiswa {$mahasiswaTarget->nim} ({$mahasiswaTarget->tahun_keluar_label}) tidak termasuk sasaran kuesioner ini ({$kuesionerAktif->target_lulusan_label}).");
             }
 
             [$jawabanUser, $jawabanLabel] = TracerResponService::formData($kuesionerAktif, $mahasiswaTarget->nim);
@@ -239,7 +239,7 @@ class AdminResponController extends Controller
 
         $kuesioner = Kuesioner::findOrFail($request->kuesioner_id);
         if (!$this->akademikCocok($kuesioner, $mahasiswa)) {
-            return back()->with('error', "Mahasiswa {$nim} (lulus {$mahasiswa->akademik_id}) tidak termasuk sasaran kuesioner ini (tahun akademik {$kuesioner->akademik_id}).");
+            return back()->with('error', "Mahasiswa {$nim} ({$mahasiswa->tahun_keluar_label}) tidak termasuk sasaran kuesioner ini ({$kuesioner->target_lulusan_label}).");
         }
 
         try {
@@ -269,9 +269,10 @@ class AdminResponController extends Controller
         }
 
         if ($request->filled('kuesioner_id')) {
-            $akademikId = Kuesioner::where('id_kuesioner', $request->kuesioner_id)->value('akademik_id');
-            if (!empty($akademikId)) {
-                $query->where('akademik_id', $akademikId);
+            $kuesioner = Kuesioner::find($request->kuesioner_id);
+            if ($kuesioner && !empty($kuesioner->akademik_id)) {
+                $matchingIds = $kuesioner->getMatchingAkademikIds();
+                $query->whereIn('akademik_id', $matchingIds);
             }
         }
 
@@ -308,7 +309,6 @@ class AdminResponController extends Controller
 
     private function akademikCocok(Kuesioner $kuesioner, Mahasiswa $mahasiswa): bool
     {
-        return empty($kuesioner->akademik_id)
-            || (string) $mahasiswa->akademik_id === (string) $kuesioner->akademik_id;
+        return $kuesioner->matchesMahasiswa($mahasiswa);
     }
 }

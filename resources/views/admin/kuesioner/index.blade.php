@@ -126,7 +126,6 @@
                                             <th class="text-center ps-1 min-w-175px">Aksi</th>
                                             <th class="min-w-150px">Judul Kuesioner</th>
                                             <th class="min-w-150px">Target Lulusan</th>
-                                            <th class="min-w-150px">Masa Berlaku</th>
                                             <th class="min-w-100px">Status</th>
                                         </tr>
                                     </thead>

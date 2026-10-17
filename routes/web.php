@@ -29,10 +29,8 @@ use Rap2hpoutre\LaravelLogViewer\LogViewerController;
 Route::get('/', function () {
     $kuesionerAktif = App\Models\Kuesioner::with('tahunAkademik')
         ->where('status', 'Published')
-        ->whereDate('tgl_mulai', '<=', now())
-        ->whereDate('tgl_selesai', '>=', now())
         ->orderByRaw('akademik_id IS NULL ASC')
-        ->orderByDesc('tgl_mulai')
+        ->orderByDesc('id_kuesioner')
         ->first();
 
     return view('landing', compact('kuesionerAktif'));

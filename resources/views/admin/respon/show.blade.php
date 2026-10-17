@@ -148,11 +148,10 @@
                                             class="badge badge-light-primary px-3 py-2 rounded-pill fw-bold fs-7 shadow-xs border border-primary border-opacity-20">
                                             <i class="fas fa-clipboard-check text-primary me-2"></i>Formulir Kuesioner
                                         </span>
-                                        @if ($respon->kuesioner && $respon->kuesioner->tgl_mulai)
+                                        @if ($respon->kuesioner && $respon->kuesioner->target_lulusan_label)
                                             <span
                                                 class="badge badge-light-info px-3 py-2 rounded-pill fw-bold fs-7 border border-info border-opacity-20">
-                                                Periode
-                                                {{ \Carbon\Carbon::parse($respon->kuesioner->tgl_mulai)->format('Y') }}
+                                                {{ $respon->kuesioner->target_lulusan_label }}
                                             </span>
                                         @endif
                                     </div>

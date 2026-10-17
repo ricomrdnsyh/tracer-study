@@ -49,14 +49,14 @@
 
                                         <div class="col-md-6">
                                             <label class="form-label fw-bold text-gray-700 fs-7 mb-2">
-                                                <i class="fa-solid fa-calendar-alt text-success me-2"></i>Tahun Akademik
+                                                <i class="fa-solid fa-calendar-alt text-success me-2"></i>Tahun Kelulusan
                                             </label>
                                             <select
                                                 class="form-select form-select-sm form-select-solid fw-bold bg-body border border-gray-300"
                                                 name="akademik_id" data-control="select2">
-                                                <option value="all">Semua Tahun</option>
-                                                @foreach ($tahunAkademik as $t)
-                                                    <option value="{{ $t->id_smt }}">{{ $t->nm_smt }}</option>
+                                                <option value="all">Semua Tahun Kelulusan</option>
+                                                @foreach ($listTahunLulus as $item)
+                                                    <option value="{{ $item['tahun_lulus'] }}">{{ $item['label'] }}</option>
                                                 @endforeach
                                             </select>
                                         </div>

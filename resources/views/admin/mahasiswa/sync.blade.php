@@ -13,25 +13,25 @@
                     <i class="fas fa-info-circle fs-2 text-primary me-3 mb-2 mb-sm-0"></i>
                     <div class="d-flex flex-column pe-0">
                         <span class="fs-7 text-gray-700">
-                            Silakan pilih <strong>Tahun Akademik Kelulusan</strong> untuk menarik data alumni dari SIM PT, atau pilih <strong>Semua Tahun Akademik</strong> untuk menarik seluruh alumni.
+                            Silakan pilih <strong>Tahun Kelulusan Alumni</strong> untuk menarik data dari SIM PT. Sistem otomatis menarik seluruh alumni yang lulus di semester <strong>Ganjil, Genap, maupun Pendek</strong> pada tahun akademik tersebut, atau pilih <strong>Semua Tahun Kelulusan</strong> untuk menarik seluruh alumni.
                         </span>
                     </div>
                 </div>
 
                 <div class="mb-3">
                     <label class="form-label fw-bolder fs-7 text-gray-700 mb-2">
-                        Tahun Akademik Kelulusan
+                        Tahun Kelulusan Alumni
                     </label>
-                    <select name="sync_tahun_akademik" id="sync_tahun_akademik" class="form-select form-select-sm" data-control="select2" data-dropdown-parent="#modal_sync_alumni" data-placeholder="Pilih Tahun Akademik">
-                        <option value="">-- Semua Tahun Akademik --</option>
-                        @foreach($tahunAkademik as $ta)
-                            <option value="{{ $ta->id_smt }}">
-                                {{ $ta->nm_smt }} ({{ $ta->id_smt }}){{ $ta->aktif == 'y' ? ' - [Aktif]' : '' }}
+                    <select name="sync_tahun_akademik" id="sync_tahun_akademik" class="form-select form-select-sm" data-control="select2" data-dropdown-parent="#modal_sync_alumni" data-placeholder="Pilih Tahun Kelulusan">
+                        <option value="">-- Semua Tahun Kelulusan --</option>
+                        @foreach($listTahunLulus as $item)
+                            <option value="{{ $item['tahun_lulus'] }}">
+                                {{ $item['label'] }}
                             </option>
                         @endforeach
                     </select>
                     <div class="form-text text-muted fs-8 mt-1">
-                        *Data alumni yang disinkronkan akan disaring berdasarkan semester kelulusan yang dipilih.
+                        *Data alumni yang disinkronkan akan mencakup seluruh periode kelulusan/wisuda (Ganjil, Genap, dan Pendek) pada tahun akademik tersebut.
                     </div>
                 </div>
             </div>

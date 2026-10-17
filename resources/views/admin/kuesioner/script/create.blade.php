@@ -2,14 +2,11 @@
     $('#bt_submit_create').on('submit', function(e) {
         e.preventDefault();
         let form = $(this)[0];
-        let tglMulai = $('#create_tgl_mulai').val();
-        let tglSelesai = $('#create_tgl_selesai').val();
-        
-        if (!tglMulai || !tglSelesai || form.checkValidity() === false) {
+        if (form.checkValidity() === false) {
             e.stopPropagation();
             $(form).addClass('was-validated');
             Swal.fire({
-                text: "Silakan lengkapi semua form yang wajib diisi (Judul, Tanggal Mulai, Tanggal Selesai).",
+                text: "Silakan lengkapi semua form yang wajib diisi (Judul dan Status).",
                 icon: "warning",
                 buttonsStyling: false,
                 confirmButtonText: "Ok, Mengerti!",
@@ -30,10 +27,5 @@
         $(this).find('form')[0].reset();
         $(this).find('form').removeClass('was-validated');
         $(this).find('select').val('').trigger('change');
-        $('#create_tgl_mulai, #create_tgl_selesai').each(function() {
-            if (this._flatpickr) {
-                this._flatpickr.clear();
-            }
-        });
     });
 </script>

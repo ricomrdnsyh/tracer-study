@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tracer Study - Universitas Nurul Jadid (UNUJA)</title>
+    <title>Tracer Study | Universitas Nurul Jadid</title>
     <meta name="description"
         content="Portal Resmi Tracer Study Universitas Nurul Jadid (UNUJA). Penelusuran rekam jejak lulusan untuk peningkatan mutu pendidikan dan akreditasi program studi.">
     <meta name="author" content="Universitas Nurul Jadid">
@@ -150,27 +150,32 @@
 </head>
 
 <body class="bg-white text-slate-800 font-sans antialiased">
-    
+
     <div id="hero" class="relative z-40 scroll-mt-0">
-        <div id="announcement" class="relative z-40 text-white text-xs sm:text-[13px] bg-navy-900 border-b border-blue-950/40" style="background-color:#1e3a5f">
+        <div id="announcement"
+            class="relative z-40 text-white text-xs sm:text-[13px] bg-navy-900 border-b border-blue-950/40"
+            style="background-color:#1e3a5f">
             <div class="max-w-7xl mx-auto px-4 py-2 sm:py-2.5 flex items-center justify-center text-center">
                 <p class="w-full font-medium text-slate-300 text-center leading-relaxed">
                     <span class="relative inline-flex h-2 w-2 shrink-0 align-middle mr-2 -translate-y-px">
-                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
+                        <span
+                            class="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
                         <span class="relative inline-flex rounded-full h-2 w-2 bg-white"></span>
                     </span>
                     @if (!empty($kuesionerAktif))
-                        Periode pelaporan <strong class="text-white">{{ $kuesionerAktif->tahunAkademik->nm_smt ?? $kuesionerAktif->judul }}</strong> sedang berlangsung
-                        <span class="text-slate-400">• s/d {{ \Carbon\Carbon::parse($kuesionerAktif->tgl_selesai)->translatedFormat('d F Y') }}</span>
+                        Periode pelaporan <strong
+                            class="text-white">{{ $kuesionerAktif->target_lulusan_label ?? ($kuesionerAktif->tahunAkademik->nm_smt ?? $kuesionerAktif->judul) }}</strong>
+                        sedang berlangsung
                     @else
-                        Periode pelaporan kuesioner <strong class="text-white">belum dibuka</strong> — pantau informasi terbaru
+                        Periode pelaporan kuesioner <strong class="text-white">belum dibuka</strong> — pantau informasi
+                        terbaru
                     @endif
                 </p>
             </div>
         </div>
     </div>
 
-    
+
     <header id="navbar"
         class="sticky top-0 z-50 transition-all duration-300 bg-white/90 backdrop-blur-xl border-b border-slate-200/70">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -262,96 +267,136 @@
         </div>
     </header>
 
-    
+
     <div id="hero-fixed-bg" class="fixed inset-0 pointer-events-none z-0 overflow-hidden">
         <img src="{{ asset('assets/media/illustrations/unuja-jaya.png') }}"
             alt="Gedung Rektorat Universitas Nurul Jadid (UNUJA)"
             class="w-full h-full object-cover object-[center_20%]">
 
-        
+
         <div class="absolute inset-0 bg-slate-950/[0.08]"></div>
 
-        
+
         <div class="absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-white/90 via-white/25 to-transparent"></div>
         <div class="absolute inset-x-0 bottom-0 h-48 bg-gradient-to-t from-white via-white/80 to-transparent"></div>
     </div>
 
-    
-    <section id="hero-section" class="relative z-10 overflow-hidden bg-transparent min-h-[700px] lg:min-h-[760px] flex flex-col justify-between pt-8 pb-10 sm:pt-10 sm:pb-12">
+
+    <section id="hero-section"
+        class="relative z-10 overflow-hidden bg-transparent min-h-[700px] lg:min-h-[760px] flex flex-col justify-between pt-8 pb-10 sm:pt-10 sm:pb-12">
         <div class="relative w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div aria-hidden="true" class="absolute left-1/2 top-[-3rem] -translate-x-1/2 w-[92%] max-w-3xl h-[135%] bg-white/60 blur-3xl rounded-[3rem] pointer-events-none"></div>
+            <div aria-hidden="true"
+                class="absolute left-1/2 top-[-3rem] -translate-x-1/2 w-[92%] max-w-3xl h-[135%] bg-white/60 blur-3xl rounded-[3rem] pointer-events-none">
+            </div>
             <div class="relative max-w-3xl mx-auto text-center">
-                <div class="reveal inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-white/95 backdrop-blur-md border border-white shadow-lg shadow-navy-900/10 text-xs font-semibold text-blue-900">
-                    <span class="px-2.5 py-0.5 rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-[11px] font-bold tracking-wide">RESMI</span>
+                <div
+                    class="reveal inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-white/95 backdrop-blur-md border border-white shadow-lg shadow-navy-900/10 text-xs font-semibold text-blue-900">
+                    <span
+                        class="px-2.5 py-0.5 rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-[11px] font-bold tracking-wide">RESMI</span>
                     <span class="flex items-center gap-1.5">
                         Instrumen Diktiristek &amp; BAN-PT
                         <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
                     </span>
                 </div>
 
-                <h1 class="reveal reveal-d1 mt-4 text-3xl sm:text-5xl font-extrabold tracking-tight leading-[1.15] text-navy-950 drop-shadow-[0_2px_12px_rgba(255,255,255,0.9)]">
+                <h1
+                    class="reveal reveal-d1 mt-4 text-3xl sm:text-5xl font-extrabold tracking-tight leading-[1.15] text-navy-950 drop-shadow-[0_2px_12px_rgba(255,255,255,0.9)]">
                     Satu Langkah Kecil Alumni,<br>
-                    <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-700 via-indigo-600 to-blue-900">Lompatan Besar Almamater.</span>
+                    <span
+                        class="text-transparent bg-clip-text bg-gradient-to-r from-blue-700 via-indigo-600 to-blue-900">Lompatan
+                        Besar Almamater.</span>
                 </h1>
 
-                <p class="reveal reveal-d2 mt-3 text-sm sm:text-base text-slate-700 font-medium leading-relaxed max-w-xl mx-auto drop-shadow-[0_1px_8px_rgba(255,255,255,0.9)]">
-                    Ceritakan perjalanan karirmu lewat Tracer Study UNUJA — cukup ±5 menit dengan NIM. Kontribusi datamu menentukan mutu kampus dan akreditasi program studi.
+                <p
+                    class="reveal reveal-d2 mt-3 text-sm sm:text-base text-slate-700 font-medium leading-relaxed max-w-xl mx-auto drop-shadow-[0_1px_8px_rgba(255,255,255,0.9)]">
+                    Ceritakan perjalanan karirmu lewat Tracer Study UNUJA — cukup ±5 menit dengan NIM. Kontribusi datamu
+                    menentukan mutu kampus dan akreditasi program studi.
                 </p>
 
                 <div class="reveal reveal-d2 mt-6 flex flex-col sm:flex-row items-center justify-center gap-3">
-                    <a href="{{ route('tracer.login') }}" class="group inline-flex items-center justify-center gap-2.5 px-8 py-3.5 text-sm font-bold text-white bg-navy-900 hover:bg-blue-700 rounded-2xl shadow-xl shadow-navy-900/25 transition-all hover:-translate-y-0.5 w-full sm:w-auto">
+                    <a href="{{ route('tracer.login') }}"
+                        class="group inline-flex items-center justify-center gap-2.5 px-8 py-3.5 text-sm font-bold text-white bg-navy-900 hover:bg-blue-700 rounded-2xl shadow-xl shadow-navy-900/25 transition-all hover:-translate-y-0.5 w-full sm:w-auto">
                         <span>Mulai Isi Kuesioner</span>
-                        <svg class="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                        <svg class="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none"
+                            stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                                d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                        </svg>
                     </a>
-                    <a href="#alur" class="group inline-flex items-center justify-center gap-2 px-8 py-3.5 text-sm font-bold text-navy-900 bg-white/95 hover:bg-white backdrop-blur-md rounded-2xl border border-white hover:border-blue-300 transition-all shadow-lg shadow-navy-900/10 w-full sm:w-auto">
-                        <svg class="w-4 h-4 text-blue-700 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    <a href="#alur"
+                        class="group inline-flex items-center justify-center gap-2 px-8 py-3.5 text-sm font-bold text-navy-900 bg-white/95 hover:bg-white backdrop-blur-md rounded-2xl border border-white hover:border-blue-300 transition-all shadow-lg shadow-navy-900/10 w-full sm:w-auto">
+                        <svg class="w-4 h-4 text-blue-700 group-hover:scale-110 transition-transform" fill="none"
+                            stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
                         <span>Lihat Caranya</span>
                     </a>
                 </div>
             </div>
         </div>
 
-        
+
         <div class="w-full h-12 sm:h-20 pointer-events-none"></div>
 
-        
+
         <div class="relative w-full max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
             <div class="reveal reveal-d2 max-w-xl sm:max-w-3xl mx-auto">
-                <div class="rounded-2xl bg-navy-950/85 backdrop-blur-xl border border-white/15 shadow-[0_18px_40px_-12px_rgba(15,39,68,0.45)] px-3 py-2.5 sm:px-8 sm:py-4">
+                <div
+                    class="rounded-2xl bg-navy-950/85 backdrop-blur-xl border border-white/15 shadow-[0_18px_40px_-12px_rgba(15,39,68,0.45)] px-3 py-2.5 sm:px-8 sm:py-4">
                     <div class="grid grid-cols-3 gap-1 sm:gap-8 sm:flex sm:items-center sm:justify-center">
                         <div class="flex items-center justify-center gap-1.5 sm:gap-2.5">
-                            <span class="flex items-center justify-center w-6 h-6 sm:w-8 sm:h-8 rounded-lg bg-amber-500/20 border border-amber-400/30 shrink-0">
-                                <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            <span
+                                class="flex items-center justify-center w-6 h-6 sm:w-8 sm:h-8 rounded-lg bg-amber-500/20 border border-amber-400/30 shrink-0">
+                                <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-300" fill="none"
+                                    stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                                 </svg>
                             </span>
                             <div class="leading-tight sm:leading-normal">
-                                <span class="text-[11px] sm:text-xs font-bold text-white whitespace-nowrap">±5 menit </span>
-                                <span class="block sm:inline text-[9px] sm:text-xs font-medium text-slate-300 whitespace-nowrap">pengisian</span>
+                                <span class="text-[11px] sm:text-xs font-bold text-white whitespace-nowrap">±5 menit
+                                </span>
+                                <span
+                                    class="block sm:inline text-[9px] sm:text-xs font-medium text-slate-300 whitespace-nowrap">pengisian</span>
                             </div>
                         </div>
 
                         <div class="flex items-center justify-center gap-1.5 sm:gap-2.5">
-                            <span class="flex items-center justify-center w-6 h-6 sm:w-8 sm:h-8 rounded-lg bg-blue-500/20 border border-blue-400/30 shrink-0">
-                                <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-blue-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4M10 17l5-5-5-5M15 12H3"/>
+                            <span
+                                class="flex items-center justify-center w-6 h-6 sm:w-8 sm:h-8 rounded-lg bg-blue-500/20 border border-blue-400/30 shrink-0">
+                                <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-blue-300" fill="none"
+                                    stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4M10 17l5-5-5-5M15 12H3" />
                                 </svg>
                             </span>
                             <div class="leading-tight sm:leading-normal">
-                                <span class="text-[11px] sm:text-xs font-bold text-white whitespace-nowrap">Tanpa akun </span>
-                                <span class="block sm:inline text-[9px] sm:text-xs font-medium text-slate-300 whitespace-nowrap">cukup NIM</span>
+                                <span class="text-[11px] sm:text-xs font-bold text-white whitespace-nowrap">Tanpa akun
+                                </span>
+                                <span
+                                    class="block sm:inline text-[9px] sm:text-xs font-medium text-slate-300 whitespace-nowrap">cukup
+                                    NIM</span>
                             </div>
                         </div>
 
                         <div class="flex items-center justify-center gap-1.5 sm:gap-2.5">
-                            <span class="flex items-center justify-center w-6 h-6 sm:w-8 sm:h-8 rounded-lg bg-emerald-500/20 border border-emerald-400/30 shrink-0">
-                                <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-emerald-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+                            <span
+                                class="flex items-center justify-center w-6 h-6 sm:w-8 sm:h-8 rounded-lg bg-emerald-500/20 border border-emerald-400/30 shrink-0">
+                                <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-emerald-300" fill="none"
+                                    stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2"
+                                        d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                                 </svg>
                             </span>
                             <div class="leading-tight sm:leading-normal">
-                                <span class="text-[11px] sm:text-xs font-bold text-white whitespace-nowrap">Aman </span>
-                                <span class="block sm:inline text-[9px] sm:text-xs font-medium text-slate-300 whitespace-nowrap"><span class="hidden sm:inline">• </span>UU PDP</span>
+                                <span class="text-[11px] sm:text-xs font-bold text-white whitespace-nowrap">Aman
+                                </span>
+                                <span
+                                    class="block sm:inline text-[9px] sm:text-xs font-medium text-slate-300 whitespace-nowrap"><span
+                                        class="hidden sm:inline">• </span>UU PDP</span>
                             </div>
                         </div>
                     </div>
@@ -360,9 +405,9 @@
         </div>
     </section>
 
-    
+
     <section id="tentang" class="relative z-20">
-        
+
         <div class="h-28 sm:h-36 bg-gradient-to-b from-white/0 via-white/80 to-white"></div>
 
         <div class="bg-white">
@@ -373,7 +418,7 @@
                             aria-label="Ilustrasi alumni mengisi kuesioner tracer study di ponsel">
                             <ellipse cx="230" cy="340" rx="130" ry="13" fill="#DBEAFE" />
 
-                            
+
                             <path d="M60 106h24M72 94v24" stroke="#F59E0B" stroke-width="5" stroke-linecap="round" />
                             <path d="M408 80h20M418 70v20" stroke="#818CF8" stroke-width="5"
                                 stroke-linecap="round" />
@@ -384,14 +429,14 @@
                                 transform="rotate(-15 437 183)" />
                             <circle cx="66" cy="220" r="5" fill="#6EE7B7" />
 
-                            
+
                             <rect x="76" y="274" width="26" height="16" rx="8" stroke="#92400E"
                                 stroke-width="5" />
                             <rect x="48" y="286" width="80" height="56" rx="10" fill="#D97706" />
                             <rect x="48" y="286" width="80" height="22" rx="10" fill="#B45309" />
                             <rect x="81" y="302" width="14" height="10" rx="3" fill="#FDE68A" />
 
-                            
+
                             <rect x="296" y="64" width="124" height="228" rx="22" fill="#0F2744" />
                             <rect x="306" y="78" width="104" height="200" rx="12" fill="#fff" />
                             <rect x="314" y="88" width="56" height="10" rx="5" fill="#1E3A5F" />
@@ -416,22 +461,22 @@
                                 opacity=".95" />
                             <rect x="338" y="284" width="40" height="5" rx="2.5" fill="#475569" />
 
-                            
+
                             <rect x="138" y="106" width="108" height="134" rx="52" fill="#1E3A5F" />
-                            
+
                             <rect x="146" y="210" width="92" height="116" rx="26" fill="#274B73" />
                             <polygon points="180,210 204,210 192,238" fill="#fff" />
-                            
+
                             <rect x="122" y="222" width="27" height="68" rx="13.5" fill="#274B73" />
                             <rect x="92" y="284" width="58" height="20" rx="10" fill="#fff"
                                 stroke="#E2E8F0" stroke-width="2" />
                             <rect x="104" y="284" width="12" height="20" fill="#EF4444" />
                             <circle cx="135" cy="294" r="11" fill="#F6C89F" />
-                            
+
                             <rect x="234" y="230" width="72" height="26" rx="13" fill="#274B73" />
                             <circle cx="308" cy="243" r="11" fill="#F6C89F" />
 
-                            
+
                             <ellipse cx="192" cy="164" rx="33" ry="37" fill="#F6C89F" />
                             <path d="M174 196Q192 206 210 196" stroke="#EAB88A" stroke-width="3"
                                 stroke-linecap="round" />
@@ -444,14 +489,14 @@
                             <path d="M182 180Q192 189 202 180" stroke="#92400E" stroke-width="3"
                                 stroke-linecap="round" />
 
-                            
+
                             <polygon points="138,116 192,90 246,116 192,142" fill="#0F2744" />
                             <circle cx="192" cy="116" r="4" fill="#475569" />
                             <line x1="246" y1="116" x2="246" y2="152" stroke="#F59E0B"
                                 stroke-width="4" stroke-linecap="round" />
                             <circle cx="246" cy="158" r="6" fill="#F59E0B" />
 
-                            
+
                             <circle cx="404" cy="274" r="24" fill="#ECFDF5" stroke="#A7F3D0"
                                 stroke-width="2" />
                             <path d="M404 260l9 3.5v7c0 7-3.5 11.5-9 14-5.5-2.5-9-7-9-14v-7l9-3.5z" fill="#10B981" />
@@ -486,7 +531,7 @@
         </div>
     </section>
 
-    
+
     <section id="alur" class="relative z-20 py-16 sm:py-20 overflow-hidden bg-navy-900"
         style="background-color:#1e3a5f">
         <div class="absolute -top-24 -left-24 w-96 h-96 rounded-full bg-blue-500/20 blur-3xl pointer-events-none">
@@ -498,7 +543,8 @@
             <div class="reveal max-w-2xl mx-auto text-center">
                 <p class="text-xs font-extrabold uppercase tracking-[0.2em] text-sky-300">Alur</p>
                 <h2 class="mt-2 text-2xl sm:text-3xl font-extrabold tracking-tight text-white">4 Langkah, ±5 Menit</h2>
-                <p class="mt-3 text-sm sm:text-base text-blue-100/80 leading-relaxed">Tanpa daftar akun — cukup NIM.</p>
+                <p class="mt-3 text-sm sm:text-base text-blue-100/80 leading-relaxed">Tanpa daftar akun — cukup NIM.
+                </p>
             </div>
             <div class="relative mt-10">
                 <div class="hidden lg:block absolute top-12 left-[13%] right-[13%] border-t-2 border-dashed border-white/25"
@@ -548,7 +594,7 @@
         </div>
     </section>
 
-    
+
     <section id="faq" class="relative z-20 py-16 sm:py-20 bg-white overflow-hidden">
         <div class="absolute top-10 -left-24 w-80 h-80 rounded-full bg-blue-100/60 blur-3xl pointer-events-none"></div>
         <div class="absolute bottom-0 -right-24 w-80 h-80 rounded-full bg-indigo-100/60 blur-3xl pointer-events-none">
@@ -620,7 +666,7 @@
         </div>
     </section>
 
-    
+
     <footer class="relative z-20" style="background: linear-gradient(160deg, #0f2744, #1e3a5f 50%, #1e40af);">
         <div class="relative max-w-7xl mx-auto px-4 sm:px-6 pt-16 pb-12">
             <div class="absolute top-0 left-0 right-0 h-px"
@@ -763,7 +809,8 @@
         <div class="border-t border-white/5">
             <div
                 class="max-w-7xl mx-auto px-4 sm:px-6 py-5 flex flex-col md:flex-row items-center justify-between gap-3">
-                <p class="text-sm text-white/30 m-0 font-medium">&copy; {{ date('Y') }} PDSI Universitas Nurul Jadid. Hak Cipta Dilindungi.</p>
+                <p class="text-sm text-white/30 m-0 font-medium">&copy; {{ date('Y') }} PDSI Universitas Nurul
+                    Jadid. Hak Cipta Dilindungi.</p>
                 <div class="flex items-center gap-4 text-sm text-white/30">
                     <a href="#faq"
                         class="text-white/30 no-underline hover:text-yellow-400 active:text-yellow-400 transition-colors active:scale-[0.98]">Kebijakan
@@ -851,7 +898,9 @@
             }
         }
 
-        window.addEventListener('scroll', updateScrollState, { passive: true });
+        window.addEventListener('scroll', updateScrollState, {
+            passive: true
+        });
         updateScrollState();
 
         if ('scrollRestoration' in history) {

@@ -18,32 +18,42 @@ class TracerController extends Controller
     public function index()
     {
         $mahasiswa = auth()->guard('mahasiswa')->user();
+        $matchingIds = [];
+        if (!empty($mahasiswa->akademik_id)) {
+            $matchingIds[] = (string) $mahasiswa->akademik_id;
+            $mhsTahunLulus = $mahasiswa->tahun_lulus;
+            if ($mhsTahunLulus) {
+                $matchingIds[] = (string) $mhsTahunLulus;
+                $taPrefix = (int) $mhsTahunLulus - 1;
+                $matchingIds[] = $taPrefix . '1';
+                $matchingIds[] = $taPrefix . '2';
+                $matchingIds[] = $taPrefix . '3';
+            }
+        }
+        $matchingIds = array_unique(array_filter($matchingIds));
 
         $kuesioner = Kuesioner::with(['kategoriPertanyaans' => function ($q) {
             $q->orderBy('urutan');
         }, 'kategoriPertanyaans.pertanyaans'])
         ->where('status', 'Published')
-        ->whereDate('tgl_mulai', '<=', now())
-        ->whereDate('tgl_selesai', '>=', now())
-        ->where(function ($q) use ($mahasiswa) {
-            if (!empty($mahasiswa->akademik_id)) {
-                $q->where('akademik_id', $mahasiswa->akademik_id)
+        ->where(function ($q) use ($matchingIds) {
+            if (!empty($matchingIds)) {
+                $q->whereIn('akademik_id', $matchingIds)
                   ->orWhereNull('akademik_id');
             } else {
                 $q->whereNull('akademik_id');
             }
         })
         ->orderByRaw('akademik_id IS NULL ASC')
-        ->orderByDesc('tgl_mulai')
         ->orderByDesc('id_kuesioner')
         ->first();
 
         if (!$kuesioner) {
             $taInfo = '';
-            if ($mahasiswa->tahunAkademik) {
-                $taInfo = ' untuk lulusan Tahun Akademik ' . $mahasiswa->tahunAkademik->nm_smt;
+            if (!empty($mahasiswa->tahun_keluar_label)) {
+                $taInfo = ' untuk ' . $mahasiswa->tahun_keluar_label;
             } elseif (!empty($mahasiswa->akademik_id)) {
-                $taInfo = ' untuk lulusan Tahun Akademik ' . $mahasiswa->akademik_id;
+                $taInfo = ' untuk kelulusan ' . $mahasiswa->akademik_id;
             }
             return view('mahasiswa.tracer.empty', ['message' => 'Belum ada Tracer Study yang aktif' . $taInfo . ' saat ini.']);
         }

@@ -149,14 +149,13 @@
                                     </div>
                                     <div
                                         class="{{ auth()->user()->role !== 'Fakultas' ? 'col-lg-4' : 'col-lg-6' }} col-md-12 col-sm-12">
-                                        <label class="form-label fw-bold mb-2">Tahun Akademik:</label>
+                                        <label class="form-label fw-bold mb-2">Tahun Kelulusan:</label>
                                         <select id="filter_tahun_keluar" class="form-select form-select-sm"
-                                            data-control="select2" data-placeholder="Semua Tahun Akademik"
+                                            data-control="select2" data-placeholder="Semua Tahun Kelulusan"
                                             data-allow-clear="true">
-                                            <option value="">Semua Tahun Akademik</option>
-                                            @foreach ($tahunAkademik as $ta)
-                                                <option value="{{ $ta->id_smt }}">{{ $ta->nm_smt }}
-                                                    ({{ $ta->id_smt }})</option>
+                                            <option value="">Semua Tahun Kelulusan</option>
+                                            @foreach ($listTahunLulus as $item)
+                                                <option value="{{ $item['tahun_lulus'] }}">{{ $item['label'] }}</option>
                                             @endforeach
                                         </select>
                                     </div>
