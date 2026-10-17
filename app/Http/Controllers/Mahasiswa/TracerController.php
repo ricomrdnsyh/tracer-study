@@ -142,7 +142,18 @@ class TracerController extends Controller
 
         $kuesioner = Kuesioner::findOrFail($request->kuesioner_id);
 
-        $wajibErrors = TracerResponService::validateWajibJawaban($kuesioner, $request->input('jawaban', []));
+        $jawaban = $request->input('jawaban', []);
+        $jawabanLabel = $request->input('jawaban_label', []);
+
+        if (is_array($jawabanLabel)) {
+            foreach ($jawabanLabel as $qId => $lbl) {
+                if ((!isset($jawaban[$qId]) || $jawaban[$qId] === '' || $jawaban[$qId] === null) && !empty($lbl)) {
+                    $jawaban[$qId] = is_string($lbl) ? trim($lbl) : $lbl;
+                }
+            }
+        }
+
+        $wajibErrors = TracerResponService::validateWajibJawaban($kuesioner, $jawaban, $jawabanLabel);
         if (!empty($wajibErrors)) {
             return redirect()->back()
                 ->with('error', 'Terdapat ' . count($wajibErrors) . ' pertanyaan wajib yang belum diisi. Mohon periksa kembali formulir Anda.')
@@ -155,8 +166,8 @@ class TracerController extends Controller
             TracerResponService::save(
                 $request->kuesioner_id,
                 $mahasiswa->nim,
-                $request->input('jawaban', []),
-                $request->input('jawaban_label', [])
+                $jawaban,
+                $jawabanLabel
             );
 
             return redirect()->route('mahasiswa.tracer.index')->with('success', 'Jawaban Tracer Study Anda berhasil disimpan!');

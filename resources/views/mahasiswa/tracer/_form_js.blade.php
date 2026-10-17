@@ -38,12 +38,18 @@
         }
 
         function getQuestionValue(id) {
-            let $inputs = $('[name="jawaban[' + id + ']"], [name="jawaban[' + id + '][]"]');
-            if ($inputs.length === 0) return null;
-            if ($inputs.first().is(':disabled')) return null;
+            let $cont = $('#pertanyaan_container_' + id);
+            if ($cont.length && ($cont.hasClass('skip-hidden') || $cont.closest('.kategori-container').hasClass('skip-hidden'))) {
+                return null;
+            }
 
-            let tagName = $inputs.first().prop('tagName');
-            let type = $inputs.first().attr('type');
+            let $inputs = $('[name="jawaban[' + id + ']"], [name="jawaban[' + id + '][]"]');
+            let $labelInput = $('[name="jawaban_label[' + id + ']"]');
+
+            if ($inputs.length === 0 && $labelInput.length === 0) return null;
+
+            let tagName = $inputs.length ? $inputs.first().prop('tagName') : '';
+            let type = $inputs.length ? $inputs.first().attr('type') : '';
 
             if (tagName === 'SELECT') {
                 return $inputs.val();
@@ -58,7 +64,16 @@
                 });
                 return vals.length > 0 ? vals : null;
             } else {
-                return $inputs.val();
+                let val = $inputs.val();
+                // Jika input utama (termasuk hidden) belum terisi namun ada isian pada input pencarian / label (seperti remote-select F18B / F18C)
+                if ((val === undefined || val === null || (typeof val === 'string' && val.trim() === '')) && $labelInput.length > 0) {
+                    let lbl = $labelInput.val();
+                    if (lbl && lbl.trim() !== '') {
+                        $inputs.val(lbl.trim());
+                        return lbl.trim();
+                    }
+                }
+                return val;
             }
         }
 
@@ -129,7 +144,7 @@
         function evaluateSkipLogic() {
             $('.kategori-container').removeClass('skip-hidden');
             $('.pertanyaan-container').removeClass('skip-hidden');
-            $('form input:not([type="hidden"]), form select, form textarea').prop('disabled', false);
+            $('form input, form select, form textarea').prop('disabled', false);
 
             $('.kategori-container').each(function() {
                 let syaratId = $(this).attr('data-syarat-pertanyaan');
@@ -168,6 +183,14 @@
             }
         });
 
+        $(document).on('input change blur keyup', 'input[data-remote-select-search]', function() {
+            let $cont = $(this).closest('.pertanyaan-container');
+            let id = $cont.attr('data-id-pertanyaan');
+            if (id && isQuestionAnswered(id)) {
+                clearQuestionError($cont);
+            }
+        });
+
         $(document).on('select2:select select2:clear change.select2', 'select', function() {
             let $cont = $(this).closest('.pertanyaan-container');
             let id = $cont.attr('data-id-pertanyaan');
@@ -180,6 +203,18 @@
             e.preventDefault();
 
             let form = $(this).closest('form')[0];
+
+            // Sinkronisasi field remote-select bila hidden input masih kosong tapi search input ada isi
+            $('div[data-remote-select]').each(function() {
+                let $hidden = $(this).find('input[type="hidden"]');
+                let $search = $(this).find('input[type="search"]');
+                if ($hidden.length && $search.length) {
+                    let searchVal = $search.val() ? $search.val().trim() : '';
+                    if (!$hidden.val() && searchVal !== '') {
+                        $hidden.val(searchVal);
+                    }
+                }
+            });
 
             // Pastikan kondisi skip logic paling mutakhir telah dievaluasi
             evaluateSkipLogic();

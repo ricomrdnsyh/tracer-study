@@ -111,6 +111,15 @@ $(document).ready(function() {
             }
         });
 
+        searchInput.on('blur', function() {
+            setTimeout(() => {
+                const keyword = $(this).val().trim();
+                if (keyword && !hiddenInput.val()) {
+                    hiddenInput.val(keyword).trigger('change');
+                }
+            }, 250);
+        });
+
         $(document).on('click', function(e) {
             if (!container.is(e.target) && container.has(e.target).length === 0) {
                 resultsContainer.addClass('d-none');
@@ -121,12 +130,13 @@ $(document).ready(function() {
             const id = $(this).data('id');
             const text = $(this).data('text');
             
+            if (debounceTimers[type]) clearTimeout(debounceTimers[type]);
+
             hiddenInput.val(id).trigger('change');
-            searchInput.val(text);
+            searchInput.val(text).trigger('change');
             
-            // Allow manual edit after selection to reset
             resultsContainer.addClass('d-none');
-            statusText.text('');
+            statusText.html('<span class="text-success fs-7 fw-semibold"><i class="fas fa-check-circle text-success me-1"></i> Terpilih: ' + text + '</span>');
         });
     });
 

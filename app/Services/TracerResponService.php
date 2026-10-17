@@ -100,10 +100,17 @@ class TracerResponService
      *
      * @return array Daftar pesan error untuk pertanyaan wajib yang belum dijawab.
      */
-    public static function validateWajibJawaban(Kuesioner $kuesioner, ?array $jawaban = []): array
+    public static function validateWajibJawaban(Kuesioner $kuesioner, ?array $jawaban = [], ?array $jawabanLabel = []): array
     {
         $jawaban = $jawaban ?? [];
+        $jawabanLabel = $jawabanLabel ?? [];
         $errors = [];
+
+        foreach ($jawabanLabel as $qId => $lbl) {
+            if ((!isset($jawaban[$qId]) || $jawaban[$qId] === '' || $jawaban[$qId] === null) && !empty($lbl)) {
+                $jawaban[$qId] = is_string($lbl) ? trim($lbl) : $lbl;
+            }
+        }
 
         $kuesioner->loadMissing(['kategoriPertanyaans' => function ($q) {
             $q->orderBy('urutan');
@@ -763,7 +770,15 @@ class TracerResponService
                     case 'prodi':
                         $kodePt = $request->query('kode_pt', '');
                         if ($kodePt) {
-                            $response = Http::timeout(10)->withoutVerifying()->get("{$baseApi}/perguruan-tinggi/{$kodePt}/program-studi", ['search' => $keyword, 'per_page' => 100]);
+                            if (!preg_match('/^[0-9a-fA-F-]{36}$/', $kodePt)) {
+                                $ptSearch = Http::timeout(10)->withoutVerifying()->get("{$baseApi}/perguruan-tinggi", ['search' => $kodePt, 'per_page' => 1]);
+                                $firstPt = $ptSearch->json('result.data.perguruan_tinggi.data.0');
+                                if ($firstPt && !empty($firstPt['id_sp'])) {
+                                    $kodePt = $firstPt['id_sp'];
+                                }
+                            }
+                            $searchKeyword = preg_replace('/\s*\((S1|S2|S3|D1|D2|D3|D4|Sp-1|Sp-2|Profesi)\)\s*$/i', '', $keyword);
+                            $response = Http::timeout(10)->withoutVerifying()->get("{$baseApi}/perguruan-tinggi/{$kodePt}/program-studi", ['search' => $searchKeyword, 'per_page' => 100]);
                             if ($response && $response->successful()) {
                                 $dataArray = $response->json('result.data.program_studi.data') ?? [];
                             }

@@ -242,7 +242,18 @@ class AdminResponController extends Controller
             return back()->with('error', "Mahasiswa {$nim} ({$mahasiswa->tahun_keluar_label}) tidak termasuk sasaran kuesioner ini ({$kuesioner->target_lulusan_label}).");
         }
 
-        $wajibErrors = TracerResponService::validateWajibJawaban($kuesioner, $request->input('jawaban', []));
+        $jawaban = $request->input('jawaban', []);
+        $jawabanLabel = $request->input('jawaban_label', []);
+
+        if (is_array($jawabanLabel)) {
+            foreach ($jawabanLabel as $qId => $lbl) {
+                if ((!isset($jawaban[$qId]) || $jawaban[$qId] === '' || $jawaban[$qId] === null) && !empty($lbl)) {
+                    $jawaban[$qId] = is_string($lbl) ? trim($lbl) : $lbl;
+                }
+            }
+        }
+
+        $wajibErrors = TracerResponService::validateWajibJawaban($kuesioner, $jawaban, $jawabanLabel);
         if (!empty($wajibErrors)) {
             return back()
                 ->with('error', 'Terdapat ' . count($wajibErrors) . ' pertanyaan wajib yang belum diisi. Mohon periksa kembali formulir.')
@@ -255,8 +266,8 @@ class AdminResponController extends Controller
             TracerResponService::save(
                 $request->kuesioner_id,
                 $nim,
-                $request->input('jawaban', []),
-                $request->input('jawaban_label', [])
+                $jawaban,
+                $jawabanLabel
             );
         } catch (\Throwable $e) {
             return back()->with('error', 'Terjadi kesalahan saat menyimpan data: ' . $e->getMessage())->withInput();

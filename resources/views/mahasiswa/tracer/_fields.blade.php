@@ -83,8 +83,7 @@
                                                                 data-disabled="{{ in_array(strtolower($pertanyaan->kode_pertanyaan), ['f5a1', 'f5a2', 'f18c']) ? 'true' : 'false' }}">
                                                                 <input type="hidden"
                                                                     name="jawaban[{{ $pertanyaan->id_pertanyaan }}]"
-                                                                    value="{{ $answer }}"
-                                                                    {{ $pertanyaan->wajib ? 'required' : '' }}>
+                                                                    value="{{ $answer }}">
                                                                 <input type="search" data-remote-select-search
                                                                     name="jawaban_label[{{ $pertanyaan->id_pertanyaan }}]"
                                                                     class="form-control form-control-sm border-gray-300"
