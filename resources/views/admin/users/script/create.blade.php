@@ -45,6 +45,9 @@
             } else {
                 $('#email').val('');
             }
+            if (selected.data('fakultas-id')) {
+                $('#fakultas_id').val(selected.data('fakultas-id')).trigger('change');
+            }
         } else {
             $('#username').val('').prop('readonly', false);
             $('#name').val('').prop('readonly', false);

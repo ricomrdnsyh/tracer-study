@@ -15,21 +15,41 @@
                         <div class="col-12">
                             <div class="d-flex flex-column mb-2">
                                 <label class="d-flex align-items-center fs-sm-8 fs-lg-6 fw-bolder mb-1 required">
-                                    <span>Pilih Karyawan</span>
+                                    <span>Pilih Pegawai (Dosen / Karyawan)</span>
                                 </label>
                                 <select id="edit_karyawan" class="form-select form-select-sm fs-sm-8 fs-lg-6"
-                                    data-control="select2" data-placeholder="Pilih Karyawan" data-allow-clear="true"
+                                    data-control="select2" data-placeholder="Pilih Dosen / Karyawan" data-allow-clear="true"
                                     data-dropdown-parent="#form_edit" required>
-                                    <option value="">-- Pilih Karyawan --</option>
-                                    @if (isset($karyawans) && is_array($karyawans))
-                                        @foreach ($karyawans as $karyawan)
-                                            <option value="{{ $karyawan['id_penduduk'] ?? '' }}"
-                                                data-nama="{{ $karyawan['nama_penduduk'] ?? '' }}"
-                                                data-email="{{ $karyawan['email'] ?? '' }}">
-                                                {{ $karyawan['nama_penduduk'] ?? '' }} -
-                                                {{ $karyawan['lembaga'] ?? '' }}
-                                            </option>
-                                        @endforeach
+                                    <option value="">-- Pilih Dosen / Karyawan --</option>
+                                    @if (!empty($dosens) && is_array($dosens))
+                                        <optgroup label="Dosen">
+                                            @foreach ($dosens as $dosen)
+                                                @php
+                                                    $namaDosen = trim(($dosen['gelar_depan'] ? $dosen['gelar_depan'] . ' ' : '') . ($dosen['nama_penduduk'] ?? '') . ($dosen['gelar_belakang'] ? ', ' . $dosen['gelar_belakang'] : ''));
+                                                    $unitDosen = $dosen['prodi'] ?? $dosen['fakultas'] ?? 'Dosen';
+                                                @endphp
+                                                <option value="{{ $dosen['id_penduduk'] ?? '' }}"
+                                                    data-nama="{{ $namaDosen }}"
+                                                    data-email="{{ $dosen['email'] ?? '' }}"
+                                                    data-fakultas-id="{{ $dosen['id_fakultas'] ?? '' }}">
+                                                    {{ $namaDosen }} - {{ $unitDosen }} (Dosen)
+                                                </option>
+                                            @endforeach
+                                        </optgroup>
+                                    @endif
+                                    @if (!empty($karyawans) && is_array($karyawans))
+                                        <optgroup label="Karyawan / Tenaga Kependidikan">
+                                            @foreach ($karyawans as $karyawan)
+                                                @php
+                                                    $namaKaryawan = trim(($karyawan['gelar_depan'] ? $karyawan['gelar_depan'] . ' ' : '') . ($karyawan['nama_penduduk'] ?? '') . ($karyawan['gelar_belakang'] ? ', ' . $karyawan['gelar_belakang'] : ''));
+                                                @endphp
+                                                <option value="{{ $karyawan['id_penduduk'] ?? '' }}"
+                                                    data-nama="{{ $namaKaryawan }}"
+                                                    data-email="{{ $karyawan['email'] ?? '' }}">
+                                                    {{ $namaKaryawan }} - {{ $karyawan['lembaga'] ?? 'Karyawan' }}
+                                                </option>
+                                            @endforeach
+                                        </optgroup>
                                     @endif
                                 </select>
                             </div>

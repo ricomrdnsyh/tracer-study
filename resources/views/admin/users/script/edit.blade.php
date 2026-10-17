@@ -75,6 +75,9 @@
             } else {
                 $('#edit_email').val('');
             }
+            if (selected.data('fakultas-id') && $('#edit_role').val() === 'Fakultas') {
+                $('#edit_fakultas_id').val(selected.data('fakultas-id')).trigger('change');
+            }
         } else {
             $('#edit_username').val('').prop('readonly', false);
             $('#edit_name').val('').prop('readonly', false);

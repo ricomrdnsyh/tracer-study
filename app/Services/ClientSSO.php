@@ -89,6 +89,22 @@ class ClientSSO
         });
     }
 
+    public function getDosenFromApi(bool $forceRefresh = false): array
+    {
+        if ($forceRefresh) {
+            Cache::forget('sso_dosen_list');
+        }
+
+        return Cache::remember('sso_dosen_list', 1800, function () {
+            try {
+                return $this->fetchData('dosen');
+            } catch (\Throwable $e) {
+                Log::warning("Gagal fetch dosen SSO: " . $e->getMessage());
+                return [];
+            }
+        });
+    }
+
     public function fetchAllPaginated(string $filter, array $additionalPayload = []): array
     {
         $auth = $this->auth->getAuth();

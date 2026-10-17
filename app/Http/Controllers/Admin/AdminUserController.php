@@ -27,7 +27,14 @@ class AdminUserController extends Controller
             $karyawans = [];
         }
 
-        return view('admin.users.index', compact('fakultas', 'karyawans'));
+        try {
+            $dosens = $this->clientSSO->getDosenFromApi($forceRefresh);
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::warning('Error loading SSO dosens: ' . $e->getMessage());
+            $dosens = [];
+        }
+
+        return view('admin.users.index', compact('fakultas', 'karyawans', 'dosens'));
     }
 
     public function getUsers()
