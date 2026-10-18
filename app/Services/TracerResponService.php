@@ -236,10 +236,16 @@ class TracerResponService
                 JawabanDetail::insert($jawabanData);
             }
 
-            $pertanyaans = Pertanyaan::whereIn('kode_pertanyaan', ['F5B', 'F1101', 'F5A1', 'F5A2', 'f5b', 'f1101', 'f5a1', 'f5a2'])->get();
+            $pertanyaans = Pertanyaan::whereIn('kode_pertanyaan', [
+                'F5B', 'F1101', 'F1102', 'F5A1', 'F5A2', 'F8', 'F5C',
+                'f5b', 'f1101', 'f1102', 'f5a1', 'f5a2', 'f8', 'f5c'
+            ])->get();
 
             $nama = null;
-            $jenis_instansi = null;
+            $jenis_instansi_raw = null;
+            $jenis_instansi_lainnya = null;
+            $f8_val = null;
+            $f5c_val = null;
             $kode_provinsi = null;
             $kode_kabupaten = null;
             $provinsi_label = null;
@@ -252,7 +258,13 @@ class TracerResponService
                 if ($kode === 'f5b' && isset($jawaban[$id]) && !empty($jawaban[$id])) {
                     $nama = !empty($jawabanLabel[$id]) ? $jawabanLabel[$id] : $jawaban[$id];
                 } elseif ($kode === 'f1101' && isset($jawaban[$id]) && !empty($jawaban[$id])) {
-                    $jenis_instansi = $jawaban[$id];
+                    $jenis_instansi_raw = $jawaban[$id];
+                } elseif ($kode === 'f1102' && isset($jawaban[$id]) && !empty($jawaban[$id])) {
+                    $jenis_instansi_lainnya = is_array($jawaban[$id]) ? implode(', ', $jawaban[$id]) : $jawaban[$id];
+                } elseif ($kode === 'f8' && isset($jawaban[$id]) && !empty($jawaban[$id])) {
+                    $f8_val = is_array($jawaban[$id]) ? implode(', ', $jawaban[$id]) : $jawaban[$id];
+                } elseif ($kode === 'f5c' && isset($jawaban[$id]) && !empty($jawaban[$id])) {
+                    $f5c_val = is_array($jawaban[$id]) ? implode(', ', $jawaban[$id]) : $jawaban[$id];
                 } elseif ($kode === 'f5a1' && isset($jawaban[$id]) && !empty($jawaban[$id])) {
                     $kode_provinsi = $jawaban[$id];
                     $provinsi_label = !empty($jawabanLabel[$id]) ? $jawabanLabel[$id] : null;
@@ -272,6 +284,16 @@ class TracerResponService
                         if ($kab) $kabupaten_label = $kab;
                     }
                 }
+            }
+
+            $jenis_instansi = $jenis_instansi_raw;
+            if ($jenis_instansi_raw) {
+                $rawStr = is_array($jenis_instansi_raw) ? implode(', ', $jenis_instansi_raw) : (string) $jenis_instansi_raw;
+                if ((stripos($rawStr, 'lainnya') !== false || stripos($rawStr, 'tuliskan') !== false) && !empty($jenis_instansi_lainnya) && trim((string)$jenis_instansi_lainnya) !== '') {
+                    $jenis_instansi = 'Lainnya: ' . trim((string)$jenis_instansi_lainnya);
+                }
+            } elseif ($f8_val && stripos((string)$f8_val, 'wiraswasta') !== false) {
+                $jenis_instansi = 'Wiraswasta/wirausaha/pekerja lepas';
             }
 
             if ($nama) {

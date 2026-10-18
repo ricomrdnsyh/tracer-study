@@ -314,7 +314,10 @@ class ResponImportController extends Controller
                     }
 
                     $nama = null;
-                    $jenis_instansi = null;
+                    $jenis_instansi_raw = null;
+                    $jenis_instansi_lainnya = null;
+                    $f8_val = null;
+                    $f5c_val = null;
                     $kode_provinsi = null;
                     $kode_kabupaten = null;
                     $provinsi_label = null;
@@ -329,7 +332,31 @@ class ResponImportController extends Controller
                             if ($kode === 'f5b') {
                                 $nama = $jawabanVal;
                             } elseif ($kode === 'f1101') {
-                                $jenis_instansi = $jawabanVal;
+                                $pKodeUpper = strtoupper($kode);
+                                if (isset($mapPertanyaan[$pKodeUpper])) {
+                                    $pId = $mapPertanyaan[$pKodeUpper][0] ?? null;
+                                    $jenis_instansi_raw = TracerResponService::nomorToLabel($opsiById[$pId] ?? null, $jawabanVal, $pKodeUpper);
+                                } else {
+                                    $jenis_instansi_raw = $jawabanVal;
+                                }
+                            } elseif ($kode === 'f1102') {
+                                $jenis_instansi_lainnya = trim((string)$jawabanVal);
+                            } elseif ($kode === 'f8') {
+                                $pKodeUpper = strtoupper($kode);
+                                if (isset($mapPertanyaan[$pKodeUpper])) {
+                                    $pId = $mapPertanyaan[$pKodeUpper][0] ?? null;
+                                    $f8_val = TracerResponService::nomorToLabel($opsiById[$pId] ?? null, $jawabanVal, $pKodeUpper);
+                                } else {
+                                    $f8_val = $jawabanVal;
+                                }
+                            } elseif ($kode === 'f5c') {
+                                $pKodeUpper = strtoupper($kode);
+                                if (isset($mapPertanyaan[$pKodeUpper])) {
+                                    $pId = $mapPertanyaan[$pKodeUpper][0] ?? null;
+                                    $f5c_val = TracerResponService::nomorToLabel($opsiById[$pId] ?? null, $jawabanVal, $pKodeUpper);
+                                } else {
+                                    $f5c_val = $jawabanVal;
+                                }
                             } elseif ($kode === 'f5a1') {
                                 $kode_provinsi = (string) $jawabanVal;
                                 $provinsi_label = $provinsiDict[$kode_provinsi] ?? $kode_provinsi;
@@ -341,10 +368,17 @@ class ResponImportController extends Controller
                     }
 
                     if ($nama) {
+                        $finalJenisInstansi = (string) ($jenis_instansi_raw ?? '');
+                        if ((stripos($finalJenisInstansi, 'lainnya') !== false || stripos($finalJenisInstansi, 'tuliskan') !== false) && !empty($jenis_instansi_lainnya) && trim((string)$jenis_instansi_lainnya) !== '') {
+                            $finalJenisInstansi = 'Lainnya: ' . trim((string)$jenis_instansi_lainnya);
+                        } elseif (empty($finalJenisInstansi) && $f8_val && stripos((string)$f8_val, 'wiraswasta') !== false) {
+                            $finalJenisInstansi = 'Wiraswasta/wirausaha/pekerja lepas';
+                        }
+
                         $batchPekerjaan[] = [
                             'respon_id'       => $responId,
                             'nama'            => (string) $nama,
-                            'jenis_instansi'  => (string) $jenis_instansi,
+                            'jenis_instansi'  => $finalJenisInstansi ?: null,
                             'kode_provinsi'   => (string) $kode_provinsi,
                             'kode_kabupaten'  => (string) $kode_kabupaten,
                             'provinsi'        => $provinsi_label,

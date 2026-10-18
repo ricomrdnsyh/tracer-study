@@ -12,6 +12,8 @@ class AdminPerusahaanController extends Controller
 {
     public function index()
     {
+        self::syncJenisInstansiLainnya();
+
         $query = PekerjaanAlumni::whereNotNull('nama');
         
         if (auth()->user()->role === 'Fakultas') {
@@ -29,6 +31,8 @@ class AdminPerusahaanController extends Controller
     public function getPerusahaan(Request $request)
     {
         if ($request->ajax()) {
+            self::syncJenisInstansiLainnya();
+
             $query = PekerjaanAlumni::select(
                 'nama',
                 'jenis_instansi',
@@ -94,5 +98,30 @@ class AdminPerusahaanController extends Controller
         $pekerjaanList = $pekerjaanListQuery->get();
 
         return view('admin.perusahaan.show', compact('perusahaan', 'pekerjaanList', 'nama'));
+    }
+
+    public static function syncJenisInstansiLainnya(): void
+    {
+        try {
+            DB::update("
+                UPDATE pekerjaan_alumni pa
+                JOIN jawaban_detail jd ON jd.respon_id = pa.respon_id
+                JOIN pertanyaan p ON p.id_pertanyaan = jd.pertanyaan_id AND p.kode_pertanyaan = 'F1102'
+                SET pa.jenis_instansi = CONCAT('Lainnya: ', TRIM(jd.jawaban_text))
+                WHERE (pa.jenis_instansi LIKE '%Lainnya%' OR pa.jenis_instansi LIKE '%tuliskan%')
+                  AND jd.jawaban_text IS NOT NULL 
+                  AND TRIM(jd.jawaban_text) != ''
+            ");
+
+            DB::update("
+                UPDATE pekerjaan_alumni pa
+                JOIN jawaban_detail jd_f8 ON jd_f8.respon_id = pa.respon_id
+                JOIN pertanyaan p_f8 ON p_f8.id_pertanyaan = jd_f8.pertanyaan_id AND p_f8.kode_pertanyaan = 'F8'
+                SET pa.jenis_instansi = 'Wiraswasta/wirausaha/pekerja lepas'
+                WHERE (pa.jenis_instansi IS NULL OR TRIM(pa.jenis_instansi) = '' OR pa.jenis_instansi = '-' OR pa.jenis_instansi LIKE 'Wiraswasta%')
+                  AND jd_f8.jawaban_text LIKE '%wiraswasta%'
+            ");
+        } catch (\Throwable $e) {
+        }
     }
 }

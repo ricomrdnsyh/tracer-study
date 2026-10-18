@@ -144,7 +144,15 @@
                                                 </div>
                                                 <div class="d-flex flex-column">
                                                     <span class="text-info fw-bold fs-7 mb-1">Jenis Instansi</span>
-                                                    <span class="text-gray-800 fw-bolder fs-5">{{ $perusahaan->jenis_instansi ?: '-' }}</span>
+                                                    <span class="text-gray-800 fw-bolder fs-5">
+                                                        @php
+                                                            $cleanJenis = trim((string)($perusahaan->jenis_instansi ?? ''));
+                                                            if ($cleanJenis === 'Lainnya, tuliskan ...' || $cleanJenis === 'Lainnya, tuliskan ..' || $cleanJenis === '(5) Lainnya, tuliskan ...') {
+                                                                $cleanJenis = 'Lainnya';
+                                                            }
+                                                        @endphp
+                                                        {{ $cleanJenis ?: '-' }}
+                                                    </span>
                                                 </div>
                                             </div>
                                         </div>

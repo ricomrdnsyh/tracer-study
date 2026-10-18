@@ -75,7 +75,12 @@
                     data: 'jenis_instansi',
                     name: 'jenis_instansi',
                     render: function(data) {
-                        return data || '-';
+                        if (!data) return '-';
+                        var clean = data.trim();
+                        if (clean === 'Lainnya, tuliskan ...' || clean === 'Lainnya, tuliskan ..' || clean === '(5) Lainnya, tuliskan ...') {
+                            return 'Lainnya';
+                        }
+                        return clean;
                     }
                 },
                 {
