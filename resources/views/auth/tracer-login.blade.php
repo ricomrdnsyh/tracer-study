@@ -143,6 +143,102 @@
             color: #9ca3af;
         }
 
+        .btn-back-home {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.55rem;
+            padding: 0.5rem 1.15rem;
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border: 1.5px solid rgba(203, 213, 225, 0.8);
+            border-radius: 50px;
+            color: #475569;
+            font-size: 0.875rem;
+            font-weight: 500;
+            text-decoration: none;
+            box-shadow: 0 2px 6px rgba(15, 23, 42, 0.04);
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .btn-back-home:hover {
+            color: var(--primary-color);
+            background: #ffffff;
+            border-color: rgba(37, 99, 235, 0.4);
+            box-shadow: 0 6px 16px rgba(37, 99, 235, 0.12);
+            transform: translateX(-2px);
+        }
+
+        .btn-back-home i {
+            font-size: 0.8rem;
+            transition: transform 0.25s ease;
+        }
+
+        .btn-back-home:hover i {
+            transform: translateX(-3px);
+        }
+
+        .btn-switch-auth {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1.15rem;
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border: 1.5px solid rgba(226, 232, 240, 0.8);
+            border-radius: 50px;
+            color: #64748b;
+            font-size: 0.85rem;
+            font-weight: 500;
+            text-decoration: none;
+            transition: all 0.25s ease;
+        }
+
+        .btn-switch-auth:hover {
+            color: var(--primary-color);
+            background: #ffffff;
+            border-color: rgba(37, 99, 235, 0.35);
+            box-shadow: 0 4px 14px rgba(37, 99, 235, 0.08);
+        }
+
+        .btn-switch-auth i {
+            font-size: 0.75rem;
+            transition: transform 0.25s ease;
+        }
+
+        .btn-switch-auth:hover i {
+            transform: translateX(3px);
+        }
+
+        .btn-back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.45rem;
+            color: #64748b;
+            font-size: 0.875rem;
+            font-weight: 500;
+            text-decoration: none;
+            padding: 0.45rem 1rem;
+            border-radius: 0.5rem;
+            transition: all 0.2s ease;
+        }
+
+        .btn-back-link:hover {
+            color: var(--primary-color);
+            background-color: rgba(37, 99, 235, 0.06);
+            transform: translateX(-2px);
+        }
+
+        .btn-back-link i {
+            font-size: 0.78rem;
+            transition: transform 0.2s ease;
+        }
+
+        .btn-back-link:hover i {
+            transform: translateX(-3px);
+        }
+
         .link-back {
             color: var(--primary-color);
             text-decoration: none;
@@ -254,6 +350,7 @@
             -webkit-appearance: none;
             margin: 0;
         }
+
         input[type=number] {
             -moz-appearance: textfield;
         }
@@ -262,11 +359,24 @@
 
 <body id="kt_body" class="bg-body bg-grid">
     <div class="d-flex flex-column flex-root auth-wrapper">
-        <div class="d-flex flex-center flex-column flex-column-fluid p-10 pb-lg-20">
+        <!-- Top Navigation Bar -->
+        <div class="w-100 py-4 px-4 px-md-7 d-flex justify-content-between align-items-center">
+            <a href="{{ route('home') }}" class="btn-back-home" title="Kembali ke Beranda Tracer Study">
+                <i class="fas fa-arrow-left"></i>
+                <span>Kembali ke Beranda</span>
+            </a>
+            <a href="{{ route('login') }}" class="btn-switch-auth d-none d-sm-inline-flex" title="Khusus Dosen, Kaprodi, Fakultas & Admin">
+                <i class="fas fa-user-shield me-1"></i>
+                <span>Login Pegawai / Admin</span>
+                <i class="fas fa-arrow-right ms-1"></i>
+            </a>
+        </div>
+
+        <div class="d-flex flex-center flex-column flex-column-fluid px-4 py-5 pb-lg-20">
             <div class="w-lg-500px mx-auto auth-card">
                 <div class="auth-card-inner">
                     <div class="text-center mb-7">
-                        <a href="{{ url('/') }}" class="d-inline-block mb-4">
+                        <a href="{{ route('home') }}" class="d-inline-block mb-4" title="Kembali ke Beranda Tracer Study">
                             <img alt="Logo Tracer Study" src="{{ asset('assets/media/logos/tracer-dark.png') }}"
                                 class="h-50px" style="max-height: 50px; width: auto;" />
                         </a>
@@ -308,6 +418,13 @@
                             <button type="submit" class="btn btn-login w-100 mb-4">
                                 Lanjut Isi Kuesioner
                             </button>
+
+                            <div class="d-flex align-items-center justify-content-center mb-4">
+                                <a href="{{ route('home') }}" class="btn-back-link">
+                                    <i class="fas fa-arrow-left"></i>
+                                    <span>Kembali ke Beranda</span>
+                                </a>
+                            </div>
 
                             <div class="text-muted auth-footer-text">
                                 Tracer Study Universitas Nurul Jadid
@@ -358,7 +475,7 @@
                             <div class="col-12">
                                 <label class="form-label mb-1">Nama Lengkap <span class="text-danger">*</span></label>
                                 <input type="text" name="nama" id="bantuan_nama" class="form-control"
-                                    placeholder="Contoh: Ahmad Fauzi" required />
+                                    placeholder="Contoh: Ahmad Rico" required />
                             </div>
 
                             <div class="col-md-6">
@@ -402,7 +519,8 @@
                                 <label class="form-label mb-1">Perkiraan Tahun Kelulusan <span
                                         class="text-muted fw-normal">(Opsional)</span></label>
                                 <input type="number" name="tahun_lulus" id="bantuan_tahun_lulus"
-                                    class="form-control" placeholder="Contoh: 2023" min="1990" max="{{ date('Y') + 1 }}" />
+                                    class="form-control" placeholder="Contoh: 2023" min="1990"
+                                    max="{{ date('Y') + 1 }}" />
                             </div>
 
                             <div class="col-12">

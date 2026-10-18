@@ -162,10 +162,29 @@
                             class="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
                         <span class="relative inline-flex rounded-full h-2 w-2 bg-white"></span>
                     </span>
-                    @if (!empty($kuesionerAktif))
-                        Periode pelaporan <strong
-                            class="text-white">{{ $kuesionerAktif->target_lulusan_label ?? ($kuesionerAktif->tahunAkademik->nm_smt ?? $kuesionerAktif->judul) }}</strong>
-                        sedang berlangsung
+                    @php
+                        $activeList = $kuesionerAktifList ?? (isset($kuesionerAktif) && $kuesionerAktif ? collect([$kuesionerAktif]) : collect());
+                    @endphp
+                    @if ($activeList->isNotEmpty())
+                        @if ($activeList->count() === 1)
+                            Periode pelaporan <strong
+                                class="text-white">{{ $activeList->first()->target_lulusan_label ?? ($activeList->first()->tahunAkademik->nm_smt ?? $activeList->first()->judul) }}</strong>
+                            sedang berlangsung
+                        @else
+                            @php
+                                $labels = $activeList->map(function ($k) {
+                                    return $k->target_lulusan_label ?? ($k->tahunAkademik->nm_smt ?? $k->judul);
+                                })->unique()->values();
+
+                                if ($labels->count() === 1) {
+                                    $labelText = $labels->first();
+                                } else {
+                                    $lastLabel = $labels->pop();
+                                    $labelText = $labels->implode(', ') . ' & ' . $lastLabel;
+                                }
+                            @endphp
+                            Periode pelaporan <strong class="text-white">{{ $labelText }}</strong> sedang berlangsung
+                        @endif
                     @else
                         Periode pelaporan kuesioner <strong class="text-white">belum dibuka</strong> — pantau informasi
                         terbaru

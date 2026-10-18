@@ -28,13 +28,15 @@ use Illuminate\Support\Facades\Route;
 use Rap2hpoutre\LaravelLogViewer\LogViewerController;
 
 Route::get('/', function () {
-    $kuesionerAktif = App\Models\Kuesioner::with('tahunAkademik')
+    $kuesionerAktifList = App\Models\Kuesioner::with('tahunAkademik')
         ->where('status', 'Published')
         ->orderByRaw('akademik_id IS NULL ASC')
-        ->orderByTahunTerbaru()
-        ->first();
+        ->orderBy('akademik_id', 'asc')
+        ->get();
 
-    return view('landing', compact('kuesionerAktif'));
+    $kuesionerAktif = $kuesionerAktifList->last() ?? $kuesionerAktifList->first();
+
+    return view('landing', compact('kuesionerAktif', 'kuesionerAktifList'));
 })->name('home');
 
 Route::redirect('/login', '/login-admin');
