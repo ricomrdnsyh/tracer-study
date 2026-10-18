@@ -833,7 +833,6 @@
     </button>
 
     <script>
-        // Mobile menu
         const menuBtn = document.getElementById('mobile-menu-btn');
         const mobileMenu = document.getElementById('mobile-menu');
         const iconOpen = document.getElementById('menu-icon-open');
@@ -849,7 +848,6 @@
             iconClose.classList.add('hidden');
         }));
 
-        // FAQ accordion
         document.querySelectorAll('.faq-btn').forEach(btn => {
             btn.addEventListener('click', () => {
                 const item = btn.closest('.faq-item');
@@ -859,7 +857,6 @@
             });
         });
 
-        // Scroll reveal
         const io = new IntersectionObserver(entries => {
             entries.forEach(e => {
                 if (e.isIntersecting) {
@@ -872,7 +869,6 @@
         });
         document.querySelectorAll('.reveal').forEach(el => io.observe(el));
 
-        // Hero progress bar
         window.addEventListener('load', () => {
             setTimeout(() => {
                 const bar = document.getElementById('hero-progress');
@@ -880,7 +876,6 @@
             }, 400);
         });
 
-        // Navbar shadow + back-to-top
         const backTop = document.getElementById('back-top');
         const navbar = document.getElementById('navbar');
 
@@ -915,7 +910,6 @@
             behavior: 'smooth'
         }));
 
-        // Klik Beranda kembali ke paling atas halaman agar pita pengumuman terlihat
         document.querySelectorAll('a[href="#hero"]').forEach(link => {
             link.addEventListener('click', (e) => {
                 e.preventDefault();

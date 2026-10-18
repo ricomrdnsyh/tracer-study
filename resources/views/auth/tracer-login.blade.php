@@ -172,7 +172,6 @@
             font-family: 'Poppins', sans-serif;
         }
 
-        /* Select2 Custom Styling for Modal */
         .select2-container--bootstrap5 .select2-selection--single,
         .select2-container .select2-selection--single {
             height: calc(1.5em + 1.5rem + 2px) !important;
@@ -250,7 +249,6 @@
             color: #ffffff !important;
         }
 
-        /* Hilangkan spinner default pada input number */
         input[type=number]::-webkit-inner-spin-button,
         input[type=number]::-webkit-outer-spin-button {
             -webkit-appearance: none;
@@ -321,7 +319,6 @@
         </div>
     </div>
 
-    <!-- Modal Bantuan Lupa NIM -->
     <div class="modal fade" id="modalBantuanNim" tabindex="-1" aria-labelledby="modalBantuanNimLabel"
         aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-lg">
@@ -446,7 +443,6 @@
             });
         });
 
-        // Chained Dropdown Fakultas -> Prodi with Select2
         const prodisByFakultas = @json(
             $fakultas->mapWithKeys(function ($f) {
                 return [
@@ -477,15 +473,12 @@
                 });
             }
 
-            // Inisialisasi awal
             initModalSelect2();
 
-            // Re-inisialisasi / refresh dimensi saat modal terbuka sempurna
             $modal.on('shown.bs.modal', function() {
                 initModalSelect2();
             });
 
-            // Handler perubahan Fakultas -> isi opsi Program Studi
             $fakultas.on('change', function() {
                 const fakultasId = $(this).val();
                 $prodi.empty().append('<option value=""></option>');
@@ -503,7 +496,6 @@
                 $prodi.val(null).trigger('change');
             });
 
-            // Reset saat modal ditutup
             $modal.on('hidden.bs.modal', function() {
                 const formEl = document.getElementById('form_bantuan_nim');
                 if (formEl) formEl.reset();
@@ -512,7 +504,6 @@
                     .trigger('change');
             });
 
-            // AJAX Submission Form Bantuan Lupa NIM
             const formBantuan = document.getElementById('form_bantuan_nim');
             if (formBantuan) {
                 formBantuan.addEventListener('submit', function(e) {

@@ -213,23 +213,19 @@
 <body>
     <div class="wrapper">
         <div class="main-card">
-            <!-- Header Section -->
             <div class="header">
                 <div class="badge-ticket">Tiket Bantuan Verifikasi</div>
                 <h1>Tracer Study UNUJA</h1>
                 <p>Lembaga Pengembangan &amp; Inovasi Pembelajaran (LPIP)<br>Universitas Nurul Jadid</p>
             </div>
 
-            <!-- Content Section -->
             <div class="content">
-                <!-- Notice Banner -->
                 <div class="notice-card">
                     <div class="notice-title">Permohonan Bantuan Lupa NIM</div>
                     <p class="notice-desc">Seorang alumni/mahasiswa telah mengisi formulir bantuan karena lupa NIM saat
                         ingin mengisi kuesioner Tracer Study.</p>
                 </div>
 
-                <!-- Highlight Card Mahasiswa -->
                 <div class="student-hero">
                     <div
                         style="font-size: 11px; text-transform: uppercase; color: #64748b; font-weight: 700; letter-spacing: 0.5px; margin-bottom: 4px;">
@@ -237,7 +233,6 @@
                     <div class="student-name" style="margin: 0;">{{ $permohonan->nama }}</div>
                 </div>
 
-                <!-- Table Rincian Data -->
                 <table class="data-table">
                     <tr>
                         <td class="data-label">Fakultas</td>
@@ -282,7 +277,6 @@
                     </tr>
                 </table>
 
-                <!-- Action Button WhatsApp with Icon -->
                 <div class="cta-container">
                     <a href="{{ $permohonan->whatsapp_url }}" target="_blank" class="btn-whatsapp">
                         @if (isset($message))
@@ -303,7 +297,6 @@
                 </div>
             </div>
 
-            <!-- Footer Section -->
             <div class="footer">
                 <p style="margin: 0; font-weight: 500; color: #64748b;">Sistem Informasi Tracer Study &mdash;
                     Universitas Nurul Jadid</p>

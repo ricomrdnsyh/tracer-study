@@ -1,11 +1,14 @@
 <script>
     window.tracerLookupBase = @json($tracerLookupBase ?? null);
 </script>
-<script src="{{ asset('assets/js/tracer-lookup.js') }}?v={{ @filemtime(public_path('assets/js/tracer-lookup.js')) ?: '1' }}"></script>
+<script
+    src="{{ asset('assets/js/tracer-lookup.js') }}?v={{ @filemtime(public_path('assets/js/tracer-lookup.js')) ?: '1' }}">
+</script>
 <style>
     .skip-hidden {
         display: none !important;
     }
+
     .is-invalid-wajib {
         border: 1.5px solid #f1416c !important;
         background-color: #fff8f8 !important;
@@ -14,12 +17,21 @@
         box-shadow: 0 0 15px rgba(241, 65, 108, 0.12) !important;
         transition: all 0.25s ease-in-out;
     }
+
     .error-wajib-badge {
         animation: fadeIn 0.3s ease-in-out;
     }
+
     @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(-4px); }
-        to { opacity: 1; transform: translateY(0); }
+        from {
+            opacity: 0;
+            transform: translateY(-4px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
     }
 </style>
 <script>
@@ -39,7 +51,8 @@
 
         function getQuestionValue(id) {
             let $cont = $('#pertanyaan_container_' + id);
-            if ($cont.length && ($cont.hasClass('skip-hidden') || $cont.closest('.kategori-container').hasClass('skip-hidden'))) {
+            if ($cont.length && ($cont.hasClass('skip-hidden') || $cont.closest('.kategori-container').hasClass(
+                    'skip-hidden'))) {
                 return null;
             }
 
@@ -65,8 +78,8 @@
                 return vals.length > 0 ? vals : null;
             } else {
                 let val = $inputs.val();
-                // Jika input utama (termasuk hidden) belum terisi namun ada isian pada input pencarian / label (seperti remote-select F18B / F18C)
-                if ((val === undefined || val === null || (typeof val === 'string' && val.trim() === '')) && $labelInput.length > 0) {
+                if ((val === undefined || val === null || (typeof val === 'string' && val.trim() === '')) &&
+                    $labelInput.length > 0) {
                     let lbl = $labelInput.val();
                     if (lbl && lbl.trim() !== '') {
                         $inputs.val(lbl.trim());
@@ -204,7 +217,6 @@
 
             let form = $(this).closest('form')[0];
 
-            // Sinkronisasi field remote-select bila hidden input masih kosong tapi search input ada isi
             $('div[data-remote-select]').each(function() {
                 let $hidden = $(this).find('input[type="hidden"]');
                 let $search = $(this).find('input[type="search"]');
@@ -216,14 +228,13 @@
                 }
             });
 
-            // Pastikan kondisi skip logic paling mutakhir telah dievaluasi
             evaluateSkipLogic();
 
-            // Cek seluruh pertanyaan wajib yang aktif (tidak disembunyikan oleh skip logic)
             let invalidContainers = [];
             $('.pertanyaan-container[data-wajib="true"]').each(function() {
                 let $cont = $(this);
-                if ($cont.hasClass('skip-hidden') || $cont.closest('.kategori-container').hasClass('skip-hidden')) {
+                if ($cont.hasClass('skip-hidden') || $cont.closest('.kategori-container')
+                    .hasClass('skip-hidden')) {
                     return;
                 }
 
@@ -233,11 +244,11 @@
                 }
             });
 
-            // Bersihkan styling error pada pertanyaan yang sudah valid
             $('.pertanyaan-container').each(function() {
                 let $c = $(this);
                 let id = $c.attr('data-id-pertanyaan');
-                if ($c.hasClass('skip-hidden') || $c.closest('.kategori-container').hasClass('skip-hidden') || isQuestionAnswered(id)) {
+                if ($c.hasClass('skip-hidden') || $c.closest('.kategori-container').hasClass(
+                        'skip-hidden') || isQuestionAnswered(id)) {
                     clearQuestionError($c);
                 }
             });
@@ -246,7 +257,9 @@
                 invalidContainers.forEach(function($cont) {
                     $cont.addClass('is-invalid-wajib');
                     if ($cont.find('.error-wajib-badge').length === 0) {
-                        $cont.append('<div class="error-wajib-badge mt-2 text-danger fs-7 fw-bold d-flex align-items-center"><i class="fas fa-exclamation-circle text-danger me-2 fs-6"></i>Pertanyaan ini wajib diisi!</div>');
+                        $cont.append(
+                            '<div class="error-wajib-badge mt-2 text-danger fs-7 fw-bold d-flex align-items-center"><i class="fas fa-exclamation-circle text-danger me-2 fs-6"></i>Pertanyaan ini wajib diisi!</div>'
+                            );
                     }
                 });
 
@@ -255,7 +268,9 @@
                 Swal.fire({
                     icon: 'warning',
                     title: 'Pertanyaan Wajib Belum Diisi',
-                    html: 'Terdapat <span class="badge badge-danger fs-6 px-2 py-1">' + invalidContainers.length + '</span> pertanyaan wajib yang belum diisi.<br><span class="text-muted fs-7 mt-2 d-block">Layar otomatis diarahkan ke pertanyaan yang perlu Anda lengkapi.</span>',
+                    html: 'Terdapat <span class="badge badge-danger fs-6 px-2 py-1">' +
+                        invalidContainers.length +
+                        '</span> pertanyaan wajib yang belum diisi.<br><span class="text-muted fs-7 mt-2 d-block">Layar otomatis diarahkan ke pertanyaan yang perlu Anda lengkapi.</span>',
                     confirmButtonText: '<i class="fas fa-arrow-down me-1"></i> Periksa Pertanyaan',
                     customClass: {
                         confirmButton: "btn btn-primary"
@@ -265,7 +280,8 @@
                         scrollTop: $first.offset().top - 120
                     }, 500);
 
-                    $first.find('input:visible, select:visible, textarea:visible').first().focus();
+                    $first.find('input:visible, select:visible, textarea:visible').first()
+                        .focus();
                 });
 
                 return false;
@@ -309,7 +325,9 @@
                     if ($cont.length) {
                         $cont.addClass('is-invalid-wajib');
                         if ($cont.find('.error-wajib-badge').length === 0) {
-                            $cont.append('<div class="error-wajib-badge mt-2 text-danger fs-7 fw-bold d-flex align-items-center"><i class="fas fa-exclamation-circle text-danger me-2 fs-6"></i>Pertanyaan ini wajib diisi!</div>');
+                            $cont.append(
+                                '<div class="error-wajib-badge mt-2 text-danger fs-7 fw-bold d-flex align-items-center"><i class="fas fa-exclamation-circle text-danger me-2 fs-6"></i>Pertanyaan ini wajib diisi!</div>'
+                                );
                         }
                         if (!firstScrolled) {
                             $('html, body').animate({
