@@ -125,7 +125,7 @@
                                             <th class="min-w-150px">Username</th>
                                             <th class="min-w-150px">Nama Lengkap</th>
                                             <th class="min-w-100px">Role</th>
-                                            <th class="min-w-150px">Fakultas</th>
+                                            <th class="min-w-150px">Unit / Fakultas / Prodi</th>
                                         </tr>
                                     </thead>
                                     <tbody class="fw-bold text-gray-800"></tbody>

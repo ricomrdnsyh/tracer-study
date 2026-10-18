@@ -23,6 +23,7 @@ class UserRequest extends FormRequest
             'password' => $this->isMethod('post') ? ['required', 'string', 'min:6'] : ['nullable', 'string', 'min:6'],
             'role'        => ['required', 'string', 'max:50'],
             'fakultas_id' => ['nullable', 'exists:fakultas,id_fakultas'],
+            'prodi_id'    => ['nullable', 'exists:prodi,id_prodi'],
         ];
     }
 }

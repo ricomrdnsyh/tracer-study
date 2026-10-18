@@ -83,6 +83,7 @@
                         if (data === 'Admin') badgeClass = 'badge-success';
                         else if (data === 'Pimpinan') badgeClass = 'badge-info';
                         else if (data === 'Fakultas') badgeClass = 'badge-warning';
+                        else if (data === 'Kaprodi') badgeClass = 'badge-info';
 
                         return '<span class="badge ' + badgeClass + '">' + data + '</span>';
                     }
@@ -91,7 +92,13 @@
                     data: 'fakultas_id',
                     name: 'fakultas_id',
                     render: function(data, type, row) {
-                        return row.role === 'Fakultas' && row.fakultas ? row.fakultas.nama_fakultas : '-';
+                        if (row.role === 'Fakultas') {
+                            return row.fakultas ? row.fakultas.nama_fakultas : '-';
+                        }
+                        if (row.role === 'Kaprodi') {
+                            return row.prodi ? row.prodi.nama_prodi : '-';
+                        }
+                        return '-';
                     }
                 },
             ]

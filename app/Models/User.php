@@ -19,6 +19,7 @@ class User extends Authenticatable
         'password',
         'role',
         'fakultas_id',
+        'prodi_id',
     ];
 
     protected $hidden = [
@@ -40,5 +41,10 @@ class User extends Authenticatable
     public function fakultas()
     {
         return $this->belongsTo(Fakultas::class, 'fakultas_id', 'id_fakultas');
+    }
+
+    public function prodi()
+    {
+        return $this->belongsTo(Prodi::class, 'prodi_id', 'id_prodi');
     }
 }

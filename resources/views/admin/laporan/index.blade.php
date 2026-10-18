@@ -32,54 +32,107 @@
                                     </h4>
 
                                     <div class="row g-6">
+                                        @if ($isKaprodi)
+                                            <div class="col-md-6">
+                                                <label class="form-label fw-bold text-gray-700 fs-7 mb-2">
+                                                    <i class="fa-solid fa-clipboard-list text-primary me-2"></i>Kuesioner
+                                                </label>
+                                                <select
+                                                    class="form-select form-select-sm form-select-solid fw-bold bg-body border border-gray-300"
+                                                    name="kuesioner_id" data-control="select2">
+                                                    <option value="all">Semua Kuesioner</option>
+                                                    @foreach ($kuesioner as $k)
+                                                        <option value="{{ $k->id_kuesioner }}">{{ $k->judul }}</option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
 
-                                        <div class="{{ $isFakultas ? 'col-md-6' : 'col-md-4' }}">
-                                            <label class="form-label fw-bold text-gray-700 fs-7 mb-2">
-                                                <i class="fa-solid fa-clipboard-list text-primary me-2"></i>Kuesioner
-                                            </label>
-                                            <select
-                                                class="form-select form-select-sm form-select-solid fw-bold bg-body border border-gray-300"
-                                                name="kuesioner_id" data-control="select2">
-                                                <option value="all">Semua Kuesioner</option>
-                                                @foreach ($kuesioner as $k)
-                                                    <option value="{{ $k->id_kuesioner }}">{{ $k->judul }}</option>
-                                                @endforeach
-                                            </select>
-                                        </div>
+                                            <input type="hidden" name="prodi_id" value="{{ $userProdiId }}">
+                                            <div class="col-md-6">
+                                                <label class="form-label fw-bold text-gray-700 fs-7 mb-2">
+                                                    <i class="fa-solid fa-graduation-cap text-info me-2"></i>Program Studi
+                                                </label>
+                                                <input type="text"
+                                                    class="form-control form-control-sm form-control-solid fw-bold bg-body border border-gray-300 text-gray-800"
+                                                    value="{{ $prodi->first()?->nama_prodi ?? 'Program Studi Anda' }}" readonly>
+                                            </div>
+                                        @elseif ($isFakultas)
+                                            <div class="col-md-6">
+                                                <label class="form-label fw-bold text-gray-700 fs-7 mb-2">
+                                                    <i class="fa-solid fa-clipboard-list text-primary me-2"></i>Kuesioner
+                                                </label>
+                                                <select
+                                                    class="form-select form-select-sm form-select-solid fw-bold bg-body border border-gray-300"
+                                                    name="kuesioner_id" data-control="select2">
+                                                    <option value="all">Semua Kuesioner</option>
+                                                    @foreach ($kuesioner as $k)
+                                                        <option value="{{ $k->id_kuesioner }}">{{ $k->judul }}</option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
 
-                                        @if($isFakultas)
                                             <input type="hidden" name="fakultas_id" id="laporan_fakultas" value="{{ $userFakultasId }}">
-                                        @else
-                                        <div class="col-md-4">
-                                            <label class="form-label fw-bold text-gray-700 fs-7 mb-2">
-                                                <i class="fa-solid fa-building text-warning me-2"></i>Fakultas
-                                            </label>
-                                            <select
-                                                class="form-select form-select-sm form-select-solid fw-bold bg-body border border-gray-300"
-                                                name="fakultas_id" id="laporan_fakultas" data-control="select2">
-                                                <option value="all">Semua Fakultas</option>
-                                                @foreach ($fakultas as $f)
-                                                    <option value="{{ $f->id_fakultas }}">{{ $f->nama_fakultas }}</option>
-                                                @endforeach
-                                            </select>
-                                        </div>
-                                        @endif
 
-                                        <div class="{{ $isFakultas ? 'col-md-6' : 'col-md-4' }}">
-                                            <label class="form-label fw-bold text-gray-700 fs-7 mb-2">
-                                                <i class="fa-solid fa-graduation-cap text-info me-2"></i>Program Studi
-                                            </label>
-                                            <select
-                                                class="form-select form-select-sm form-select-solid fw-bold bg-body border border-gray-300"
-                                                name="prodi_id" id="laporan_prodi" data-control="select2">
-                                                <option value="all">Semua Prodi</option>
-                                                @foreach ($prodi as $p)
-                                                    <option value="{{ $p->id_prodi }}"
-                                                        data-fakultas="{{ $p->fakultas_id }}">{{ $p->jenjang }}
-                                                        {{ $p->nama_prodi }}</option>
-                                                @endforeach
-                                            </select>
-                                        </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label fw-bold text-gray-700 fs-7 mb-2">
+                                                    <i class="fa-solid fa-graduation-cap text-info me-2"></i>Program Studi
+                                                </label>
+                                                <select
+                                                    class="form-select form-select-sm form-select-solid fw-bold bg-body border border-gray-300"
+                                                    name="prodi_id" id="laporan_prodi" data-control="select2">
+                                                    <option value="all">Semua Prodi</option>
+                                                    @foreach ($prodi as $p)
+                                                        <option value="{{ $p->id_prodi }}"
+                                                            data-fakultas="{{ $p->fakultas_id }}">{{ $p->jenjang }}
+                                                            {{ $p->nama_prodi }}</option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                        @else
+                                            <div class="col-md-4">
+                                                <label class="form-label fw-bold text-gray-700 fs-7 mb-2">
+                                                    <i class="fa-solid fa-clipboard-list text-primary me-2"></i>Kuesioner
+                                                </label>
+                                                <select
+                                                    class="form-select form-select-sm form-select-solid fw-bold bg-body border border-gray-300"
+                                                    name="kuesioner_id" data-control="select2">
+                                                    <option value="all">Semua Kuesioner</option>
+                                                    @foreach ($kuesioner as $k)
+                                                        <option value="{{ $k->id_kuesioner }}">{{ $k->judul }}</option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+
+                                            <div class="col-md-4">
+                                                <label class="form-label fw-bold text-gray-700 fs-7 mb-2">
+                                                    <i class="fa-solid fa-building text-warning me-2"></i>Fakultas
+                                                </label>
+                                                <select
+                                                    class="form-select form-select-sm form-select-solid fw-bold bg-body border border-gray-300"
+                                                    name="fakultas_id" id="laporan_fakultas" data-control="select2">
+                                                    <option value="all">Semua Fakultas</option>
+                                                    @foreach ($fakultas as $f)
+                                                        <option value="{{ $f->id_fakultas }}">{{ $f->nama_fakultas }}</option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+
+                                            <div class="col-md-4">
+                                                <label class="form-label fw-bold text-gray-700 fs-7 mb-2">
+                                                    <i class="fa-solid fa-graduation-cap text-info me-2"></i>Program Studi
+                                                </label>
+                                                <select
+                                                    class="form-select form-select-sm form-select-solid fw-bold bg-body border border-gray-300"
+                                                    name="prodi_id" id="laporan_prodi" data-control="select2">
+                                                    <option value="all">Semua Prodi</option>
+                                                    @foreach ($prodi as $p)
+                                                        <option value="{{ $p->id_prodi }}"
+                                                            data-fakultas="{{ $p->fakultas_id }}">{{ $p->jenjang }}
+                                                            {{ $p->nama_prodi }}</option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                        @endif
                                     </div>
                                 </div>
 

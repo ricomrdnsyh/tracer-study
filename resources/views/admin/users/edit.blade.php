@@ -31,7 +31,8 @@
                                                 <option value="{{ $dosen['id_penduduk'] ?? '' }}"
                                                     data-nama="{{ $namaDosen }}"
                                                     data-email="{{ $dosen['email'] ?? '' }}"
-                                                    data-fakultas-id="{{ $dosen['id_fakultas'] ?? '' }}">
+                                                    data-fakultas-id="{{ $dosen['id_fakultas'] ?? '' }}"
+                                                    data-prodi-id="{{ $dosen['id_prodi'] ?? $dosen['prodi_id'] ?? '' }}">
                                                     {{ $namaDosen }} - {{ $unitDosen }} (Dosen)
                                                 </option>
                                             @endforeach
@@ -100,6 +101,7 @@
                                     <option value="" disabled selected>Pilih Role</option>
                                     <option value="Admin">Admin</option>
                                     <option value="Fakultas">Fakultas</option>
+                                    <option value="Kaprodi">Kaprodi</option>
                                 </select>
 
                                 <div class="invalid-feedback">Role wajib dipilih.</div>
@@ -119,6 +121,22 @@
                                 </select>
 
                                 <div class="invalid-feedback">Fakultas wajib dipilih.</div>
+                            </div>
+                        </div>
+
+                        <div class="col-12" id="edit_prodi_container" style="display: none;">
+                            <div class="d-flex flex-column mb-2">
+                                <label class="d-flex align-items-center fs-sm-8 fs-lg-6 fw-bolder mb-1 required">
+                                    <span>Program Studi</span>
+                                </label>
+                                <select name="prodi_id" id="edit_prodi_id" class="form-select form-select-sm fs-sm-8 fs-lg-6 @error('prodi_id') is-invalid @enderror" data-control="select2" data-dropdown-parent="#form_edit" data-placeholder="Pilih Program Studi">
+                                    <option value="" disabled selected>Pilih Program Studi</option>
+                                    @foreach($prodis as $p)
+                                        <option value="{{ $p->id_prodi }}">{{ $p->nama_prodi }}</option>
+                                    @endforeach
+                                </select>
+
+                                <div class="invalid-feedback">Program Studi wajib dipilih.</div>
                             </div>
                         </div>
 

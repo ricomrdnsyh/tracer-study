@@ -20,18 +20,39 @@
         $('#role').val('').trigger('change');
         $('#fakultas_container').hide();
         $('#fakultas_id').prop('required', false).val('').trigger('change');
+        $('#prodi_container').hide();
+        $('#prodi_id').prop('required', false).val('').trigger('change');
         if ($('#karyawan').length) {
             $('#karyawan').val(null).trigger('change.select2');
         }
     });
 
     $('#role').on('change', function() {
-        if ($(this).val() === 'Fakultas') {
+        let role = $(this).val();
+        if (role === 'Fakultas') {
             $('#fakultas_container').show();
             $('#fakultas_id').prop('required', true);
+            $('#prodi_container').hide();
+            $('#prodi_id').prop('required', false).val('').trigger('change');
+        } else if (role === 'Kaprodi') {
+            $('#fakultas_container').hide();
+            $('#fakultas_id').prop('required', false).val('').trigger('change');
+            $('#prodi_container').show();
+            $('#prodi_id').prop('required', true);
         } else {
             $('#fakultas_container').hide();
             $('#fakultas_id').prop('required', false).val('').trigger('change');
+            $('#prodi_container').hide();
+            $('#prodi_id').prop('required', false).val('').trigger('change');
+        }
+
+        let selected = $('#karyawan').find('option:selected');
+        if (selected.length && selected.val()) {
+            if (role === 'Fakultas' && selected.data('fakultas-id')) {
+                $('#fakultas_id').val(selected.data('fakultas-id')).trigger('change');
+            } else if (role === 'Kaprodi' && selected.data('prodi-id')) {
+                $('#prodi_id').val(selected.data('prodi-id')).trigger('change');
+            }
         }
     });
 
@@ -45,8 +66,11 @@
             } else {
                 $('#email').val('');
             }
-            if (selected.data('fakultas-id')) {
+            if (selected.data('fakultas-id') && $('#role').val() === 'Fakultas') {
                 $('#fakultas_id').val(selected.data('fakultas-id')).trigger('change');
+            }
+            if (selected.data('prodi-id') && $('#role').val() === 'Kaprodi') {
+                $('#prodi_id').val(selected.data('prodi-id')).trigger('change');
             }
         } else {
             $('#username').val('').prop('readonly', false);

@@ -16,9 +16,18 @@
                 if (response.role === 'Fakultas') {
                     $('#edit_fakultas_container').show();
                     $('#edit_fakultas_id').val(response.fakultas_id).trigger('change');
+                    $('#edit_prodi_container').hide();
+                    $('#edit_prodi_id').val('').trigger('change');
+                } else if (response.role === 'Kaprodi') {
+                    $('#edit_fakultas_container').hide();
+                    $('#edit_fakultas_id').val('').trigger('change');
+                    $('#edit_prodi_container').show();
+                    $('#edit_prodi_id').val(response.prodi_id).trigger('change');
                 } else {
                     $('#edit_fakultas_container').hide();
                     $('#edit_fakultas_id').val('').trigger('change');
+                    $('#edit_prodi_container').hide();
+                    $('#edit_prodi_id').val('').trigger('change');
                 }
                 if ($('#edit_karyawan').length) {
                     $('#edit_karyawan').val(response.username).trigger('change.select2');
@@ -50,18 +59,30 @@
         $(this).find('form').removeClass('was-validated');
         $('#edit_fakultas_container').hide();
         $('#edit_fakultas_id').prop('required', false).val('').trigger('change');
+        $('#edit_prodi_container').hide();
+        $('#edit_prodi_id').prop('required', false).val('').trigger('change');
         if ($('#edit_karyawan').length) {
             $('#edit_karyawan').val(null).trigger('change.select2');
         }
     });
 
     $('#edit_role').on('change', function() {
-        if ($(this).val() === 'Fakultas') {
+        let role = $(this).val();
+        if (role === 'Fakultas') {
             $('#edit_fakultas_container').show();
             $('#edit_fakultas_id').prop('required', true);
+            $('#edit_prodi_container').hide();
+            $('#edit_prodi_id').prop('required', false).val('').trigger('change');
+        } else if (role === 'Kaprodi') {
+            $('#edit_fakultas_container').hide();
+            $('#edit_fakultas_id').prop('required', false).val('').trigger('change');
+            $('#edit_prodi_container').show();
+            $('#edit_prodi_id').prop('required', true);
         } else {
             $('#edit_fakultas_container').hide();
             $('#edit_fakultas_id').prop('required', false).val('').trigger('change');
+            $('#edit_prodi_container').hide();
+            $('#edit_prodi_id').prop('required', false).val('').trigger('change');
         }
     });
 
@@ -77,6 +98,9 @@
             }
             if (selected.data('fakultas-id') && $('#edit_role').val() === 'Fakultas') {
                 $('#edit_fakultas_id').val(selected.data('fakultas-id')).trigger('change');
+            }
+            if (selected.data('prodi-id') && $('#edit_role').val() === 'Kaprodi') {
+                $('#edit_prodi_id').val(selected.data('prodi-id')).trigger('change');
             }
         } else {
             $('#edit_username').val('').prop('readonly', false);

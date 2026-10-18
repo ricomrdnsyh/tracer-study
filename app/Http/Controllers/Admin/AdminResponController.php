@@ -21,22 +21,32 @@ class AdminResponController extends Controller
     public function index()
     {
         $kuesioner = Kuesioner::orderByTahunTerbaru()->get();
-        $fakultas = Fakultas::orderBy('nama_fakultas')->get();
+        $user = auth()->user();
+        $isFakultas = $user && $user->role === 'Fakultas';
+        $isKaprodi = $user && $user->role === 'Kaprodi';
 
-        if (auth()->user()->role === 'Fakultas') {
-            $prodi = Prodi::where('fakultas_id', auth()->user()->fakultas_id)->orderBy('nama_prodi')->get();
+        if ($isKaprodi) {
+            $fakultas = collect();
+            $prodi = Prodi::where('id_prodi', $user->prodi_id)->get();
+        } elseif ($isFakultas) {
+            $fakultas = Fakultas::where('id_fakultas', $user->fakultas_id)->get();
+            $prodi = Prodi::where('fakultas_id', $user->fakultas_id)->orderBy('nama_prodi')->get();
         } else {
+            $fakultas = Fakultas::orderBy('nama_fakultas')->get();
             $prodi = Prodi::orderBy('nama_prodi')->get();
         }
 
-        return view('admin.respon.index', compact('kuesioner', 'fakultas', 'prodi'));
+        return view('admin.respon.index', compact('kuesioner', 'fakultas', 'prodi', 'isFakultas', 'isKaprodi'));
     }
 
     public function getRespon(Request $request)
     {
         $query = ResponTracer::with(['mahasiswa.prodi.fakultas', 'kuesioner'])->select(['id_respon', 'mahasiswa_id', 'kuesioner_id', 'status', 'tgl_isi'])->orderByDesc('tgl_isi');
 
-        if (auth()->user()->role === 'Fakultas') {
+        if (auth()->user()->role === 'Kaprodi') {
+            $nimList = Mahasiswa::where('prodi_id', auth()->user()->prodi_id)->pluck('nim')->toArray();
+            $query->whereIn('mahasiswa_id', $nimList);
+        } elseif (auth()->user()->role === 'Fakultas') {
             $facultyProdiIds = Prodi::where('fakultas_id', auth()->user()->fakultas_id)->pluck('id_prodi')->toArray();
             $nimList = Mahasiswa::whereIn('prodi_id', $facultyProdiIds)->pluck('nim')->toArray();
             $query->whereIn('mahasiswa_id', $nimList);
@@ -96,7 +106,11 @@ class AdminResponController extends Controller
             'pekerjaanAlumni'
         ]);
 
-        if (auth()->user()->role === 'Fakultas') {
+        if (auth()->user()->role === 'Kaprodi') {
+            $query->whereHas('mahasiswa', function ($q) {
+                $q->where('prodi_id', auth()->user()->prodi_id);
+            });
+        } elseif (auth()->user()->role === 'Fakultas') {
             $query->whereHas('mahasiswa.prodi', function ($q) {
                 $q->where('fakultas_id', auth()->user()->fakultas_id);
             });
@@ -202,6 +216,10 @@ class AdminResponController extends Controller
                 ->where('nim', trim((string) $request->nim))
                 ->firstOrFail();
 
+            if ($this->isKaprodiScope() && !$this->inOwnProdi($mahasiswaTarget)) {
+                abort(403, 'Mahasiswa tersebut bukan dari program studi Anda.');
+            }
+
             if ($this->isFakultasScope() && !$this->inOwnFakultas($mahasiswaTarget)) {
                 abort(403, 'Mahasiswa tersebut bukan dari fakultas Anda.');
             }
@@ -232,6 +250,10 @@ class AdminResponController extends Controller
 
         $nim = trim((string) $request->nim);
         $mahasiswa = Mahasiswa::with('prodi')->where('nim', $nim)->firstOrFail();
+
+        if ($this->isKaprodiScope() && !$this->inOwnProdi($mahasiswa)) {
+            return back()->with('error', 'Mahasiswa tersebut bukan dari program studi Anda.');
+        }
 
         if ($this->isFakultasScope() && !$this->inOwnFakultas($mahasiswa)) {
             return back()->with('error', 'Mahasiswa tersebut bukan dari fakultas Anda.');
@@ -283,7 +305,9 @@ class AdminResponController extends Controller
 
         $query = Mahasiswa::with('prodi')->select(['nim', 'nama', 'prodi_id']);
 
-        if ($this->isFakultasScope()) {
+        if ($this->isKaprodiScope()) {
+            $query->where('prodi_id', auth()->user()->prodi_id);
+        } elseif ($this->isFakultasScope()) {
             $prodiIds = Prodi::where('fakultas_id', auth()->user()->fakultas_id)->pluck('id_prodi')->toArray();
             $query->whereIn('prodi_id', $prodiIds);
         }
@@ -321,10 +345,20 @@ class AdminResponController extends Controller
         return auth()->user() && auth()->user()->role === 'Fakultas';
     }
 
+    private function isKaprodiScope(): bool
+    {
+        return auth()->user() && auth()->user()->role === 'Kaprodi';
+    }
+
     private function inOwnFakultas(Mahasiswa $mahasiswa): bool
     {
         return $mahasiswa->prodi
             && (string) $mahasiswa->prodi->fakultas_id === (string) auth()->user()->fakultas_id;
+    }
+
+    private function inOwnProdi(Mahasiswa $mahasiswa): bool
+    {
+        return (string) $mahasiswa->prodi_id === (string) auth()->user()->prodi_id;
     }
 
     private function akademikCocok(Kuesioner $kuesioner, Mahasiswa $mahasiswa): bool

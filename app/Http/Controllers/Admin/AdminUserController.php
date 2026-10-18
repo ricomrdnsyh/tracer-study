@@ -19,6 +19,7 @@ class AdminUserController extends Controller
     public function index(Request $request)
     {
         $fakultas = \App\Models\Fakultas::all();
+        $prodis = \App\Models\Prodi::orderBy('nama_prodi')->get();
         $forceRefresh = $request->boolean('refresh_sso');
         try {
             $karyawans = $this->clientSSO->getKaryawanFromApi($forceRefresh);
@@ -34,12 +35,12 @@ class AdminUserController extends Controller
             $dosens = [];
         }
 
-        return view('admin.users.index', compact('fakultas', 'karyawans', 'dosens'));
+        return view('admin.users.index', compact('fakultas', 'prodis', 'karyawans', 'dosens'));
     }
 
     public function getUsers()
     {
-        $query = User::with('fakultas')->select(['id', 'username', 'name', 'email', 'role', 'fakultas_id'])->orderByDesc('created_at');
+        $query = User::with(['fakultas', 'prodi'])->select(['id', 'username', 'name', 'email', 'role', 'fakultas_id', 'prodi_id'])->orderByDesc('created_at');
 
         return DataTables::of($query)
             ->addColumn('action', function ($row) {
@@ -67,13 +68,13 @@ class AdminUserController extends Controller
 
     public function show(string $id)
     {
-        $user = User::findOrFail($id);
+        $user = User::with(['fakultas', 'prodi'])->findOrFail($id);
         return view('admin.users.show', compact('user'));
     }
 
     public function edit(string $id)
     {
-        $user = User::with('fakultas')->findOrFail($id);
+        $user = User::with(['fakultas', 'prodi'])->findOrFail($id);
         return response()->json($user);
     }
 
@@ -86,6 +87,7 @@ class AdminUserController extends Controller
             'password'    => Hash::make($request->password),
             'role'        => $request->role,
             'fakultas_id' => $request->role === 'Fakultas' ? $request->fakultas_id : null,
+            'prodi_id'    => $request->role === 'Kaprodi' ? $request->prodi_id : null,
         ]);
 
         return redirect()->route('admin.users.index')->with('success', 'Data user berhasil ditambahkan.');
@@ -101,6 +103,7 @@ class AdminUserController extends Controller
             'email'       => $request->email,
             'role'        => $request->role,
             'fakultas_id' => $request->role === 'Fakultas' ? $request->fakultas_id : null,
+            'prodi_id'    => $request->role === 'Kaprodi' ? $request->prodi_id : null,
         ];
 
         if ($request->filled('password')) {

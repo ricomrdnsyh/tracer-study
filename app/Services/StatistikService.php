@@ -20,16 +20,17 @@ class StatistikService
     {
         $user = auth()->user();
         $isFakultas = $user && $user->role === 'Fakultas';
+        $isKaprodi = $user && $user->role === 'Kaprodi';
 
         $kuesionerId = $request->input('kuesioner_id');
         $akademikId = $request->input('akademik_id');
         $fakultasId = $isFakultas ? $user->fakultas_id : $request->input('fakultas_id');
-        $prodiId = $request->input('prodi_id');
+        $prodiId = $isKaprodi ? $user->prodi_id : $request->input('prodi_id');
 
         $kuesionerId = ($kuesionerId && $kuesionerId !== 'all') ? (int) $kuesionerId : null;
         $akademikId = ($akademikId && $akademikId !== 'all') ? (string) $akademikId : null;
         $fakultasId = ($fakultasId && $fakultasId !== 'all') ? (int) $fakultasId : null;
-        $prodiId = ($prodiId && $prodiId !== 'all') ? (int) $prodiId : null;
+        $prodiId = ($prodiId && $prodiId !== 'all') ? (string) $prodiId : null;
 
         $mahasiswaQuery = Mahasiswa::query();
         if ($akademikId) {

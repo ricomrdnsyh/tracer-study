@@ -15,9 +15,18 @@
                 if (response.role === 'Fakultas') {
                     $('#show_fakultas_container').show();
                     $('#show_fakultas').val(response.fakultas ? response.fakultas.nama_fakultas : '-');
+                    $('#show_prodi_container').hide();
+                    $('#show_prodi').val('');
+                } else if (response.role === 'Kaprodi') {
+                    $('#show_fakultas_container').hide();
+                    $('#show_fakultas').val('');
+                    $('#show_prodi_container').show();
+                    $('#show_prodi').val(response.prodi ? response.prodi.nama_prodi : '-');
                 } else {
                     $('#show_fakultas_container').hide();
                     $('#show_fakultas').val('');
+                    $('#show_prodi_container').hide();
+                    $('#show_prodi').val('');
                 }
             },
             error: function() {
@@ -33,6 +42,8 @@
         $('#show_role').val('');
         $('#show_fakultas_container').hide();
         $('#show_fakultas').val('');
+        $('#show_prodi_container').hide();
+        $('#show_prodi').val('');
     });
 </script>
 

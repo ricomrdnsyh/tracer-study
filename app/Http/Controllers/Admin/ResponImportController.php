@@ -104,10 +104,16 @@ class ResponImportController extends Controller
 
         $user = auth()->user();
         $isFakultas = ($user && $user->role === 'Fakultas');
+        $isKaprodi = ($user && $user->role === 'Kaprodi');
         $userFakultasId = $user ? $user->fakultas_id : null;
+        $userProdiId = $user ? $user->prodi_id : null;
 
         if ($isFakultas && empty($userFakultasId)) {
             return back()->with('error', 'Akun Anda tidak terhubung dengan fakultas manapun.');
+        }
+
+        if ($isKaprodi && empty($userProdiId)) {
+            return back()->with('error', 'Akun Anda tidak terhubung dengan program studi manapun.');
         }
 
         try {
@@ -167,7 +173,12 @@ class ResponImportController extends Controller
                         continue;
                     }
 
-                    if ($isFakultas) {
+                    if ($isKaprodi) {
+                        if (!$mahasiswa->prodi || (string) $mahasiswa->prodi_id !== (string) $userProdiId) {
+                            $skippedFakultasCount++;
+                            continue;
+                        }
+                    } elseif ($isFakultas) {
                         if (!$mahasiswa->prodi || (string) $mahasiswa->prodi->fakultas_id !== (string) $userFakultasId) {
                             $skippedFakultasCount++;
                             continue;
@@ -405,13 +416,15 @@ class ResponImportController extends Controller
 
             if ($importedCount === 0) {
                 if ($skippedFakultasCount > 0) {
-                    return back()->with('error', "Tidak ada data yang diimport. Seluruh data ($skippedFakultasCount mahasiswa) dilewati karena bukan merupakan mahasiswa dari fakultas Anda.");
+                    $unitNama = $isKaprodi ? 'program studi' : 'fakultas';
+                    return back()->with('error', "Tidak ada data yang diimport. Seluruh data ($skippedFakultasCount mahasiswa) dilewati karena bukan merupakan mahasiswa dari {$unitNama} Anda.");
                 }
                 return back()->with('error', 'Tidak ada data yang berhasil diimport (Pastikan Data Mahasiswa Terdaftar di Tabel Mahasiswa Lulusan Tracer Study). Silahkan menghubungi admin!');
             }
 
             if ($skippedFakultasCount > 0) {
-                return back()->with('warning', "Berhasil mengimport respon untuk $importedCount mahasiswa fakultas Anda. Sebanyak $skippedFakultasCount data mahasiswa dari fakultas lain dilewati.");
+                $unitNama = $isKaprodi ? 'program studi' : 'fakultas';
+                return back()->with('warning', "Berhasil mengimport respon untuk $importedCount mahasiswa {$unitNama} Anda. Sebanyak $skippedFakultasCount data mahasiswa dari {$unitNama} lain dilewati.");
             }
 
             return back()->with('success', "Berhasil mengimport respon untuk $importedCount mahasiswa secara instan.");
@@ -432,7 +445,11 @@ class ResponImportController extends Controller
         $query = ResponTracer::with(['mahasiswa', 'jawabanDetails'])
             ->where('kuesioner_id', $request->kuesioner_id);
 
-        if (auth()->user()->role === 'Fakultas') {
+        if (auth()->user()->role === 'Kaprodi') {
+            $query->whereHas('mahasiswa', function ($q) {
+                $q->where('prodi_id', auth()->user()->prodi_id);
+            });
+        } elseif (auth()->user()->role === 'Fakultas') {
             $query->whereHas('mahasiswa.prodi', function ($q) {
                 $q->where('fakultas_id', auth()->user()->fakultas_id);
             });

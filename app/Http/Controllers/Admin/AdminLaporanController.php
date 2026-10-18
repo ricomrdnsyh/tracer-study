@@ -17,9 +17,14 @@ class AdminLaporanController extends Controller
         $kuesioner = Kuesioner::orderByTahunTerbaru()->get();
         $user = auth()->user();
         $isFakultas = $user && $user->role === 'Fakultas';
+        $isKaprodi = $user && $user->role === 'Kaprodi';
         $userFakultasId = $isFakultas ? $user->fakultas_id : null;
+        $userProdiId = $isKaprodi ? $user->prodi_id : null;
 
-        if ($isFakultas) {
+        if ($isKaprodi) {
+            $fakultas = collect();
+            $prodi = Prodi::where('id_prodi', $userProdiId)->get();
+        } elseif ($isFakultas) {
             $fakultas = Fakultas::where('id_fakultas', $userFakultasId)->get();
             $prodi = Prodi::where('fakultas_id', $userFakultasId)->orderBy('nama_prodi')->get();
         } else {
@@ -29,6 +34,6 @@ class AdminLaporanController extends Controller
 
         $hasCustomTemplate = Storage::exists('templates/laporan_prodi.docx');
 
-        return view('admin.laporan.index', compact('kuesioner', 'fakultas', 'prodi', 'hasCustomTemplate', 'isFakultas', 'userFakultasId'));
+        return view('admin.laporan.index', compact('kuesioner', 'fakultas', 'prodi', 'hasCustomTemplate', 'isFakultas', 'isKaprodi', 'userFakultasId', 'userProdiId'));
     }
 }

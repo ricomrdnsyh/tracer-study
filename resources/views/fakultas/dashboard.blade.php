@@ -1,10 +1,9 @@
 @extends('layouts.main')
 
-@section('title', 'Dashboard Admin')
+@section('title', 'Dashboard Fakultas')
 
 @section('css')
     <style>
-
         @keyframes fadeInUp {
             from {
                 opacity: 0;
@@ -282,6 +281,7 @@
             transform: translateY(-3px);
             box-shadow: 0 4px 15px rgba(var(--bs-primary-rgb), 0.15);
         }
+
         .pintasan-btn.pintasan-primary:hover .pintasan-title {
             color: var(--bs-primary) !important;
         }
@@ -293,6 +293,7 @@
             transform: translateY(-3px);
             box-shadow: 0 4px 15px rgba(var(--bs-info-rgb), 0.15);
         }
+
         .pintasan-btn.pintasan-info:hover .pintasan-title {
             color: var(--bs-info) !important;
         }
@@ -304,6 +305,7 @@
             transform: translateY(-3px);
             box-shadow: 0 4px 15px rgba(var(--bs-success-rgb), 0.15);
         }
+
         .pintasan-btn.pintasan-success:hover .pintasan-title {
             color: var(--bs-success) !important;
         }
@@ -312,6 +314,7 @@
             background-color: rgba(0, 158, 247, 0.15) !important;
             border-color: rgba(0, 158, 247, 0.4) !important;
         }
+
         [data-bs-theme="dark"] .pintasan-btn.pintasan-primary:hover .pintasan-title {
             color: #009ef7 !important;
         }
@@ -320,6 +323,7 @@
             background-color: rgba(114, 57, 234, 0.15) !important;
             border-color: rgba(114, 57, 234, 0.4) !important;
         }
+
         [data-bs-theme="dark"] .pintasan-btn.pintasan-info:hover .pintasan-title {
             color: #7239ea !important;
         }
@@ -328,6 +332,7 @@
             background-color: rgba(80, 205, 137, 0.15) !important;
             border-color: rgba(80, 205, 137, 0.4) !important;
         }
+
         [data-bs-theme="dark"] .pintasan-btn.pintasan-success:hover .pintasan-title {
             color: #50cd89 !important;
         }
@@ -466,7 +471,8 @@
                                     </div>
                                     <div>
                                         <div class="text-gray-600 fw-semibold fs-7 mb-1">Total Alumni</div>
-                                        <div class="text-gray-900 fw-bolder fs-2x">{{ number_format($statsData['kpi']['total_alumni'] ?? 0, 0, ',', '.') }}</div>
+                                        <div class="text-gray-900 fw-bolder fs-2x">
+                                            {{ number_format($statsData['kpi']['total_alumni'] ?? 0, 0, ',', '.') }}</div>
                                     </div>
                                 </div>
                             </div>
@@ -481,7 +487,9 @@
                                     </div>
                                     <div>
                                         <div class="text-gray-600 fw-semibold fs-7 mb-1">Total Responden</div>
-                                        <div class="text-gray-900 fw-bolder fs-2x">{{ number_format($statsData['kpi']['total_responden'] ?? 0, 0, ',', '.') }}</div>
+                                        <div class="text-gray-900 fw-bolder fs-2x">
+                                            {{ number_format($statsData['kpi']['total_responden'] ?? 0, 0, ',', '.') }}
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -495,21 +503,26 @@
                                     </div>
                                     <div>
                                         <div class="text-gray-600 fw-semibold fs-7 mb-1">Response Rate</div>
-                                        <div class="text-gray-900 fw-bolder fs-2x">{{ number_format($statsData['kpi']['response_rate'] ?? 0, 1, ',', '.') }}%</div>
+                                        <div class="text-gray-900 fw-bolder fs-2x">
+                                            {{ number_format($statsData['kpi']['response_rate'] ?? 0, 1, ',', '.') }}%
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
                         <div class="col-xl-3 col-md-6 animate-fade-in-up delay-500">
-                            <div class="card stat-card shadow-sm h-100 border border-dashed border-warning bg-light-warning">
+                            <div
+                                class="card stat-card shadow-sm h-100 border border-dashed border-warning bg-light-warning">
                                 <div class="card-body d-flex align-items-center">
                                     <div class="stat-icon bg-body shadow-sm me-4 icon-glow-warning">
                                         <i class="fa-solid fa-briefcase fs-2x text-warning"></i>
                                     </div>
                                     <div>
                                         <div class="text-gray-600 fw-semibold fs-7 mb-1">Rata-rata Waktu Tunggu</div>
-                                        <div class="text-gray-900 fw-bolder fs-2x">{{ $statsData['kpi']['waktu_tunggu_bekerja'] ?? 0 }} <span class="fs-6 fw-semibold text-gray-600">Bulan</span></div>
+                                        <div class="text-gray-900 fw-bolder fs-2x">
+                                            {{ $statsData['kpi']['waktu_tunggu_bekerja'] ?? 0 }} <span
+                                                class="fs-6 fw-semibold text-gray-600">Bulan</span></div>
                                     </div>
                                 </div>
                             </div>
@@ -542,7 +555,8 @@
                                                 style="border-radius: 1rem;">
                                                 <i class="fa-solid fa-chart-pie fs-2x me-4 text-info"></i>
                                                 <div class="text-start">
-                                                    <span class="d-block fw-bold fs-5 text-gray-800 pintasan-title" style="transition: color 0.3s ease;">Statistik & Laporan</span>
+                                                    <span class="d-block fw-bold fs-5 text-gray-800 pintasan-title"
+                                                        style="transition: color 0.3s ease;">Statistik & Laporan</span>
                                                     <span class="d-block fw-semibold fs-7 text-gray-600 mt-1">Lihat
                                                         analitik keseluruhan</span>
                                                 </div>
@@ -554,7 +568,8 @@
                                                 style="border-radius: 1rem;">
                                                 <i class="fa-solid fa-file-word fs-2x me-4 text-success"></i>
                                                 <div class="text-start">
-                                                    <span class="d-block fw-bold fs-5 text-gray-800 pintasan-title" style="transition: color 0.3s ease;">Cetak Laporan</span>
+                                                    <span class="d-block fw-bold fs-5 text-gray-800 pintasan-title"
+                                                        style="transition: color 0.3s ease;">Cetak Laporan</span>
                                                     <span class="d-block fw-semibold fs-7 text-gray-600 mt-1">Ekspor
                                                         hasil tracer ke Word</span>
                                                 </div>
@@ -672,4 +687,3 @@
         })();
     </script>
 @endsection
-

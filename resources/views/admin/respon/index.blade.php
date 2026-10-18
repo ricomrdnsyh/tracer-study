@@ -146,7 +146,48 @@
                                 <h5 class="text-primary mb-4"><i class="fas fa-filter text-primary me-2"></i>Filter Data
                                 </h5>
                                 <div class="row g-5">
-                                    @if (auth()->user()->role !== 'Fakultas')
+                                    @if ($isKaprodi)
+                                        <input type="hidden" id="filter_prodi" value="{{ auth()->user()->prodi_id }}">
+                                        <div class="col-lg-6 col-md-12 col-sm-12">
+                                            <label class="form-label fw-bold mb-2">Program Studi:</label>
+                                            <input type="text" class="form-control form-control-sm bg-light text-muted"
+                                                value="{{ auth()->user()->prodi->nama_prodi ?? 'Program Studi' }}" readonly>
+                                        </div>
+                                        <div class="col-lg-6 col-md-12 col-sm-12">
+                                            <label class="form-label fw-bold mb-2">Kuesioner:</label>
+                                            <select id="filter_kuesioner" class="form-select form-select-sm"
+                                                data-control="select2" data-placeholder="Semua Kuesioner"
+                                                data-allow-clear="true">
+                                                <option value="">Semua Kuesioner</option>
+                                                @foreach ($kuesioner as $k)
+                                                    <option value="{{ $k->id_kuesioner }}">{{ $k->judul }}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                    @elseif ($isFakultas)
+                                        <div class="col-lg-6 col-md-12 col-sm-12">
+                                            <label class="form-label fw-bold mb-2">Program Studi:</label>
+                                            <select id="filter_prodi" class="form-select form-select-sm" data-control="select2"
+                                                data-placeholder="Semua Program Studi" data-allow-clear="true">
+                                                <option value="">Semua Program Studi</option>
+                                                @foreach ($prodi as $p)
+                                                    <option value="{{ $p->id_prodi }}" data-fakultas="{{ $p->fakultas_id }}">
+                                                        {{ $p->nama_prodi }}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                        <div class="col-lg-6 col-md-12 col-sm-12">
+                                            <label class="form-label fw-bold mb-2">Kuesioner:</label>
+                                            <select id="filter_kuesioner" class="form-select form-select-sm"
+                                                data-control="select2" data-placeholder="Semua Kuesioner"
+                                                data-allow-clear="true">
+                                                <option value="">Semua Kuesioner</option>
+                                                @foreach ($kuesioner as $k)
+                                                    <option value="{{ $k->id_kuesioner }}">{{ $k->judul }}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                    @else
                                         <div class="col-lg-4 col-md-12 col-sm-12">
                                             <label class="form-label fw-bold mb-2">Fakultas:</label>
                                             <select id="filter_fakultas" class="form-select form-select-sm"
@@ -158,31 +199,29 @@
                                                 @endforeach
                                             </select>
                                         </div>
+                                        <div class="col-lg-4 col-md-12 col-sm-12">
+                                            <label class="form-label fw-bold mb-2">Program Studi:</label>
+                                            <select id="filter_prodi" class="form-select form-select-sm" data-control="select2"
+                                                data-placeholder="Semua Program Studi" data-allow-clear="true">
+                                                <option value="">Semua Program Studi</option>
+                                                @foreach ($prodi as $p)
+                                                    <option value="{{ $p->id_prodi }}" data-fakultas="{{ $p->fakultas_id }}">
+                                                        {{ $p->nama_prodi }}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                        <div class="col-lg-4 col-md-12 col-sm-12">
+                                            <label class="form-label fw-bold mb-2">Kuesioner:</label>
+                                            <select id="filter_kuesioner" class="form-select form-select-sm"
+                                                data-control="select2" data-placeholder="Semua Kuesioner"
+                                                data-allow-clear="true">
+                                                <option value="">Semua Kuesioner</option>
+                                                @foreach ($kuesioner as $k)
+                                                    <option value="{{ $k->id_kuesioner }}">{{ $k->judul }}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
                                     @endif
-                                    <div
-                                        class="{{ auth()->user()->role !== 'Fakultas' ? 'col-lg-4' : 'col-lg-6' }} col-md-12 col-sm-12">
-                                        <label class="form-label fw-bold mb-2">Program Studi:</label>
-                                        <select id="filter_prodi" class="form-select form-select-sm" data-control="select2"
-                                            data-placeholder="Semua Program Studi" data-allow-clear="true">
-                                            <option value="">Semua Program Studi</option>
-                                            @foreach ($prodi as $p)
-                                                <option value="{{ $p->id_prodi }}" data-fakultas="{{ $p->fakultas_id }}">
-                                                    {{ $p->nama_prodi }}</option>
-                                            @endforeach
-                                        </select>
-                                    </div>
-                                    <div
-                                        class="{{ auth()->user()->role !== 'Fakultas' ? 'col-lg-4' : 'col-lg-6' }} col-md-12 col-sm-12">
-                                        <label class="form-label fw-bold mb-2">Kuesioner:</label>
-                                        <select id="filter_kuesioner" class="form-select form-select-sm"
-                                            data-control="select2" data-placeholder="Semua Kuesioner"
-                                            data-allow-clear="true">
-                                            <option value="">Semua Kuesioner</option>
-                                            @foreach ($kuesioner as $k)
-                                                <option value="{{ $k->id_kuesioner }}">{{ $k->judul }}</option>
-                                            @endforeach
-                                        </select>
-                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -226,7 +265,19 @@
                     enctype="multipart/form-data">
                     @csrf
                     <div class="modal-body">
-                        @if (auth()->user()->role === 'Fakultas')
+                        @if ($isKaprodi)
+                            <div
+                                class="alert alert-dismissible bg-light-primary border border-primary border-dashed d-flex align-items-center p-3 mb-4">
+                                <i class="fa-solid fa-circle-info fs-2 text-primary me-3"></i>
+                                <div class="d-flex flex-column">
+                                    <span class="fs-7 text-gray-800">
+                                        Import dibatasi: Hanya data mahasiswa dari program studi
+                                        <strong>{{ auth()->user()->prodi->nama_prodi ?? 'Anda' }}</strong>
+                                        yang akan dimasukkan ke sistem. Data mahasiswa program studi lain otomatis dilewati.
+                                    </span>
+                                </div>
+                            </div>
+                        @elseif ($isFakultas)
                             <div
                                 class="alert alert-dismissible bg-light-primary border border-primary border-dashed d-flex align-items-center p-3 mb-4">
                                 <i class="fa-solid fa-circle-info fs-2 text-primary me-3"></i>
@@ -363,7 +414,7 @@
                         </div>
 
                         <div class="row g-3">
-                            @if (auth()->user()->role !== 'Fakultas')
+                            @if (!$isFakultas && !$isKaprodi)
                                 <div class="col-md-12">
                                     <label class="d-flex align-items-center fw-bolder mb-1">Fakultas (Opsional)</label>
                                     <select name="fakultas_id" class="form-select form-select-sm" data-control="select2"
@@ -376,6 +427,7 @@
                                     </select>
                                 </div>
                             @endif
+                            @if (!$isKaprodi)
                             <div class="col-md-12">
                                 <label class="d-flex align-items-center fw-bolder mb-1">Program Studi (Opsional)</label>
                                 <select name="prodi_id" class="form-select form-select-sm" data-control="select2"
@@ -387,6 +439,7 @@
                                     @endforeach
                                 </select>
                             </div>
+                            @endif
                         </div>
                     </div>
                     <div class="modal-footer">

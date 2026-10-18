@@ -16,7 +16,11 @@ class AdminPerusahaanController extends Controller
 
         $query = PekerjaanAlumni::whereNotNull('nama');
         
-        if (auth()->user()->role === 'Fakultas') {
+        if (auth()->user()->role === 'Kaprodi') {
+            $query->whereHas('responTracer.mahasiswa', function ($q) {
+                $q->where('prodi_id', auth()->user()->prodi_id);
+            });
+        } elseif (auth()->user()->role === 'Fakultas') {
             $query->whereHas('responTracer.mahasiswa.prodi', function ($q) {
                 $q->where('fakultas_id', auth()->user()->fakultas_id);
             });
@@ -42,7 +46,11 @@ class AdminPerusahaanController extends Controller
             )
             ->whereNotNull('nama');
 
-            if (auth()->user()->role === 'Fakultas') {
+            if (auth()->user()->role === 'Kaprodi') {
+                $query->whereHas('responTracer.mahasiswa', function ($q) {
+                    $q->where('prodi_id', auth()->user()->prodi_id);
+                });
+            } elseif (auth()->user()->role === 'Fakultas') {
                 $query->whereHas('responTracer.mahasiswa.prodi', function ($q) {
                     $q->where('fakultas_id', auth()->user()->fakultas_id);
                 });
@@ -78,7 +86,11 @@ class AdminPerusahaanController extends Controller
         $nama = urldecode($nama);
         
         $perusahaanQuery = PekerjaanAlumni::where('nama', $nama);
-        if (auth()->user()->role === 'Fakultas') {
+        if (auth()->user()->role === 'Kaprodi') {
+            $perusahaanQuery->whereHas('responTracer.mahasiswa', function ($q) {
+                $q->where('prodi_id', auth()->user()->prodi_id);
+            });
+        } elseif (auth()->user()->role === 'Fakultas') {
             $perusahaanQuery->whereHas('responTracer.mahasiswa.prodi', function ($q) {
                 $q->where('fakultas_id', auth()->user()->fakultas_id);
             });
@@ -90,7 +102,11 @@ class AdminPerusahaanController extends Controller
 
         $pekerjaanListQuery = PekerjaanAlumni::with(['responTracer.mahasiswa.prodi.fakultas'])
             ->where('nama', $nama);
-        if (auth()->user()->role === 'Fakultas') {
+        if (auth()->user()->role === 'Kaprodi') {
+            $pekerjaanListQuery->whereHas('responTracer.mahasiswa', function ($q) {
+                $q->where('prodi_id', auth()->user()->prodi_id);
+            });
+        } elseif (auth()->user()->role === 'Fakultas') {
             $pekerjaanListQuery->whereHas('responTracer.mahasiswa.prodi', function ($q) {
                 $q->where('fakultas_id', auth()->user()->fakultas_id);
             });

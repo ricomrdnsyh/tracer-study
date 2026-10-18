@@ -19,6 +19,7 @@ use App\Http\Controllers\Admin\ResponImportController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Auth\BantuanNimController;
 use App\Http\Controllers\Fakultas\DashboardController as FakultasDashboard;
+use App\Http\Controllers\Kaprodi\DashboardController as KaprodiDashboard;
 use App\Http\Controllers\Mahasiswa\DashboardController as MahasiswaDashboard;
 use App\Http\Controllers\Mahasiswa\TracerController;
 use App\Http\Controllers\SsoController;
@@ -56,7 +57,7 @@ Route::get('/api/prodi-by-fakultas/{fakultasId}', [BantuanNimController::class, 
 
 Route::get('log-viewer', [LogViewerController::class, 'index'])->middleware(['auth', 'role:Admin']);
 
-Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:Admin,Fakultas'])->group(function () {
+Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:Admin,Fakultas,Kaprodi'])->group(function () {
     Route::middleware(['role:Admin'])->group(function () {
         Route::get('/dashboard', [AdminDashboard::class, 'index'])->name('dashboard');
         Route::get('/users/data', [AdminUserController::class, 'getUsers'])->name('users.data');
@@ -119,6 +120,10 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:Admin,Fakultas
 
 Route::prefix('fakultas')->name('fakultas.')->middleware(['auth', 'role:Fakultas'])->group(function () {
     Route::get('/dashboard', [FakultasDashboard::class, 'index'])->name('dashboard');
+});
+
+Route::prefix('kaprodi')->name('kaprodi.')->middleware(['auth', 'role:Kaprodi'])->group(function () {
+    Route::get('/dashboard', [KaprodiDashboard::class, 'index'])->name('dashboard');
 });
 
 Route::prefix('mahasiswa')->name('mahasiswa.')->middleware(['auth:mahasiswa'])->group(function () {

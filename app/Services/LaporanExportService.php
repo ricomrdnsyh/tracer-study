@@ -35,7 +35,13 @@ class LaporanExportService
 
         $user = auth()->user();
         $isFakultas = $user && $user->role === 'Fakultas';
+        $isKaprodi = $user && $user->role === 'Kaprodi';
         $userFakultasId = $isFakultas ? $user->fakultas_id : null;
+        $userProdiId = $isKaprodi ? $user->prodi_id : null;
+
+        if ($isKaprodi && $userProdiId) {
+            $filters['prodi_id'] = $userProdiId;
+        }
 
         $fakultasId = $isFakultas ? $userFakultasId : ($filters['fakultas_id'] ?? null);
 

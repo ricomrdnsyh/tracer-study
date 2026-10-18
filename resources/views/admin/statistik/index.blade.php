@@ -443,20 +443,53 @@
 
                             <div class="row g-4 align-items-end">
 
-                                <div class="{{ $isFakultas ? 'col-xl-5 col-lg-5' : 'col-xl-3 col-lg-3' }} col-md-6 col-sm-12">
-                                    <label class="form-label fw-bold fs-7 mb-2 text-gray-700">Kuesioner Tracer:</label>
-                                    <select id="filter_kuesioner" class="form-select form-select-sm" data-control="select2"
-                                        data-placeholder="Semua Kuesioner" data-allow-clear="true">
-                                        <option value="all">Semua Kuesioner</option>
-                                        @foreach ($kuesionerList as $k)
-                                            <option value="{{ $k->id_kuesioner }}">{{ $k->judul }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
-
-                                @if ($isFakultas)
+                                @if ($isKaprodi)
+                                    <input type="hidden" id="filter_prodi" value="{{ $userProdiId }}">
+                                    <div class="col-xl-10 col-lg-10 col-md-12 col-sm-12">
+                                        <label class="form-label fw-bold fs-7 mb-2 text-gray-700">Kuesioner Tracer:</label>
+                                        <select id="filter_kuesioner" class="form-select form-select-sm" data-control="select2"
+                                            data-placeholder="Semua Kuesioner" data-allow-clear="true">
+                                            <option value="all">Semua Kuesioner</option>
+                                            @foreach ($kuesionerList as $k)
+                                                <option value="{{ $k->id_kuesioner }}">{{ $k->judul }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                @elseif ($isFakultas)
+                                    <div class="col-xl-5 col-lg-5 col-md-6 col-sm-12">
+                                        <label class="form-label fw-bold fs-7 mb-2 text-gray-700">Kuesioner Tracer:</label>
+                                        <select id="filter_kuesioner" class="form-select form-select-sm" data-control="select2"
+                                            data-placeholder="Semua Kuesioner" data-allow-clear="true">
+                                            <option value="all">Semua Kuesioner</option>
+                                            @foreach ($kuesionerList as $k)
+                                                <option value="{{ $k->id_kuesioner }}">{{ $k->judul }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
                                     <input type="hidden" id="filter_fakultas" value="{{ $userFakultasId }}">
+                                    <div class="col-xl-5 col-lg-5 col-md-6 col-sm-12">
+                                        <label class="form-label fw-bold fs-7 mb-2 text-gray-700">Program Studi:</label>
+                                        <select id="filter_prodi" class="form-select form-select-sm" data-control="select2"
+                                            data-placeholder="Semua Prodi" data-allow-clear="true">
+                                            <option value="all">Semua Program Studi</option>
+                                            @foreach ($prodiList as $p)
+                                                <option value="{{ $p->id_prodi }}" data-fakultas="{{ $p->fakultas_id }}">
+                                                    {{ $p->nama_prodi }} ({{ $p->jenjang ?? 'S1' }})
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                    </div>
                                 @else
+                                    <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12">
+                                        <label class="form-label fw-bold fs-7 mb-2 text-gray-700">Kuesioner Tracer:</label>
+                                        <select id="filter_kuesioner" class="form-select form-select-sm" data-control="select2"
+                                            data-placeholder="Semua Kuesioner" data-allow-clear="true">
+                                            <option value="all">Semua Kuesioner</option>
+                                            @foreach ($kuesionerList as $k)
+                                                <option value="{{ $k->id_kuesioner }}">{{ $k->judul }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
                                     <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12">
                                         <label class="form-label fw-bold fs-7 mb-2 text-gray-700">Fakultas:</label>
                                         <select id="filter_fakultas" class="form-select form-select-sm"
@@ -470,20 +503,19 @@
                                             @endforeach
                                         </select>
                                     </div>
+                                    <div class="col-xl-4 col-lg-4 col-md-6 col-sm-12">
+                                        <label class="form-label fw-bold fs-7 mb-2 text-gray-700">Program Studi:</label>
+                                        <select id="filter_prodi" class="form-select form-select-sm" data-control="select2"
+                                            data-placeholder="Semua Prodi" data-allow-clear="true">
+                                            <option value="all">Semua Program Studi</option>
+                                            @foreach ($prodiList as $p)
+                                                <option value="{{ $p->id_prodi }}" data-fakultas="{{ $p->fakultas_id }}">
+                                                    {{ $p->nama_prodi }} ({{ $p->jenjang ?? 'S1' }})
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                    </div>
                                 @endif
-
-                                <div class="{{ $isFakultas ? 'col-xl-5 col-lg-5' : 'col-xl-4 col-lg-4' }} col-md-6 col-sm-12">
-                                    <label class="form-label fw-bold fs-7 mb-2 text-gray-700">Program Studi:</label>
-                                    <select id="filter_prodi" class="form-select form-select-sm" data-control="select2"
-                                        data-placeholder="Semua Prodi" data-allow-clear="true">
-                                        <option value="all">Semua Program Studi</option>
-                                        @foreach ($prodiList as $p)
-                                            <option value="{{ $p->id_prodi }}" data-fakultas="{{ $p->fakultas_id }}">
-                                                {{ $p->nama_prodi }} ({{ $p->jenjang ?? 'S1' }})
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                </div>
 
                                 <div class="col-xl-2 col-lg-2 col-md-12 col-sm-12 d-flex justify-content-xl-end">
                                     <button type="button" class="btn btn-sm btn-primary fw-bold w-100"

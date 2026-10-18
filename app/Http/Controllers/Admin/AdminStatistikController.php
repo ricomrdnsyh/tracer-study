@@ -29,9 +29,14 @@ class AdminStatistikController extends Controller
 
         $user = auth()->user();
         $isFakultas = $user && $user->role === 'Fakultas';
+        $isKaprodi = $user && $user->role === 'Kaprodi';
         $userFakultasId = $isFakultas ? $user->fakultas_id : null;
+        $userProdiId = $isKaprodi ? $user->prodi_id : null;
 
-        if ($isFakultas) {
+        if ($isKaprodi) {
+            $fakultasList = collect();
+            $prodiList = Prodi::where('id_prodi', $userProdiId)->get();
+        } elseif ($isFakultas) {
             $fakultasList = Fakultas::where('id_fakultas', $userFakultasId)->get();
             $prodiList = Prodi::where('fakultas_id', $userFakultasId)->orderBy('nama_prodi')->get();
         } else {
@@ -50,7 +55,9 @@ class AdminStatistikController extends Controller
             'fakultasList',
             'prodiList',
             'isFakultas',
+            'isKaprodi',
             'userFakultasId',
+            'userProdiId',
             'statsData'
         ));
     }

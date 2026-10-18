@@ -207,6 +207,9 @@
                             @elseif($roleName === 'Fakultas')
                                 <a class="menu-link {{ Request::is('fakultas/dashboard*') ? 'active' : '' }}"
                                     href="{{ route('fakultas.dashboard') }}">
+                            @elseif($roleName === 'Kaprodi')
+                                <a class="menu-link {{ Request::is('kaprodi/dashboard*') ? 'active' : '' }}"
+                                    href="{{ route('kaprodi.dashboard') }}">
                                 @else
                                     <a class="menu-link {{ Request::is('admin/dashboard*') ? 'active' : '' }}"
                                         href="{{ route('admin.dashboard') }}">
@@ -233,7 +236,7 @@
                         </div>
                     @endif
 
-                    @if (!$isMahasiswa && in_array($roleName, ['Admin', 'Fakultas']))
+                    @if (!$isMahasiswa && in_array($roleName, ['Admin', 'Fakultas', 'Kaprodi']))
                         @if ($roleName === 'Admin')
                             <div class="menu-item">
                                 <a class="menu-link {{ Request::is('admin/users*') ? 'active' : '' }}"
