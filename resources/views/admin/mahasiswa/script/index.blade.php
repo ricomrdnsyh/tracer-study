@@ -60,6 +60,8 @@
                     d.fakultas_id = $('#filter_fakultas').val();
                     d.prodi_id = $('#filter_prodi').val();
                     d.tahun_keluar = $('#filter_tahun_keluar').val();
+                    d.kuesioner_id = $('#filter_kuesioner').val();
+                    d.status_tracer = $('#filter_status_tracer').val();
                 }
             },
             columns: [{
@@ -108,6 +110,13 @@
                         return '<span class="badge ' + badgeClass + ' text-capitalize">' + data + '</span>';
                     }
                 },
+                {
+                    data: 'status_tracer',
+                    name: 'status_tracer',
+                    orderable: false,
+                    searchable: false,
+                    className: 'text-center'
+                },
             ]
         });
 
@@ -134,16 +143,8 @@
             });
         }
 
-        $('#filter_prodi, #filter_tahun_keluar').on('change', function() {
+        $('#filter_prodi, #filter_tahun_keluar, #filter_kuesioner, #filter_status_tracer').on('change', function() {
             $('#example').DataTable().ajax.reload();
-        });
-
-        $('#btn_reset_filter').on('click', function() {
-            if ($('#filter_fakultas').length) {
-                $('#filter_fakultas').val('').trigger('change.select2');
-            }
-            $('#filter_prodi').val('').trigger('change');
-            $('#filter_tahun_keluar').val('').trigger('change');
         });
 
         @if ($message = Session::get('success'))

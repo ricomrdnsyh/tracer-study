@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Fakultas;
+use App\Models\Kuesioner;
 use App\Models\Mahasiswa;
 use App\Models\Prodi;
 use App\Models\TahunAkademik;
@@ -20,6 +21,11 @@ class AdminMahasiswaController extends Controller
         if (auth()->user()->role === 'Fakultas') {
             $prodi->where('fakultas_id', auth()->user()->fakultas_id);
             $fakultas = Fakultas::where('id_fakultas', auth()->user()->fakultas_id)->get();
+        } elseif (auth()->user()->role === 'Kaprodi') {
+            $prodi->where('id_prodi', auth()->user()->prodi_id);
+            $fakultas = Fakultas::whereHas('prodis', function ($q) {
+                $q->where('id_prodi', auth()->user()->prodi_id);
+            })->get();
         } else {
             $fakultas = Fakultas::orderBy('nama_fakultas')->get();
         }
@@ -27,7 +33,18 @@ class AdminMahasiswaController extends Controller
         $prodi = $prodi->get();
         $tahunAkademik = TahunAkademik::orderByDesc('id_smt')->get();
         $listTahunLulus = TahunAkademik::getListTahunLulus();
-        return view('admin.mahasiswa.index', compact('prodi', 'tahunAkademik', 'listTahunLulus', 'fakultas'));
+        $listKuesioner = Kuesioner::orderByTahunTerbaru()->get();
+        $defaultKuesioner = $listKuesioner->firstWhere('status', 'Published') ?: $listKuesioner->first();
+        $defaultKuesionerId = $defaultKuesioner ? $defaultKuesioner->id_kuesioner : null;
+
+        return view('admin.mahasiswa.index', compact(
+            'prodi',
+            'tahunAkademik',
+            'listTahunLulus',
+            'fakultas',
+            'listKuesioner',
+            'defaultKuesionerId'
+        ));
     }
 
     public function getMahasiswa(Request $request)
@@ -36,7 +53,9 @@ class AdminMahasiswaController extends Controller
             ->select(['nim', 'prodi_id', 'nama', 'email', 'status', 'no_hp', 'akademik_id', 'created_at'])
             ->orderByDesc('created_at');
 
-        if (auth()->user()->role === 'Fakultas') {
+        if (auth()->user()->role === 'Kaprodi') {
+            $query->where('prodi_id', auth()->user()->prodi_id);
+        } elseif (auth()->user()->role === 'Fakultas') {
             $facultyProdiIds = Prodi::where('fakultas_id', auth()->user()->fakultas_id)->pluck('id_prodi')->toArray();
             $query->whereIn('prodi_id', $facultyProdiIds);
         } elseif ($request->filled('fakultas_id') && $request->fakultas_id !== 'all' && $request->fakultas_id !== '') {
@@ -57,12 +76,45 @@ class AdminMahasiswaController extends Controller
             $query->where('status', $request->status);
         }
 
+        $targetKuesionerId = $request->filled('kuesioner_id') ? $request->kuesioner_id : null;
+
+        $query->withExists(['responTracers as sudah_mengisi' => function ($q) use ($targetKuesionerId) {
+            if (!empty($targetKuesionerId) && $targetKuesionerId !== 'all') {
+                $q->where('kuesioner_id', $targetKuesionerId);
+            }
+            $q->where('status', 'Selesai');
+        }]);
+
+        if ($request->filled('status_tracer') && $request->status_tracer !== 'all') {
+            if ($request->status_tracer === 'sudah') {
+                $query->whereHas('responTracers', function ($q) use ($targetKuesionerId) {
+                    if (!empty($targetKuesionerId) && $targetKuesionerId !== 'all') {
+                        $q->where('kuesioner_id', $targetKuesionerId);
+                    }
+                    $q->where('status', 'Selesai');
+                });
+            } elseif ($request->status_tracer === 'belum') {
+                $query->whereDoesntHave('responTracers', function ($q) use ($targetKuesionerId) {
+                    if (!empty($targetKuesionerId) && $targetKuesionerId !== 'all') {
+                        $q->where('kuesioner_id', $targetKuesionerId);
+                    }
+                    $q->where('status', 'Selesai');
+                });
+            }
+        }
+
         return DataTables::of($query)
             ->addColumn('prodi_nama', function ($row) {
                 return $row->prodi ? $row->prodi->nama_prodi : '-';
             })
             ->addColumn('tahun_keluar_label', function ($row) {
                 return $row->tahun_keluar_label;
+            })
+            ->addColumn('status_tracer', function ($row) {
+                if ($row->sudah_mengisi) {
+                    return '<span class="badge badge-light-success fw-bold text-success">Sudah Mengisi</span>';
+                }
+                return '<span class="badge badge-light-danger fw-bold text-danger">Belum Mengisi</span>';
             })
             ->addColumn('action', function ($row) {
                 $showBtn = '<a href="javascript:void(0)"
@@ -74,7 +126,7 @@ class AdminMahasiswaController extends Controller
 
                 return '<div class="text-center">' . $showBtn . '</div>';
             })
-            ->rawColumns(['action'])
+            ->rawColumns(['action', 'status_tracer'])
             ->make(true);
     }
 

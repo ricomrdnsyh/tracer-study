@@ -44,6 +44,11 @@ class Mahasiswa extends Authenticatable
         return $this->belongsTo(TahunAkademik::class, 'akademik_id', 'id_smt');
     }
 
+    public function responTracers()
+    {
+        return $this->hasMany(ResponTracer::class, 'mahasiswa_id', 'nim');
+    }
+
     /**
      * Get the attributes that should be cast.
      *

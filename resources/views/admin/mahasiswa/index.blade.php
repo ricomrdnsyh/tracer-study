@@ -119,11 +119,10 @@
                         </div>
                         <div class="card-body py-4 px-8 filter-container mt-4">
                             <div class="border border-dashed rounded p-5 mb-5" style="border-color: #b5b5c3 !important;">
-                                <h5 class="text-primary mb-4"><i class="fas fa-filter text-primary me-2"></i>Filter Data
-                                </h5>
+                                <h5 class="text-primary mb-4"><i class="fas fa-filter text-primary me-2"></i>Filter Data</h5>
                                 <div class="row g-5">
                                     @if (auth()->user()->role !== 'Fakultas')
-                                        <div class="col-lg-4 col-md-12 col-sm-12">
+                                        <div class="col-lg-4 col-md-6 col-sm-12">
                                             <label class="form-label fw-bold mb-2">Fakultas:</label>
                                             <select id="filter_fakultas" class="form-select form-select-sm"
                                                 data-control="select2" data-placeholder="Semua Fakultas"
@@ -136,7 +135,7 @@
                                         </div>
                                     @endif
                                     <div
-                                        class="{{ auth()->user()->role !== 'Fakultas' ? 'col-lg-4' : 'col-lg-6' }} col-md-12 col-sm-12">
+                                        class="{{ auth()->user()->role !== 'Fakultas' ? 'col-lg-4 col-md-6' : 'col-lg-6 col-md-6' }} col-sm-12">
                                         <label class="form-label fw-bold mb-2">Program Studi:</label>
                                         <select id="filter_prodi" class="form-select form-select-sm" data-control="select2"
                                             data-placeholder="Semua Program Studi" data-allow-clear="true">
@@ -148,7 +147,7 @@
                                         </select>
                                     </div>
                                     <div
-                                        class="{{ auth()->user()->role !== 'Fakultas' ? 'col-lg-4' : 'col-lg-6' }} col-md-12 col-sm-12">
+                                        class="{{ auth()->user()->role !== 'Fakultas' ? 'col-lg-4 col-md-12' : 'col-lg-6 col-md-6' }} col-sm-12">
                                         <label class="form-label fw-bold mb-2">Tahun Kelulusan:</label>
                                         <select id="filter_tahun_keluar" class="form-select form-select-sm"
                                             data-control="select2" data-placeholder="Semua Tahun Kelulusan"
@@ -157,6 +156,29 @@
                                             @foreach ($listTahunLulus as $item)
                                                 <option value="{{ $item['tahun_lulus'] }}">{{ $item['label'] }}</option>
                                             @endforeach
+                                        </select>
+                                    </div>
+                                    <div class="col-lg-6 col-md-6 col-sm-12">
+                                        <label class="form-label fw-bold mb-2">Target Kuesioner:</label>
+                                        <select id="filter_kuesioner" class="form-select form-select-sm"
+                                            data-control="select2" data-placeholder="Semua Kuesioner"
+                                            data-allow-clear="true">
+                                            <option value="">Semua Kuesioner</option>
+                                            @foreach ($listKuesioner as $k)
+                                                <option value="{{ $k->id_kuesioner }}" {{ $defaultKuesionerId == $k->id_kuesioner ? 'selected' : '' }}>
+                                                    {{ $k->judul }} {{ $k->target_lulusan_label ? '(' . $k->target_lulusan_label . ')' : '' }} {{ $k->status === 'Published' ? '[Aktif]' : '' }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                    <div class="col-lg-6 col-md-6 col-sm-12">
+                                        <label class="form-label fw-bold mb-2">Status Pengisian Tracer:</label>
+                                        <select id="filter_status_tracer" class="form-select form-select-sm"
+                                            data-control="select2" data-placeholder="Semua Status Tracer"
+                                            data-allow-clear="true">
+                                            <option value="">Semua Status Tracer</option>
+                                            <option value="belum">Belum Mengisi</option>
+                                            <option value="sudah">Sudah Mengisi</option>
                                         </select>
                                     </div>
                                 </div>
@@ -175,6 +197,7 @@
                                             <th class="min-w-150px">Prodi</th>
                                             <th class="min-w-125px">Tahun Akademik</th>
                                             <th class="min-w-100px">Status</th>
+                                            <th class="min-w-125px text-center">Status Tracer</th>
                                         </tr>
                                     </thead>
                                     <tbody class="fw-bold text-gray-800"></tbody>
