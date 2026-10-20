@@ -42,7 +42,7 @@ Route::get('/', function () {
 Route::redirect('/login', '/login-admin');
 Route::get('/login-admin', [AuthController::class, 'showLoginForm'])->name('login');
 Route::post('/login-admin', [AuthController::class, 'login'])->name('login.post');
-Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+Route::match(['get', 'post'], '/logout', [AuthController::class, 'logout'])->name('logout');
 
 // SSO Routes
 Route::any('/sso', [SsoController::class, 'sso'])->name('sso.callback');

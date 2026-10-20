@@ -89,14 +89,14 @@ class AuthController extends Controller
     {
         if (Auth::guard('web')->check()) {
             Auth::guard('web')->logout();
-        } elseif (Auth::guard('mahasiswa')->check()) {
+        }
+        if (Auth::guard('mahasiswa')->check()) {
             Auth::guard('mahasiswa')->logout();
         }
 
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect('/login-admin');
+        return redirect('https://sso.unuja.ac.id');
     }
 }
-

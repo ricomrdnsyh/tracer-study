@@ -221,7 +221,7 @@
                             Kuesioner</a>
                     </nav>
                     <span class="w-px h-6 bg-slate-200 mx-2"></span>
-                    <a href="{{ route('login') }}"
+                    <a href="https://sso.unuja.ac.id"
                         class="inline-flex items-center gap-2 px-5 py-2.5 text-[13px] font-bold text-white rounded-xl bg-navy-900 hover:bg-blue-700 shadow-lg shadow-navy-900/20 transition-all">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2"
@@ -232,7 +232,7 @@
                 </div>
 
                 <div class="hidden sm:flex lg:hidden items-center gap-2.5 ml-auto">
-                    <a href="{{ route('login') }}"
+                    <a href="https://sso.unuja.ac.id"
                         class="inline-flex items-center gap-2 px-5 py-2.5 text-[13px] font-bold text-white rounded-xl bg-navy-900 hover:bg-blue-700 shadow-lg shadow-navy-900/20 transition-all">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2"
@@ -274,7 +274,7 @@
                     Kuesioner</a>
             </nav>
             <div class="pt-3 mt-2 border-t border-slate-100">
-                <a href="{{ route('login') }}"
+                <a href="https://sso.unuja.ac.id"
                     class="flex items-center justify-center gap-2 px-4 py-3 text-[13px] font-bold text-white rounded-xl bg-navy-900">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2"

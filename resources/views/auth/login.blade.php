@@ -272,24 +272,15 @@
 
 <body id="kt_body" class="bg-body bg-grid">
     <div class="d-flex flex-column flex-root auth-wrapper">
-        <!-- Top Navigation Bar -->
-        <div class="w-100 py-4 px-4 px-md-7 d-flex justify-content-between align-items-center">
-            <a href="{{ route('home') }}" class="btn-back-home" title="Kembali ke Beranda Tracer Study">
-                <i class="fas fa-arrow-left"></i>
-                <span>Kembali ke Beranda</span>
-            </a>
-            <a href="{{ route('tracer.login') }}" class="btn-switch-auth d-none d-sm-inline-flex" title="Khusus Alumni pengisi kuesioner">
-                <span>Alumni? Isi Kuesioner</span>
-                <i class="fas fa-arrow-right ms-1"></i>
-            </a>
-        </div>
 
         <div class="d-flex flex-center flex-column flex-column-fluid px-4 py-5 pb-lg-20">
             <div class="w-lg-500px mx-auto auth-card">
                 <div class="auth-card-inner">
                     <div class="text-center mb-7">
-                        <a href="{{ route('home') }}" class="d-inline-block mb-4" title="Kembali ke Beranda Tracer Study">
-                            <img alt="Logo Tracer Study" src="{{ asset('assets/media/logos/tracer-dark.png') }}" class="h-50px" style="max-height: 50px; width: auto;" />
+                        <a href="{{ route('home') }}" class="d-inline-block mb-4"
+                            title="Kembali ke Beranda Tracer Study">
+                            <img alt="Logo Tracer Study" src="{{ asset('assets/media/logos/tracer-dark.png') }}"
+                                class="h-50px" style="max-height: 50px; width: auto;" />
                         </a>
                         <h1 class="text-dark mb-2 auth-title fs-2">Selamat Datang</h1>
                         <p class="text-muted auth-subtitle">Silakan masuk untuk mengakses Tracer Study UNUJA</p>
@@ -416,4 +407,3 @@
 </body>
 
 </html>
-
