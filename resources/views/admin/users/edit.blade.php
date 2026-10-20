@@ -18,22 +18,31 @@
                                     <span>Pilih Pegawai (Dosen / Karyawan)</span>
                                 </label>
                                 <select id="edit_karyawan" class="form-select form-select-sm fs-sm-8 fs-lg-6"
-                                    data-control="select2" data-placeholder="Pilih Dosen / Karyawan" data-allow-clear="true"
-                                    data-dropdown-parent="#form_edit" required>
+                                    data-control="select2" data-placeholder="Pilih Dosen / Karyawan"
+                                    data-allow-clear="true" data-dropdown-parent="#form_edit" required>
                                     <option value="">-- Pilih Dosen / Karyawan --</option>
                                     @if (!empty($dosens) && is_array($dosens))
                                         <optgroup label="Dosen">
                                             @foreach ($dosens as $dosen)
                                                 @php
-                                                    $namaDosen = trim(($dosen['gelar_depan'] ? $dosen['gelar_depan'] . ' ' : '') . ($dosen['nama_penduduk'] ?? '') . ($dosen['gelar_belakang'] ? ', ' . $dosen['gelar_belakang'] : ''));
-                                                    $unitDosen = $dosen['prodi'] ?? $dosen['fakultas'] ?? 'Dosen';
+                                                    $namaDosen = trim(
+                                                        ($dosen['gelar_depan'] ? $dosen['gelar_depan'] . ' ' : '') .
+                                                            ($dosen['nama_penduduk'] ?? '') .
+                                                            ($dosen['gelar_belakang']
+                                                                ? ', ' . $dosen['gelar_belakang']
+                                                                : ''),
+                                                    );
+                                                    $unitDosen = $dosen['prodi'] ?? ($dosen['fakultas'] ?? 'Dosen');
+                                                    $nidn = !empty($dosen['nidn'])
+                                                        ? ' (NIDN: ' . $dosen['nidn'] . ')'
+                                                        : '';
                                                 @endphp
                                                 <option value="{{ $dosen['id_penduduk'] ?? '' }}"
                                                     data-nama="{{ $namaDosen }}"
                                                     data-email="{{ $dosen['email'] ?? '' }}"
-                                                    data-fakultas-id="{{ $dosen['id_fakultas'] ?? '' }}"
-                                                    data-prodi-id="{{ $dosen['id_prodi'] ?? $dosen['prodi_id'] ?? '' }}">
-                                                    {{ $namaDosen }} - {{ $unitDosen }} (Dosen)
+                                                    data-fakultas-id="{{ $dosen['id_fakultas'] ?? ($dosen['kd_fakultas'] ?? '') }}"
+                                                    data-prodi-id="{{ $dosen['id_sms'] ?? ($dosen['id_prodi'] ?? ($dosen['prodi_id'] ?? '')) }}">
+                                                    {{ $namaDosen }}{{ $nidn }} - {{ $unitDosen }} (Dosen)
                                                 </option>
                                             @endforeach
                                         </optgroup>
@@ -42,7 +51,15 @@
                                         <optgroup label="Karyawan / Tenaga Kependidikan">
                                             @foreach ($karyawans as $karyawan)
                                                 @php
-                                                    $namaKaryawan = trim(($karyawan['gelar_depan'] ? $karyawan['gelar_depan'] . ' ' : '') . ($karyawan['nama_penduduk'] ?? '') . ($karyawan['gelar_belakang'] ? ', ' . $karyawan['gelar_belakang'] : ''));
+                                                    $namaKaryawan = trim(
+                                                        ($karyawan['gelar_depan']
+                                                            ? $karyawan['gelar_depan'] . ' '
+                                                            : '') .
+                                                            ($karyawan['nama_penduduk'] ?? '') .
+                                                            ($karyawan['gelar_belakang']
+                                                                ? ', ' . $karyawan['gelar_belakang']
+                                                                : ''),
+                                                    );
                                                 @endphp
                                                 <option value="{{ $karyawan['id_penduduk'] ?? '' }}"
                                                     data-nama="{{ $namaKaryawan }}"
@@ -62,7 +79,8 @@
                                     <span>Username</span>
                                 </label>
                                 <input type="text" name="username" id="edit_username"
-                                    class="form-control form-control-sm fs-sm-8 fs-lg-6 @error('username') is-invalid @enderror" required readonly maxlength="20">
+                                    class="form-control form-control-sm fs-sm-8 fs-lg-6 @error('username') is-invalid @enderror"
+                                    required readonly maxlength="20">
 
                                 <div class="invalid-feedback">Username wajib diisi (maks 10 karakter).</div>
                             </div>
@@ -74,7 +92,8 @@
                                     <span>Nama Lengkap</span>
                                 </label>
                                 <input type="text" name="name" id="edit_name"
-                                    class="form-control form-control-sm fs-sm-8 fs-lg-6 @error('name') is-invalid @enderror" required readonly maxlength="100">
+                                    class="form-control form-control-sm fs-sm-8 fs-lg-6 @error('name') is-invalid @enderror"
+                                    required readonly maxlength="100">
 
                                 <div class="invalid-feedback">Name wajib diisi.</div>
                             </div>
@@ -86,7 +105,8 @@
                                     <span>Email</span>
                                 </label>
                                 <input type="email" name="email" id="edit_email"
-                                    class="form-control form-control-sm fs-sm-8 fs-lg-6 @error('email') is-invalid @enderror" maxlength="100">
+                                    class="form-control form-control-sm fs-sm-8 fs-lg-6 @error('email') is-invalid @enderror"
+                                    maxlength="100">
 
                                 <div class="invalid-feedback">Format Email tidak valid.</div>
                             </div>
@@ -97,7 +117,10 @@
                                 <label class="d-flex align-items-center fs-sm-8 fs-lg-6 fw-bolder mb-1 required">
                                     <span>Role</span>
                                 </label>
-                                <select name="role" id="edit_role" class="form-select form-select-sm fs-sm-8 fs-lg-6 @error('role') is-invalid @enderror" data-control="select2" data-hide-search="true" data-dropdown-parent="#form_edit" data-placeholder="Pilih Role" required>
+                                <select name="role" id="edit_role"
+                                    class="form-select form-select-sm fs-sm-8 fs-lg-6 @error('role') is-invalid @enderror"
+                                    data-control="select2" data-hide-search="true" data-dropdown-parent="#form_edit"
+                                    data-placeholder="Pilih Role" required>
                                     <option value="" disabled selected>Pilih Role</option>
                                     <option value="Admin">Admin</option>
                                     <option value="Fakultas">Fakultas</option>
@@ -113,9 +136,12 @@
                                 <label class="d-flex align-items-center fs-sm-8 fs-lg-6 fw-bolder mb-1 required">
                                     <span>Fakultas</span>
                                 </label>
-                                <select name="fakultas_id" id="edit_fakultas_id" class="form-select form-select-sm fs-sm-8 fs-lg-6 @error('fakultas_id') is-invalid @enderror" data-control="select2" data-dropdown-parent="#form_edit" data-placeholder="Pilih Fakultas">
+                                <select name="fakultas_id" id="edit_fakultas_id"
+                                    class="form-select form-select-sm fs-sm-8 fs-lg-6 @error('fakultas_id') is-invalid @enderror"
+                                    data-control="select2" data-dropdown-parent="#form_edit"
+                                    data-placeholder="Pilih Fakultas">
                                     <option value="" disabled selected>Pilih Fakultas</option>
-                                    @foreach($fakultas as $f)
+                                    @foreach ($fakultas as $f)
                                         <option value="{{ $f->id_fakultas }}">{{ $f->nama_fakultas }}</option>
                                     @endforeach
                                 </select>
@@ -129,9 +155,12 @@
                                 <label class="d-flex align-items-center fs-sm-8 fs-lg-6 fw-bolder mb-1 required">
                                     <span>Program Studi</span>
                                 </label>
-                                <select name="prodi_id" id="edit_prodi_id" class="form-select form-select-sm fs-sm-8 fs-lg-6 @error('prodi_id') is-invalid @enderror" data-control="select2" data-dropdown-parent="#form_edit" data-placeholder="Pilih Program Studi">
+                                <select name="prodi_id" id="edit_prodi_id"
+                                    class="form-select form-select-sm fs-sm-8 fs-lg-6 @error('prodi_id') is-invalid @enderror"
+                                    data-control="select2" data-dropdown-parent="#form_edit"
+                                    data-placeholder="Pilih Program Studi">
                                     <option value="" disabled selected>Pilih Program Studi</option>
-                                    @foreach($prodis as $p)
+                                    @foreach ($prodis as $p)
                                         <option value="{{ $p->id_prodi }}">{{ $p->nama_prodi }}</option>
                                     @endforeach
                                 </select>
@@ -146,7 +175,8 @@
                                     <span>Password (Kosongkan jika tidak ingin diubah)</span>
                                 </label>
                                 <input type="password" name="password" id="edit_password"
-                                    class="form-control form-control-sm fs-sm-8 fs-lg-6 @error('password') is-invalid @enderror" minlength="6">
+                                    class="form-control form-control-sm fs-sm-8 fs-lg-6 @error('password') is-invalid @enderror"
+                                    minlength="6">
 
                                 <div class="invalid-feedback">Password minimal 6 karakter.</div>
                             </div>

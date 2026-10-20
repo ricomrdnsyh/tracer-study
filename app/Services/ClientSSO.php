@@ -60,33 +60,39 @@ class ClientSSO
             Cache::forget('sso_karyawan_list');
         }
 
-        return Cache::remember('sso_karyawan_list', 1800, function () use ($forceRefresh) {
-            $allKaryawans = [];
+        $cached = Cache::get('sso_karyawan_list');
+        if (!empty($cached) && is_array($cached)) {
+            return $cached;
+        }
 
-            try {
-                $lembagaList = $this->getLembagaFromApi($forceRefresh);
+        $allKaryawans = [];
+        try {
+            $lembagaList = $this->getLembagaFromApi($forceRefresh);
 
-                foreach ($lembagaList as $lembaga) {
-                    if (isset($lembaga['id_lembaga'])) {
-                        try {
-                            $data = $this->fetchData('karyawan', [
-                                'id_lembaga' => $lembaga['id_lembaga'],
-                                'pagination' => 'off'
-                            ]);
-                            if (is_array($data)) {
-                                $allKaryawans = array_merge($allKaryawans, $data);
-                            }
-                        } catch (\Throwable $e) {
-                            Log::warning("Gagal fetch karyawan lembaga {$lembaga['id_lembaga']}: " . $e->getMessage());
+            foreach ($lembagaList as $lembaga) {
+                if (isset($lembaga['id_lembaga'])) {
+                    try {
+                        $data = $this->fetchData('karyawan', [
+                            'id_lembaga' => $lembaga['id_lembaga'],
+                            'pagination' => 'off'
+                        ]);
+                        if (is_array($data)) {
+                            $allKaryawans = array_merge($allKaryawans, $data);
                         }
+                    } catch (\Throwable $e) {
+                        Log::warning("Gagal fetch karyawan lembaga {$lembaga['id_lembaga']}: " . $e->getMessage());
                     }
                 }
-            } catch (\Throwable $e) {
-                Log::warning("Gagal fetch karyawan SSO: " . $e->getMessage());
             }
 
-            return $allKaryawans;
-        });
+            if (!empty($allKaryawans)) {
+                Cache::put('sso_karyawan_list', $allKaryawans, 3600);
+            }
+        } catch (\Throwable $e) {
+            Log::warning("Gagal fetch karyawan SSO: " . $e->getMessage());
+        }
+
+        return $allKaryawans;
     }
 
     public function getDosenFromApi(bool $forceRefresh = false): array
@@ -95,14 +101,21 @@ class ClientSSO
             Cache::forget('sso_dosen_list');
         }
 
-        return Cache::remember('sso_dosen_list', 1800, function () {
-            try {
-                return $this->fetchData('dosen');
-            } catch (\Throwable $e) {
-                Log::warning("Gagal fetch dosen SSO: " . $e->getMessage());
-                return [];
+        $cached = Cache::get('sso_dosen_list');
+        if (!empty($cached) && is_array($cached)) {
+            return $cached;
+        }
+
+        try {
+            $dosens = $this->fetchAllPaginated('dosen');
+            if (!empty($dosens) && is_array($dosens)) {
+                Cache::put('sso_dosen_list', $dosens, 3600);
             }
-        });
+            return $dosens;
+        } catch (\Throwable $e) {
+            Log::warning("Gagal fetch dosen SSO: " . $e->getMessage());
+            return [];
+        }
     }
 
     public function fetchAllPaginated(string $filter, array $additionalPayload = []): array
@@ -129,7 +142,7 @@ class ClientSSO
             ->connectTimeout(15)
             ->post($url . '?page=1', $payload);
 
-        if ($response->status() === 401) {
+        if (in_array($response->status(), [401, 403])) {
             $auth = $this->auth->refreshAuth();
             $url = $auth['data_url'];
             $headers = $auth['headers'];
@@ -207,7 +220,7 @@ class ClientSSO
             ->connectTimeout(10)
             ->post($url, $payload);
 
-        if ($response->status() === 401) {
+        if (in_array($response->status(), [401, 403])) {
             $auth = $this->auth->refreshAuth();
             $url = $auth['data_url'];
             $headers = $auth['headers'];

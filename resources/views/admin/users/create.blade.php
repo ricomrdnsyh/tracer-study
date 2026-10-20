@@ -17,22 +17,31 @@
                                     <span>Pilih Pegawai (Dosen / Karyawan)</span>
                                 </label>
                                 <select id="karyawan" class="form-select form-select-sm fs-sm-8 fs-lg-6"
-                                    data-control="select2" data-placeholder="Pilih Dosen / Karyawan" data-allow-clear="true"
-                                    data-dropdown-parent="#form_create" required>
+                                    data-control="select2" data-placeholder="Pilih Dosen / Karyawan"
+                                    data-allow-clear="true" data-dropdown-parent="#form_create" required>
                                     <option value="">-- Pilih Dosen / Karyawan --</option>
                                     @if (!empty($dosens) && is_array($dosens))
                                         <optgroup label="Dosen">
                                             @foreach ($dosens as $dosen)
                                                 @php
-                                                    $namaDosen = trim(($dosen['gelar_depan'] ? $dosen['gelar_depan'] . ' ' : '') . ($dosen['nama_penduduk'] ?? '') . ($dosen['gelar_belakang'] ? ', ' . $dosen['gelar_belakang'] : ''));
-                                                    $unitDosen = $dosen['prodi'] ?? $dosen['fakultas'] ?? 'Dosen';
+                                                    $namaDosen = trim(
+                                                        ($dosen['gelar_depan'] ? $dosen['gelar_depan'] . ' ' : '') .
+                                                            ($dosen['nama_penduduk'] ?? '') .
+                                                            ($dosen['gelar_belakang']
+                                                                ? ', ' . $dosen['gelar_belakang']
+                                                                : ''),
+                                                    );
+                                                    $unitDosen = $dosen['prodi'] ?? ($dosen['fakultas'] ?? 'Dosen');
+                                                    $nidn = !empty($dosen['nidn'])
+                                                        ? ' (NIDN: ' . $dosen['nidn'] . ')'
+                                                        : '';
                                                 @endphp
                                                 <option value="{{ $dosen['id_penduduk'] ?? '' }}"
                                                     data-nama="{{ $namaDosen }}"
                                                     data-email="{{ $dosen['email'] ?? '' }}"
-                                                    data-fakultas-id="{{ $dosen['id_fakultas'] ?? '' }}"
-                                                    data-prodi-id="{{ $dosen['id_prodi'] ?? $dosen['prodi_id'] ?? '' }}">
-                                                    {{ $namaDosen }} - {{ $unitDosen }} (Dosen)
+                                                    data-fakultas-id="{{ $dosen['id_fakultas'] ?? ($dosen['kd_fakultas'] ?? '') }}"
+                                                    data-prodi-id="{{ $dosen['id_sms'] ?? ($dosen['id_prodi'] ?? ($dosen['prodi_id'] ?? '')) }}">
+                                                    {{ $namaDosen }}{{ $nidn }} - {{ $unitDosen }} (Dosen)
                                                 </option>
                                             @endforeach
                                         </optgroup>
@@ -41,7 +50,15 @@
                                         <optgroup label="Karyawan / Tenaga Kependidikan">
                                             @foreach ($karyawans as $karyawan)
                                                 @php
-                                                    $namaKaryawan = trim(($karyawan['gelar_depan'] ? $karyawan['gelar_depan'] . ' ' : '') . ($karyawan['nama_penduduk'] ?? '') . ($karyawan['gelar_belakang'] ? ', ' . $karyawan['gelar_belakang'] : ''));
+                                                    $namaKaryawan = trim(
+                                                        ($karyawan['gelar_depan']
+                                                            ? $karyawan['gelar_depan'] . ' '
+                                                            : '') .
+                                                            ($karyawan['nama_penduduk'] ?? '') .
+                                                            ($karyawan['gelar_belakang']
+                                                                ? ', ' . $karyawan['gelar_belakang']
+                                                                : ''),
+                                                    );
                                                 @endphp
                                                 <option value="{{ $karyawan['id_penduduk'] ?? '' }}"
                                                     data-nama="{{ $namaKaryawan }}"
