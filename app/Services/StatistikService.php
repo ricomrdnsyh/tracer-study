@@ -106,7 +106,8 @@ class StatistikService
         $cariKerjaSet = array_flip($cariKerjaResponIds);
 
         $f505Collection = $coreAnswers->get('F505', collect());
-        $takeHomePayData = $this->buildTakeHomePayData($f505Collection, $nowFormatted);
+        $f505Bekerja = $f505Collection->filter(fn($d) => isset($bekerjaSet[$d->respon_id]));
+        $takeHomePayData = $this->buildTakeHomePayData($f505Bekerja, $nowFormatted);
 
         $f505Wiraswasta = $f505Collection->filter(fn($d) => isset($wiraswastaSet[$d->respon_id]));
         $takeHomePayWiraswastaData = $this->buildTakeHomePayData($f505Wiraswasta, $nowFormatted);
@@ -116,10 +117,10 @@ class StatistikService
         $f1101Bekerja = $coreAnswers->get('F1101', collect())->filter(fn($d) => isset($bekerjaSet[$d->respon_id]));
         $jenisInstansiData = $this->buildJenisInstansiData($f1101Bekerja, $nowFormatted);
 
-        $f502Bekerja = $coreAnswers->get('F502', collect())->filter(fn($d) => isset($bekerjaSet[$d->respon_id]) && (int)$d->id_pertanyaan === 2);
+        $f502Bekerja = $coreAnswers->get('F502', collect())->filter(fn($d) => isset($bekerjaSet[$d->respon_id]))->unique('respon_id');
         $waktuTungguBekerjaData = $this->calcWaktuTungguIntervals($f502Bekerja->pluck('jawaban_text'), $nowFormatted);
 
-        $f502Wiraswasta = $coreAnswers->get('F502', collect())->filter(fn($d) => isset($wiraswastaSet[$d->respon_id]) && (int)$d->id_pertanyaan === 25);
+        $f502Wiraswasta = $coreAnswers->get('F502', collect())->filter(fn($d) => isset($wiraswastaSet[$d->respon_id]))->unique('respon_id');
         $waktuTungguWiraswastaData = $this->calcWaktuTungguIntervals($f502Wiraswasta->pluck('jawaban_text'), $nowFormatted);
 
         $f14Bekerja = $coreAnswers->get('F14', collect())->filter(fn($d) => isset($bekerjaSet[$d->respon_id]));
@@ -184,7 +185,7 @@ class StatistikService
                 ->select([
                     'jawaban_detail.respon_id',
                     'pertanyaan.id_pertanyaan',
-                    'pertanyaan.kode_pertanyaan',
+                    DB::raw('UPPER(TRIM(pertanyaan.kode_pertanyaan)) as kode_pertanyaan'),
                     'jawaban_detail.jawaban_text',
                     'jawaban_detail.jawaban_json',
                 ])
@@ -524,20 +525,35 @@ class StatistikService
     private function calcWaktuTungguIntervals($answers, string $nowFormatted)
     {
         $c0_6 = 0; $c0_12 = 0; $c6_12 = 0; $cAbove12 = 0;
-        $sum = 0; $count = 0;
+        $sum = 0; $count = 0; $countAvg = 0;
         foreach ($answers as $ans) {
-            $str = trim((string)$ans);
-            if (is_numeric($str)) {
-                $m = (float)$str;
+            $raw = trim((string)$ans);
+            if ($raw === '') continue;
+            $clean = str_replace(',', '.', $raw);
+            if (is_numeric($clean)) {
+                $m = (float)$clean;
+            } elseif (preg_match('/^([0-9]+(?:\.[0-9]+)?)/', $clean, $matches)) {
+                $m = (float)$matches[1];
+            } else {
+                continue;
+            }
+
+            if ($m < 0) continue;
+
+            $count++;
+            if ($m <= 6) $c0_6++;
+            if ($m <= 12) $c0_12++;
+            if ($m > 6 && $m <= 12) $c6_12++;
+            if ($m > 12) $cAbove12++;
+
+            // Filter outlier ekstrem (misal salah input tahun 2023-2026 atau nominal gaji ribuan/jutaan):
+            // Batas wajar masa tunggu tracer study maksimal 60 bulan (5 tahun).
+            if ($m <= 60) {
                 $sum += $m;
-                $count++;
-                if ($m <= 6) $c0_6++;
-                if ($m <= 12) $c0_12++;
-                if ($m > 6 && $m <= 12) $c6_12++;
-                if ($m > 12) $cAbove12++;
+                $countAvg++;
             }
         }
-        $avg = $count > 0 ? round($sum / $count, 2) : 0;
+        $avg = $countAvg > 0 ? round($sum / $countAvg, 2) : 0;
         $totalRes = $count;
         $p0_6 = $totalRes > 0 ? round(($c0_6 / $totalRes) * 100, 2) : 0;
         $p0_12 = $totalRes > 0 ? round(($c0_12 / $totalRes) * 100, 2) : 0;

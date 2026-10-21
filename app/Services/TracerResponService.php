@@ -142,6 +142,11 @@ class TracerResponService
                     if ($isEmpty) {
                         $kode = strtoupper($pertanyaan->kode_pertanyaan ?? 'P');
                         $errors[$id] = "Pertanyaan [{$kode}] \"{$pertanyaan->teks_pertanyaan}\" wajib diisi.";
+                    } elseif (strtoupper(trim($pertanyaan->kode_pertanyaan ?? '')) === 'F502') {
+                        $cleanNum = str_replace(',', '.', trim((string)$val));
+                        if (!is_numeric($cleanNum) || (float)$cleanNum < 0 || (float)$cleanNum > 60) {
+                            $errors[$id] = "Pertanyaan [F502] masa tunggu harus berupa angka antara 0 sampai 60 bulan (jangan masukkan tahun atau nominal gaji).";
+                        }
                     }
                 }
             }

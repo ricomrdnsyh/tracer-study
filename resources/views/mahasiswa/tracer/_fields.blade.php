@@ -187,11 +187,21 @@
                                                                 {{ $pertanyaan->wajib ? 'required' : '' }}>
                                                         </div>
                                                     @elseif($pertanyaan->tipe_jawaban == 'number')
+                                                        @php
+                                                            $isF502 = strtoupper(trim($pertanyaan->kode_pertanyaan ?? '')) === 'F502';
+                                                        @endphp
                                                         <input type="number"
                                                             class="form-control form-control-sm border-gray-300"
                                                             name="jawaban[{{ $pertanyaan->id_pertanyaan }}]"
-                                                            placeholder="Masukkan angka..." value="{{ $answer }}"
+                                                            placeholder="{{ $isF502 ? 'Contoh: 0, 3, 6 (dalam bulan)' : 'Masukkan angka...' }}"
+                                                            value="{{ $answer }}"
+                                                            {{ $isF502 ? 'min=0 max=60' : '' }}
                                                             {{ $pertanyaan->wajib ? 'required' : '' }}>
+                                                        @if ($isF502)
+                                                            <div class="form-text text-muted fs-8 mt-1">
+                                                                <i class="fas fa-info-circle text-primary me-1"></i>Isi dalam <strong>satuan bulan</strong> (contoh: <code>0</code> jika sudah bekerja sebelum lulus, <code>3</code> jika 3 bulan setelah lulus). Maksimal 60 bulan. <em>Jangan mengisi tahun atau nominal gaji.</em>
+                                                            </div>
+                                                        @endif
                                                     @endif
                                                 </div>
                                             @endforeach
