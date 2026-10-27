@@ -88,26 +88,71 @@
                 "showMethod": "fadeIn",
                 "hideMethod": "fadeOut"
             };
-
-            @if (session('success'))
-                toastr.success(@json(session('success')));
-            @endif
-            @if (session('error'))
-                toastr.error(@json(session('error')));
-            @endif
-            @if (session('failed'))
-                toastr.error(@json(session('failed')));
-            @endif
-            @if (session('warning'))
-                toastr.warning(@json(session('warning')));
-            @endif
-            @if (session('info'))
-                toastr.info(@json(session('info')));
-            @endif
-            @if ($errors->any())
-                toastr.error(@json($errors->first()));
-            @endif
         }
+
+        $(function() {
+            @if (session('success'))
+                Swal.fire({
+                    text: @json(session('success')),
+                    icon: "success",
+                    buttonsStyling: false,
+                    confirmButtonText: "Ok, got it!",
+                    customClass: {
+                        confirmButton: "btn btn-primary"
+                    }
+                });
+            @elseif (session('error'))
+                Swal.fire({
+                    text: @json(session('error')),
+                    icon: "error",
+                    buttonsStyling: false,
+                    confirmButtonText: "Ok, got it!",
+                    customClass: {
+                        confirmButton: "btn btn-danger"
+                    }
+                });
+            @elseif (session('failed'))
+                Swal.fire({
+                    text: @json(session('failed')),
+                    icon: "error",
+                    buttonsStyling: false,
+                    confirmButtonText: "Ok, got it!",
+                    customClass: {
+                        confirmButton: "btn btn-danger"
+                    }
+                });
+            @elseif (session('warning'))
+                Swal.fire({
+                    text: @json(session('warning')),
+                    icon: "warning",
+                    buttonsStyling: false,
+                    confirmButtonText: "Ok, got it!",
+                    customClass: {
+                        confirmButton: "btn btn-warning"
+                    }
+                });
+            @elseif (session('info'))
+                Swal.fire({
+                    text: @json(session('info')),
+                    icon: "info",
+                    buttonsStyling: false,
+                    confirmButtonText: "Ok, got it!",
+                    customClass: {
+                        confirmButton: "btn btn-info"
+                    }
+                });
+            @elseif ($errors->any())
+                Swal.fire({
+                    text: @json($errors->first()),
+                    icon: "error",
+                    buttonsStyling: false,
+                    confirmButtonText: "Ok, got it!",
+                    customClass: {
+                        confirmButton: "btn btn-danger"
+                    }
+                });
+            @endif
+        });
     </script>
     @yield('js')
 </body>

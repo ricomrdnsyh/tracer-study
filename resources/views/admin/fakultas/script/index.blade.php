@@ -88,27 +88,6 @@
             ]
         });
 
-        @if ($message = Session::get('success'))
-            Swal.fire({
-                text: "{{ $message }}",
-                icon: "success",
-                confirmButtonText: "Ok, got it!",
-                confirmButtonColor: '#004289',
-            });
-        @endif
-
-        @if ($message = Session::get('failed'))
-            Swal.fire({
-                text: "{{ $message }}",
-                icon: "error",
-                buttonsStyling: false,
-                confirmButtonText: "Ok, got it!",
-                customClass: {
-                    confirmButton: "btn btn-sm btn-danger"
-                }
-            });
-        @endif
-
         $('#btn_sync_fakultas').on('click', function() {
             Swal.fire({
                 title: "Sinkronisasi Fakultas?",

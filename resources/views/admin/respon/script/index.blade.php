@@ -166,36 +166,6 @@
             });
         }
 
-        @if ($message = Session::get('success'))
-            Swal.fire({
-                text: {!! json_encode($message) !!},
-                icon: "success",
-                confirmButtonText: "Ok, got it!",
-                confirmButtonColor: '#004289',
-            });
-        @endif
-
-        @if ($message = Session::get('warning'))
-            Swal.fire({
-                text: {!! json_encode($message) !!},
-                icon: "warning",
-                confirmButtonText: "Ok, mengerti",
-                confirmButtonColor: '#004289',
-            });
-        @endif
-
-        @if ($message = Session::get('error') ?? Session::get('failed'))
-            Swal.fire({
-                text: {!! json_encode($message) !!},
-                icon: "error",
-                buttonsStyling: false,
-                confirmButtonText: "Ok, got it!",
-                customClass: {
-                    confirmButton: "btn btn-sm btn-danger"
-                }
-            });
-        @endif
-
         $('#form_import').on('submit', function() {
             let fileInput = $('#file_import')[0];
             if (!fileInput.files || fileInput.files.length === 0) {

@@ -196,27 +196,6 @@
             ]
         });
 
-        @if ($message = Session::get('success'))
-            Swal.fire({
-                text: "{!! $message !!}",
-                icon: "success",
-                confirmButtonText: "Ok, got it!",
-                confirmButtonColor: '#004289',
-            });
-        @endif
-
-        @if ($message = Session::get('error'))
-            Swal.fire({
-                text: "{!! $message !!}",
-                icon: "error",
-                buttonsStyling: false,
-                confirmButtonText: "Ok, got it!",
-                customClass: {
-                    confirmButton: "btn btn-sm btn-danger"
-                }
-            });
-        @endif
-
         $('#form_import').on('submit', function() {
             let fileInput = $('#file_import')[0];
             if (!fileInput.files || fileInput.files.length === 0) {

@@ -44,19 +44,3 @@
     </div>
 @endsection
 
-@section('js')
-    @if (session('success'))
-        <script>
-            Swal.fire({
-                text: "{{ session('success') }}",
-                icon: "success",
-                buttonsStyling: false,
-                confirmButtonText: "Ok, Mengerti!",
-                customClass: {
-                    confirmButton: "btn btn-primary"
-                }
-            });
-        </script>
-    @endif
-@endsection
-

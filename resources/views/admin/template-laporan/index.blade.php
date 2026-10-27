@@ -133,43 +133,6 @@
 @section('js')
 <script>
     $(document).ready(function() {
-
-        @if(session('success'))
-            Swal.fire({
-                text: "{{ session('success') }}",
-                icon: "success",
-                buttonsStyling: false,
-                confirmButtonText: "Ok, Mengerti!",
-                customClass: {
-                    confirmButton: "btn btn-primary"
-                }
-            });
-        @endif
-
-        @if(session('error'))
-            Swal.fire({
-                text: "{{ session('error') }}",
-                icon: "error",
-                buttonsStyling: false,
-                confirmButtonText: "Ok, Mengerti!",
-                customClass: {
-                    confirmButton: "btn btn-danger"
-                }
-            });
-        @endif
-
-        @if($errors->any())
-            Swal.fire({
-                text: "{{ $errors->first() }}",
-                icon: "error",
-                buttonsStyling: false,
-                confirmButtonText: "Ok, Mengerti!",
-                customClass: {
-                    confirmButton: "btn btn-danger"
-                }
-            });
-        @endif
-
         $('#upload_template_form').on('submit', function(e) {
             var fileInput = document.getElementById('template_file');
             var filePath = fileInput.value;

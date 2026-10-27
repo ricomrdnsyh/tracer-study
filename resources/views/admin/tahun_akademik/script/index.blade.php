@@ -82,27 +82,6 @@
             ]
         });
 
-        @if ($message = Session::get('success'))
-            Swal.fire({
-                text: {!! json_encode($message) !!},
-                icon: "success",
-                confirmButtonText: "Ok, got it!",
-                confirmButtonColor: '#004289',
-            });
-        @endif
-
-        @if ($message = Session::get('failed') ?? Session::get('error'))
-            Swal.fire({
-                text: {!! json_encode($message) !!},
-                icon: "error",
-                buttonsStyling: false,
-                confirmButtonText: "Ok, got it!",
-                customClass: {
-                    confirmButton: "btn btn-sm btn-danger"
-                }
-            });
-        @endif
-
         $('#btn_sync_tahun_akademik').on('click', function() {
             Swal.fire({
                 title: "Sinkronisasi Tahun Akademik?",

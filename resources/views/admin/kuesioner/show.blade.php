@@ -742,39 +742,6 @@
                     $('#upload_prompt_json').hide();
                     $('#file_name_display_json').show();
                 });
-
-                @if ($message = Session::get('success'))
-                    Swal.fire({
-                        text: "{{ $message }}",
-                        icon: "success",
-                        confirmButtonText: "Ok, got it!",
-                        confirmButtonColor: '#004289',
-                    });
-                @endif
-
-                @if ($message = Session::get('failed'))
-                    Swal.fire({
-                        text: "{{ $message }}",
-                        icon: "error",
-                        buttonsStyling: false,
-                        confirmButtonText: "Ok, got it!",
-                        customClass: {
-                            confirmButton: "btn btn-sm btn-danger"
-                        }
-                    });
-                @endif
-
-                @if ($errors->any())
-                    Swal.fire({
-                        text: "{{ $errors->first() }}",
-                        icon: "error",
-                        buttonsStyling: false,
-                        confirmButtonText: "Ok, got it!",
-                        customClass: {
-                            confirmButton: "btn btn-sm btn-danger"
-                        }
-                    });
-                @endif
             });
         </script>
     @endif
