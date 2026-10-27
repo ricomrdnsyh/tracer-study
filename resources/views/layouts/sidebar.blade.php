@@ -247,13 +247,15 @@
                                     <span class="menu-title">Pengguna</span>
                                 </a>
                             </div>
+                        @endif
 
-                            <div class="menu-item pt-1">
-                                <div class="menu-content">
-                                    <span class="menu-heading fw-bold text-uppercase fs-8">Master</span>
-                                </div>
+                        <div class="menu-item pt-1">
+                            <div class="menu-content">
+                                <span class="menu-heading fw-bold text-uppercase fs-8">{{ $roleName === 'Admin' ? 'Master' : 'Data Akademik' }}</span>
                             </div>
+                        </div>
 
+                        @if ($roleName === 'Admin')
                             <div class="menu-item">
                                 <a class="menu-link {{ Request::is('admin/fakultas*') ? 'active' : '' }}"
                                     href="{{ route('admin.fakultas.index') }}">
@@ -283,7 +285,9 @@
                                     <span class="menu-title">Tahun Akademik</span>
                                 </a>
                             </div>
+                        @endif
 
+                        @if (in_array($roleName, ['Admin', 'Fakultas', 'Kaprodi']))
                             <div class="menu-item">
                                 <a class="menu-link {{ Request::is('admin/mahasiswa*') ? 'active' : '' }}"
                                     href="{{ route('admin.mahasiswa.index') }}">
@@ -293,7 +297,9 @@
                                     <span class="menu-title">Mahasiswa</span>
                                 </a>
                             </div>
+                        @endif
 
+                        @if ($roleName === 'Admin')
                             <div class="menu-item">
                                 <a class="menu-link {{ Request::is('admin/wilayah*') ? 'active' : '' }}"
                                     href="{{ route('admin.wilayah.index') }}">
@@ -376,6 +382,30 @@
                                 <span class="menu-title">Cetak Laporan Tracer</span>
                             </a>
                         </div>
+
+                        @if ($roleName === 'Admin')
+                            <div class="menu-item pt-1">
+                                <div class="menu-content">
+                                    <span class="menu-heading fw-bold text-uppercase fs-8">Layanan Alumni</span>
+                                </div>
+                            </div>
+
+                            <div class="menu-item">
+                                <a class="menu-link {{ Request::is('admin/bantuan-nim*') ? 'active' : '' }}"
+                                    href="{{ route('admin.bantuan-nim.index') }}">
+                                    <span class="menu-icon">
+                                        <i class="fa-solid fa-headset fs-4"></i>
+                                    </span>
+                                    <span class="menu-title">Bantuan Lupa NIM</span>
+                                    @php
+                                        $pendingBantuanCount = \App\Models\BantuanLupaNim::where('status', 'pending')->count();
+                                    @endphp
+                                    @if ($pendingBantuanCount > 0)
+                                        <span class="badge badge-warning text-dark badge-circle fw-bold fs-9 ms-auto me-1">{{ $pendingBantuanCount }}</span>
+                                    @endif
+                                </a>
+                            </div>
+                        @endif
                     @endif
 
                 </div>

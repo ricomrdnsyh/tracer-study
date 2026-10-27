@@ -19,12 +19,16 @@ class LaporanExportService
 {
     public function exportWord($statsData, $filters, $templatePath)
     {
+        \PhpOffice\PhpWord\Settings::setOutputEscapingEnabled(true);
 
         $templateProcessor = new TemplateProcessor($templatePath);
 
         $totalLulusan = $statsData['kpi']['total_alumni'] ?? 0;
         $totalResponden = $statsData['kpi']['total_responden'] ?? 0;
-        $responseRate = $statsData['kpi']['response_rate'] ?? '0%';
+        $rawRate = $statsData['kpi']['response_rate'] ?? 0;
+        $responseRate = is_numeric($rawRate)
+            ? number_format((float) $rawRate, 1, ',', '.') . '%'
+            : (str_ends_with(trim((string) $rawRate), '%') ? trim((string) $rawRate) : trim((string) $rawRate) . '%');
 
         $coverTop = 'UNUJA';
         $coverBottom = 'UNUJA';
@@ -39,14 +43,18 @@ class LaporanExportService
         $userFakultasId = $isFakultas ? $user->fakultas_id : null;
         $userProdiId = $isKaprodi ? $user->prodi_id : null;
 
-        if ($isKaprodi && $userProdiId) {
-            $filters['prodi_id'] = $userProdiId;
+        if ($isKaprodi) {
+            $filters['prodi_id'] = $userProdiId ?: '__UNASSIGNED__';
         }
 
-        $fakultasId = $isFakultas ? $userFakultasId : ($filters['fakultas_id'] ?? null);
+        $fakultasId = $isFakultas ? ($userFakultasId ?: -1) : ($filters['fakultas_id'] ?? null);
 
         if (isset($filters['prodi_id']) && $filters['prodi_id'] !== 'all' && $filters['prodi_id'] !== '') {
-            $prodiObj = Prodi::with('fakultas')->find($filters['prodi_id']);
+            $prodiQuery = Prodi::with('fakultas')->where('id_prodi', $filters['prodi_id']);
+            if ($isFakultas) {
+                $prodiQuery->where('fakultas_id', $userFakultasId ?: -1);
+            }
+            $prodiObj = $prodiQuery->first();
             if ($prodiObj) {
                 $coverTop = strtoupper($prodiObj->nama_prodi);
 
@@ -95,15 +103,10 @@ class LaporanExportService
                 $tahunAkademikObj = \App\Models\TahunAkademik::find($fAkademik);
                 if ($tahunAkademikObj) {
                     if (preg_match('/^(\d{4})\/(\d{4})\s+(.*)$/i', trim($tahunAkademikObj->nm_smt), $matches)) {
-                        $tahun1 = $matches[1];
-                        $tahun2 = $matches[2];
-                        $semester = strtolower(trim($matches[3]));
-
-                        if ($semester === 'genap' || $semester === 'pendek') {
-                            $lulusanTahun = 'LULUSAN ' . $tahun2;
-                        } else {
-                            $lulusanTahun = 'LULUSAN ' . $tahun1;
-                        }
+                        // Konsisten dengan TahunAkademik::getListTahunLulus(): TA 2024/2025 (Ganjil/Genap/Pendek) = Lulusan 2025
+                        $lulusanTahun = 'LULUSAN ' . $matches[2];
+                    } elseif (preg_match('/^(\d{4})/', trim((string) $tahunAkademikObj->id_smt), $idMatch)) {
+                        $lulusanTahun = 'LULUSAN ' . ((int) $idMatch[1] + 1);
                     } else {
                         $lulusanTahun = 'LULUSAN ' . $tahunAkademikObj->nm_smt;
                     }
@@ -137,8 +140,9 @@ class LaporanExportService
             }
         }
 
-        $avgWaktuTunggu = $statsData['waktu_tunggu_bekerja']['rata_rata'] ?? '0 bulan';
-        $pendapatan = $statsData['take_home_pay']['rata_rata'] ?? '0';
+        $avgWaktuTunggu = $statsData['waktu_tunggu_bekerja']['rata_rata'] ?? '0,00 bulan';
+        $medianWaktuTunggu = $statsData['waktu_tunggu_bekerja']['median'] ?? $avgWaktuTunggu;
+        $pendapatan = $statsData['take_home_pay']['rata_rata'] ?? 'Rp 0';
 
         $maxKerja = $statsData['take_home_pay']['max'] ?? 'Rp 0';
         $minKerja = $statsData['take_home_pay']['min'] ?? 'Rp 0';
@@ -203,14 +207,21 @@ class LaporanExportService
             }
         }
 
-        $keselarasanVertikal = '0%';
+        $keselarasanVertikal = '0,00%';
         if (isset($statsData['keselarasan_vertikal']['table'])) {
+            $totalVertikal = (int) ($statsData['keselarasan_vertikal']['total_responden'] ?? 0);
+            $selarasVertikalCount = 0;
+            $selarasVertikalPct = 0.0;
             foreach ($statsData['keselarasan_vertikal']['table'] as $row) {
-                if (stripos($row['label'], 'Tinggi') !== false) {
-                    $keselarasanVertikal = $row['persentase'];
-                    break;
+                if (stripos($row['label'], 'Tinggi') !== false || stripos($row['label'], 'Sama') !== false) {
+                    $selarasVertikalCount += (int) ($row['jumlah'] ?? 0);
+                    $selarasVertikalPct += (float) ($row['pct_numeric'] ?? 0);
                 }
             }
+            $finalPctVertikal = $totalVertikal > 0
+                ? round(($selarasVertikalCount / $totalVertikal) * 100, 2)
+                : round($selarasVertikalPct, 2);
+            $keselarasanVertikal = number_format($finalPctVertikal, 2, ',', '.') . '%';
         }
 
         $templateProcessor->setValue('CoverTop', $coverTop);
@@ -228,7 +239,7 @@ class LaporanExportService
         $templateProcessor->setValue('Wiraswasta', $wiraswasta);
         $templateProcessor->setValue('Melanjutkan Studi', $studi);
         $templateProcessor->setValue('Rata-rata Waktu Tunggu', $avgWaktuTunggu);
-        $templateProcessor->setValue('Median Waktu Tunggu', $avgWaktuTunggu);
+        $templateProcessor->setValue('Median Waktu Tunggu', $medianWaktuTunggu);
         $templateProcessor->setValue('Keselarasan Horizontal', $keselarasanHorizontal);
         $templateProcessor->setValue('Keselarasan Vertikal', $keselarasanVertikal);
         $templateProcessor->setValue('Pendapatan Kerja', $pendapatan);
@@ -261,27 +272,49 @@ class LaporanExportService
         $templateProcessor->setValue('Rata-rata', $rataRataPembelajaran);
 
         $templateProcessor->setValue('Etika-1', $etika1);
+        $templateProcessor->setValue('Etika_1', $etika1);
         $templateProcessor->setValue('Etika-2', $etika2);
+        $templateProcessor->setValue('Etika_2', $etika2);
         $templateProcessor->setValue('Keahlian-1', $keahlian1);
+        $templateProcessor->setValue('Keahlian_1', $keahlian1);
         $templateProcessor->setValue('Keahlian-2', $keahlian2);
+        $templateProcessor->setValue('Keahlian_2', $keahlian2);
         $templateProcessor->setValue('Bahasa Inggris-1', $bahasa1);
+        $templateProcessor->setValue('Bahasa Inggris_1', $bahasa1);
         $templateProcessor->setValue('Bahasa Inggris-2', $bahasa2);
+        $templateProcessor->setValue('Bahasa Inggris_2', $bahasa2);
         $templateProcessor->setValue('TI-1', $ti1);
+        $templateProcessor->setValue('TI_1', $ti1);
         $templateProcessor->setValue('TI-2', $ti2);
+        $templateProcessor->setValue('TI_2', $ti2);
         $templateProcessor->setValue('Komunikasi-1', $komunikasi1);
+        $templateProcessor->setValue('Komunikasi_1', $komunikasi1);
         $templateProcessor->setValue('Komunikasi-2', $komunikasi2);
+        $templateProcessor->setValue('Komunikasi_2', $komunikasi2);
         $templateProcessor->setValue('Kerjasama-1', $kerjasama1);
+        $templateProcessor->setValue('Kerjasama_1', $kerjasama1);
         $templateProcessor->setValue('Kerjasama-2', $kerjasama2);
+        $templateProcessor->setValue('Kerjasama_2', $kerjasama2);
         $templateProcessor->setValue('Pengembangan-1', $pengembangan1);
+        $templateProcessor->setValue('Pengembangan_1', $pengembangan1);
         $templateProcessor->setValue('Pengembangan-2', $pengembangan2);
+        $templateProcessor->setValue('Pengembangan_2', $pengembangan2);
         $templateProcessor->setValue('Kritis-1', $kritis1);
+        $templateProcessor->setValue('Kritis_1', $kritis1);
         $templateProcessor->setValue('Kritis-2', $kritis2);
+        $templateProcessor->setValue('Kritis_2', $kritis2);
         $templateProcessor->setValue('Kreativitas-1', $kreativitas1);
+        $templateProcessor->setValue('Kreativitas_1', $kreativitas1);
         $templateProcessor->setValue('Kreativitas-2', $kreativitas2);
+        $templateProcessor->setValue('Kreativitas_2', $kreativitas2);
         $templateProcessor->setValue('Kewirausahaan-1', $kewirausahaan1);
+        $templateProcessor->setValue('Kewirausahaan_1', $kewirausahaan1);
         $templateProcessor->setValue('Kewirausahaan-2', $kewirausahaan2);
+        $templateProcessor->setValue('Kewirausahaan_2', $kewirausahaan2);
         $templateProcessor->setValue('Adaptasi-1', $adaptasi1);
+        $templateProcessor->setValue('Adaptasi_1', $adaptasi1);
         $templateProcessor->setValue('Adaptasi-2', $adaptasi2);
+        $templateProcessor->setValue('Adaptasi_2', $adaptasi2);
 
         $fileName = 'Laporan_Tracer_Study_' . date('Ymd_His') . '.docx';
         $tempFile = tempnam(sys_get_temp_dir(), 'PHPWord');

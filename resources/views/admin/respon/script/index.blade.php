@@ -131,30 +131,38 @@
         if ($('#filter_fakultas').length) {
             var originalProdiOptions = $('#filter_prodi option').clone();
 
-            if (!$('#filter_fakultas').val()) {
-                $('#filter_prodi').prop('disabled', true);
-            }
-
             $('#filter_fakultas').on('change', function() {
                 var selectedFakultas = $(this).val();
 
                 $('#filter_prodi').empty();
 
-                if (selectedFakultas) {
-                    $('#filter_prodi').prop('disabled', false);
-                    originalProdiOptions.each(function() {
-                        var fakultasId = $(this).data('fakultas');
-                        if (selectedFakultas == fakultasId || !$(this).val()) {
-                            $('#filter_prodi').append($(this).clone());
-                        }
-                    });
-                } else {
-                    $('#filter_prodi').prop('disabled', true);
-                    $('#filter_prodi').append('<option value="">Semua Program Studi</option>');
-                }
+                originalProdiOptions.each(function() {
+                    var fakultasId = $(this).data('fakultas');
+                    if (!selectedFakultas || selectedFakultas == fakultasId || !$(this).val()) {
+                        $('#filter_prodi').append($(this).clone());
+                    }
+                });
 
                 $('#filter_prodi').val('').trigger('change.select2');
                 table.draw();
+            });
+        }
+
+        if ($('#export_fakultas').length && $('#export_prodi').length) {
+            var originalExportProdiOptions = $('#export_prodi option').clone();
+
+            $('#export_fakultas').on('change', function() {
+                var selectedFakultas = $(this).val();
+                $('#export_prodi').empty();
+
+                originalExportProdiOptions.each(function() {
+                    var fakultasId = $(this).data('fakultas');
+                    if (!selectedFakultas || selectedFakultas == fakultasId || !$(this).val()) {
+                        $('#export_prodi').append($(this).clone());
+                    }
+                });
+
+                $('#export_prodi').val('').trigger('change.select2');
             });
         }
 

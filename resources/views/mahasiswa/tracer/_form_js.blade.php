@@ -1,5 +1,5 @@
 <script>
-    window.tracerLookupBase = @json($tracerLookupBase ?? null);
+    window.tracerLookupBase = @json($tracerLookupBase ?? route('mahasiswa.tracer.lookup'));
 </script>
 <script
     src="{{ asset('assets/js/tracer-lookup.js') }}?v={{ @filemtime(public_path('assets/js/tracer-lookup.js')) ?: '1' }}">
@@ -110,7 +110,7 @@
         function cleanConditionText(str) {
             if (!str) return '';
             return String(str)
-                .replace(/^\s*(\[\w+\])?\s*(\(0\/1\))?\s*(\(\d+\))?\s*/, '')
+                .replace(/^\s*(\[\w+\])?\s*(\(0\/1\))?\s*([\[\(]\d+[\]\)])?\s*/, '')
                 .replace(/\s+/g, ' ')
                 .trim()
                 .toLowerCase();
@@ -182,6 +182,34 @@
                     }
                 }
             });
+
+            $('.kategori-container:not(.skip-hidden)').each(function() {
+                let $kat = $(this);
+                let $negaraSelect = $kat.find('select[data-wilayah-select="f5a0"]');
+                if ($negaraSelect.length) {
+                    let negaraId = $negaraSelect.data('id-pertanyaan');
+                    let val = ($negaraSelect.val() || '').toString().trim().toUpperCase();
+                    let label = (($('#hidden_label_' + negaraId).val()) || '').toString().trim().toLowerCase();
+                    let isIndonesia = (val === '' || val === 'ID' || label === 'indonesia');
+                    let $provSelect = $kat.find('select[data-wilayah-select="f5a1"]');
+                    let $kabSelect = $kat.find('select[data-wilayah-select="f5a2"]');
+
+                    if (!isIndonesia) {
+                        [$provSelect, $kabSelect].forEach(function($s) {
+                            let $box = $s.closest('.pertanyaan-container');
+                            $box.addClass('skip-hidden');
+                            $box.find('input, select, textarea').prop('disabled', true);
+                        });
+                    } else {
+                        if ($provSelect.length && !val) {
+                            $provSelect.prop('disabled', true);
+                        }
+                        if ($kabSelect.length && !$provSelect.val()) {
+                            $kabSelect.prop('disabled', true);
+                        }
+                    }
+                }
+            });
         }
 
         evaluateSkipLogic();
@@ -210,6 +238,14 @@
             if (id && isQuestionAnswered(id)) {
                 clearQuestionError($cont);
             }
+        });
+
+        // Cegah submit native (mis. tombol Enter) agar selalu melewati validasi #btn_submit_tracer.
+        // form.submit() via JS tidak memicu event 'submit', sehingga tidak terjadi loop.
+        $('#btn_submit_tracer').closest('form').on('submit', function(e) {
+            e.preventDefault();
+            $('#btn_submit_tracer').trigger('click');
+            return false;
         });
 
         $('#btn_submit_tracer').click(function(e) {
@@ -287,6 +323,45 @@
                 return false;
             }
 
+            // Validasi rentang F502 (0-60 bulan), karena form.submit() melewati validasi HTML5 min/max
+            let $invalidF502 = null;
+            $('.pertanyaan-container[data-kode="F502"]').each(function() {
+                let $c = $(this);
+                if ($c.hasClass('skip-hidden') || $c.closest('.kategori-container').hasClass('skip-hidden')) {
+                    return;
+                }
+                let raw = ($c.find('input').first().val() || '').toString().trim().replace(',', '.');
+                if (raw === '') return;
+                let num = Number(raw);
+                if (isNaN(num) || num < 0 || num > 60) {
+                    $invalidF502 = $c;
+                    return false;
+                }
+            });
+
+            if ($invalidF502) {
+                $invalidF502.addClass('is-invalid-wajib');
+                $invalidF502.find('.error-wajib-badge').stop(true, true).remove();
+                $invalidF502.append(
+                    '<div class="error-wajib-badge mt-2 text-danger fs-7 fw-bold d-flex align-items-center"><i class="fas fa-exclamation-circle text-danger me-2 fs-6"></i>Masa tunggu harus berupa angka 0 sampai 60 bulan!</div>'
+                );
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Masa Tunggu Tidak Valid',
+                    html: 'Isian <strong>[F502]</strong> harus berupa angka antara <strong>0 sampai 60 bulan</strong>.<br><span class="text-muted fs-7 mt-2 d-block">Jangan mengisi tahun atau nominal gaji.</span>',
+                    confirmButtonText: 'Perbaiki',
+                    customClass: {
+                        confirmButton: "btn btn-primary"
+                    }
+                }).then(() => {
+                    $('html, body').animate({
+                        scrollTop: $invalidF502.offset().top - 120
+                    }, 500);
+                    $invalidF502.find('input:visible').first().focus();
+                });
+                return false;
+            }
+
             Swal.fire({
                 title: 'Apakah Anda Yakin?',
                 text: "Pastikan semua jawaban sudah benar sebelum mengirim kuesioner ini.",
@@ -318,16 +393,18 @@
 
         @if (session('wajib_errors'))
             setTimeout(function() {
-                let errIds = @json(array_keys(session('wajib_errors')));
+                let wErrors = @json(session('wajib_errors'));
+                let errIds = Object.keys(wErrors);
                 let firstScrolled = false;
                 errIds.forEach(function(qId) {
                     let $cont = $('#pertanyaan_container_' + qId);
                     if ($cont.length) {
                         $cont.addClass('is-invalid-wajib');
                         if ($cont.find('.error-wajib-badge').length === 0) {
-                            $cont.append(
-                                '<div class="error-wajib-badge mt-2 text-danger fs-7 fw-bold d-flex align-items-center"><i class="fas fa-exclamation-circle text-danger me-2 fs-6"></i>Pertanyaan ini wajib diisi!</div>'
-                                );
+                            let msg = wErrors[qId] || 'Pertanyaan ini wajib diisi!';
+                            let $badge = $('<div class="error-wajib-badge mt-2 text-danger fs-7 fw-bold d-flex align-items-center"><i class="fas fa-exclamation-circle text-danger me-2 fs-6"></i></div>');
+                            $badge.append($('<span>').text(msg));
+                            $cont.append($badge);
                         }
                         if (!firstScrolled) {
                             $('html, body').animate({

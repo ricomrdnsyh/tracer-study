@@ -22,7 +22,7 @@ class DashboardController extends Controller
 
         $user = auth()->user();
         $isFakultas = $user && $user->role === 'Fakultas';
-        $userFakultasId = $isFakultas ? $user->fakultas_id : null;
+        $userFakultasId = $isFakultas ? ($user->fakultas_id ?: -1) : null;
 
         $statsRequest = new Request([
             'kuesioner_id' => $kuesionerId,
@@ -31,7 +31,9 @@ class DashboardController extends Controller
 
         $statsData = app(StatistikService::class)->buildStatisticsData($statsRequest);
 
-        $recentQuery = ResponTracer::with(['mahasiswa.prodi', 'kuesioner'])->orderByDesc('tgl_isi');
+        $recentQuery = ResponTracer::with(['mahasiswa.prodi', 'kuesioner'])
+            ->where('status', 'Selesai')
+            ->orderByDesc('tgl_isi');
         if ($kuesionerId) {
             $recentQuery->where('kuesioner_id', $kuesionerId);
         }

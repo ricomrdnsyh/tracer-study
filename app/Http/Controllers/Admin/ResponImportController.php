@@ -90,11 +90,20 @@ class ResponImportController extends Controller
 
         $mapPertanyaan = [];
         $opsiById = [];
+        $kategoriSyaratById = [];
         foreach ($kuesioner->kategoriPertanyaans as $kategori) {
             foreach ($kategori->pertanyaans as $pertanyaan) {
                 if (is_array($pertanyaan->opsi_jawaban) && count($pertanyaan->opsi_jawaban) > 0) {
                     $opsiById[$pertanyaan->id_pertanyaan] = array_values($pertanyaan->opsi_jawaban);
                 }
+                $kategoriSyaratById[$pertanyaan->id_pertanyaan] = [
+                    'syarat_id'        => $kategori->syarat_pertanyaan_id,
+                    'syarat_jawaban'   => $kategori->syarat_jawaban,
+                    'q_syarat_id'      => $pertanyaan->syarat_pertanyaan_id,
+                    'q_syarat_jawaban' => $pertanyaan->syarat_jawaban,
+                    'kategori_id'      => $kategori->id_kategori,
+                    'kode'             => !empty($pertanyaan->kode_pertanyaan) ? strtoupper(trim($pertanyaan->kode_pertanyaan)) : '',
+                ];
                 $kode = !empty($pertanyaan->kode_pertanyaan)
                     ? strtoupper(trim($pertanyaan->kode_pertanyaan))
                     : 'P' . $pertanyaan->id_pertanyaan;
@@ -149,8 +158,36 @@ class ResponImportController extends Controller
 
             $mahasiswaMap = Mahasiswa::with('prodi')->whereIn('nim', $allNims)->get()->keyBy('nim');
 
+            $negaraDict = DB::table('master_negara')->pluck('negara', 'kode_wilayah_negara')->toArray();
             $provinsiDict = DB::table('master_provinsi')->pluck('provinsi', 'kode_wilayah_provinsi')->toArray();
             $kabupatenDict = DB::table('master_kota_kabupaten')->pluck('kota_kabupaten', 'kode_wilayah_kota_kabupaten')->toArray();
+
+            $resolveWilayah = function ($rawVal, array $dict): array {
+                $val = trim((string) $rawVal);
+                if ($val === '') {
+                    return ['', null];
+                }
+                if (isset($dict[$val])) {
+                    return [$val, $dict[$val]];
+                }
+                if (ctype_digit($val) && strlen($val) < 6) {
+                    $padded = str_pad($val, 6, '0', STR_PAD_LEFT);
+                    if (isset($dict[$padded])) {
+                        return [$padded, $dict[$padded]];
+                    }
+                }
+                foreach ($dict as $k => $lbl) {
+                    if (strcasecmp(trim((string) $lbl), $val) === 0) {
+                        return [(string) $k, $lbl];
+                    }
+                }
+                foreach ($dict as $k => $lbl) {
+                    if (stripos((string) $lbl, $val) !== false) {
+                        return [(string) $k, $lbl];
+                    }
+                }
+                return [$val, $val];
+            };
 
             DB::beginTransaction();
 
@@ -236,6 +273,67 @@ class ResponImportController extends Controller
 
                     $importedCount++;
 
+                    $rowJawabanById = [];
+                    foreach ($headers as $index => $headerKode) {
+                        if ($index === $nimIndex) continue;
+                        $kode = strtoupper(trim((string)$headerKode));
+                        $jawabanVal = $row[$index] ?? null;
+                        if ($jawabanVal === null || $jawabanVal === '') continue;
+                        if (isset($mapPertanyaan[$kode])) {
+                            foreach ($mapPertanyaan[$kode] as $pId) {
+                                $syarat = $kategoriSyaratById[$pId] ?? null;
+                                if (empty($syarat['syarat_id'])) {
+                                    $rowJawabanById[$pId] = TracerResponService::nomorToLabel($opsiById[$pId] ?? null, $jawabanVal, $kode);
+                                }
+                            }
+                        }
+                    }
+
+                    $luarNegeriKatIds = [];
+                    foreach ($headers as $index => $headerKode) {
+                        if ($index === $nimIndex) continue;
+                        $kode = strtoupper(trim((string)$headerKode));
+                        $jawabanVal = $row[$index] ?? null;
+                        if ($jawabanVal === null || $jawabanVal === '') continue;
+                        if (isset($mapPertanyaan[$kode])) {
+                            foreach ($mapPertanyaan[$kode] as $pId) {
+                                $syarat = $kategoriSyaratById[$pId] ?? null;
+                                if (!empty($syarat['syarat_id'])) {
+                                    if (!isset($rowJawabanById[$syarat['syarat_id']]) || TracerResponService::checkCondition($syarat['syarat_id'], $syarat['syarat_jawaban'], $rowJawabanById)) {
+                                        $rowJawabanById[$pId] = TracerResponService::nomorToLabel($opsiById[$pId] ?? null, $jawabanVal, $kode);
+                                    }
+                                }
+                                if ($kode === 'F5A0' && isset($rowJawabanById[$pId])) {
+                                    $valNeg = trim((string)$rowJawabanById[$pId]);
+                                    if ($valNeg !== '' && strcasecmp($valNeg, 'ID') !== 0 && strcasecmp($valNeg, 'Indonesia') !== 0) {
+                                        $luarNegeriKatIds[$syarat['kategori_id']] = true;
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    $canInsertForPertanyaan = function ($pId) use ($kategoriSyaratById, $rowJawabanById, $luarNegeriKatIds): bool {
+                        $syarat = $kategoriSyaratById[$pId] ?? null;
+                        if (!$syarat) {
+                            return true;
+                        }
+                        if (!empty($syarat['syarat_id']) && isset($rowJawabanById[$syarat['syarat_id']])) {
+                            if (!TracerResponService::checkCondition($syarat['syarat_id'], $syarat['syarat_jawaban'], $rowJawabanById)) {
+                                return false;
+                            }
+                        }
+                        if (!empty($syarat['q_syarat_id'])) {
+                            if (!TracerResponService::checkCondition($syarat['q_syarat_id'], $syarat['q_syarat_jawaban'], $rowJawabanById)) {
+                                return false;
+                            }
+                        }
+                        if (in_array($syarat['kode'] ?? '', ['F5A1', 'F5A2'], true) && isset($luarNegeriKatIds[$syarat['kategori_id'] ?? 0])) {
+                            return false;
+                        }
+                        return true;
+                    };
+
                     $f4Selected = [];
                     $f16Selected = [];
 
@@ -261,12 +359,30 @@ class ResponImportController extends Controller
                         }
 
                         if (isset($mapPertanyaan[$kode])) {
+                            $resolvedText = null;
+                            $resolvedJson = null;
+                            if ($kode === 'F5A0') {
+                                [$wKode, $wLabel] = $resolveWilayah($jawabanVal, $negaraDict);
+                                $resolvedText = $wKode;
+                                $resolvedJson = ($wLabel && $wLabel !== $wKode) ? json_encode(['label' => $wLabel]) : null;
+                            } elseif ($kode === 'F5A1') {
+                                [$wKode, $wLabel] = $resolveWilayah($jawabanVal, $provinsiDict);
+                                $resolvedText = $wKode;
+                                $resolvedJson = ($wLabel && $wLabel !== $wKode) ? json_encode(['label' => $wLabel]) : null;
+                            } elseif ($kode === 'F5A2') {
+                                [$wKode, $wLabel] = $resolveWilayah($jawabanVal, $kabupatenDict);
+                                $resolvedText = $wKode;
+                                $resolvedJson = ($wLabel && $wLabel !== $wKode) ? json_encode(['label' => $wLabel]) : null;
+                            }
+
                             foreach ($mapPertanyaan[$kode] as $pId) {
+                                if (!$canInsertForPertanyaan($pId)) continue;
+
                                 $batchJawaban[] = [
                                     'respon_id'     => $responId,
                                     'pertanyaan_id' => $pId,
-                                    'jawaban_text'  => TracerResponService::nomorToLabel($opsiById[$pId] ?? null, $jawabanVal, $kode),
-                                    'jawaban_json'  => null,
+                                    'jawaban_text'  => $resolvedText ?? TracerResponService::nomorToLabel($opsiById[$pId] ?? null, $jawabanVal, $kode),
+                                    'jawaban_json'  => $resolvedJson,
                                     'created_at'    => $now,
                                     'updated_at'    => $now,
                                 ];
@@ -276,6 +392,8 @@ class ResponImportController extends Controller
 
                     if (!empty($f4Selected) && isset($mapPertanyaan['F4'])) {
                         foreach ($mapPertanyaan['F4'] as $pId) {
+                            if (!$canInsertForPertanyaan($pId)) continue;
+
                             $resolvedOptions = [];
                             $opsiPertanyaan = $opsiById[$pId] ?? [];
                             foreach ($f4Selected as $subK) {
@@ -301,6 +419,8 @@ class ResponImportController extends Controller
 
                     if (!empty($f16Selected) && isset($mapPertanyaan['F16'])) {
                         foreach ($mapPertanyaan['F16'] as $pId) {
+                            if (!$canInsertForPertanyaan($pId)) continue;
+
                             $resolvedOptions = [];
                             $opsiPertanyaan = $opsiById[$pId] ?? [];
                             foreach ($f16Selected as $subK) {
@@ -337,52 +457,58 @@ class ResponImportController extends Controller
                     foreach ($headers as $index => $headerKode) {
                         if ($index === $nimIndex) continue;
                         $kode = strtolower(trim((string)$headerKode));
+                        $pKodeUpper = strtoupper($kode);
                         $jawabanVal = $row[$index] ?? null;
 
                         if ($jawabanVal !== null && $jawabanVal !== '') {
+                            $activePId = null;
+                            if (isset($mapPertanyaan[$pKodeUpper])) {
+                                foreach ($mapPertanyaan[$pKodeUpper] as $candPId) {
+                                    if ($canInsertForPertanyaan($candPId)) {
+                                        $activePId = $candPId;
+                                        break;
+                                    }
+                                }
+                                if ($activePId === null) {
+                                    continue;
+                                }
+                            }
+
                             if ($kode === 'f5b') {
                                 $nama = $jawabanVal;
                             } elseif ($kode === 'f1101') {
-                                $pKodeUpper = strtoupper($kode);
-                                if (isset($mapPertanyaan[$pKodeUpper])) {
-                                    $pId = $mapPertanyaan[$pKodeUpper][0] ?? null;
-                                    $jenis_instansi_raw = TracerResponService::nomorToLabel($opsiById[$pId] ?? null, $jawabanVal, $pKodeUpper);
+                                if ($activePId !== null) {
+                                    $jenis_instansi_raw = TracerResponService::nomorToLabel($opsiById[$activePId] ?? null, $jawabanVal, $pKodeUpper);
                                 } else {
                                     $jenis_instansi_raw = $jawabanVal;
                                 }
                             } elseif ($kode === 'f1102') {
                                 $jenis_instansi_lainnya = trim((string)$jawabanVal);
                             } elseif ($kode === 'f8') {
-                                $pKodeUpper = strtoupper($kode);
-                                if (isset($mapPertanyaan[$pKodeUpper])) {
-                                    $pId = $mapPertanyaan[$pKodeUpper][0] ?? null;
-                                    $f8_val = TracerResponService::nomorToLabel($opsiById[$pId] ?? null, $jawabanVal, $pKodeUpper);
+                                if ($activePId !== null) {
+                                    $f8_val = TracerResponService::nomorToLabel($opsiById[$activePId] ?? null, $jawabanVal, $pKodeUpper);
                                 } else {
                                     $f8_val = $jawabanVal;
                                 }
                             } elseif ($kode === 'f5c') {
-                                $pKodeUpper = strtoupper($kode);
-                                if (isset($mapPertanyaan[$pKodeUpper])) {
-                                    $pId = $mapPertanyaan[$pKodeUpper][0] ?? null;
-                                    $f5c_val = TracerResponService::nomorToLabel($opsiById[$pId] ?? null, $jawabanVal, $pKodeUpper);
+                                if ($activePId !== null) {
+                                    $f5c_val = TracerResponService::nomorToLabel($opsiById[$activePId] ?? null, $jawabanVal, $pKodeUpper);
                                 } else {
                                     $f5c_val = $jawabanVal;
                                 }
                             } elseif ($kode === 'f5a1') {
-                                $kode_provinsi = (string) $jawabanVal;
-                                $provinsi_label = $provinsiDict[$kode_provinsi] ?? $kode_provinsi;
+                                [$kode_provinsi, $provinsi_label] = $resolveWilayah($jawabanVal, $provinsiDict);
                             } elseif ($kode === 'f5a2') {
-                                $kode_kabupaten = (string) $jawabanVal;
-                                $kabupaten_label = $kabupatenDict[$kode_kabupaten] ?? $kode_kabupaten;
+                                [$kode_kabupaten, $kabupaten_label] = $resolveWilayah($jawabanVal, $kabupatenDict);
                             }
                         }
                     }
 
                     if ($nama) {
                         $finalJenisInstansi = (string) ($jenis_instansi_raw ?? '');
-                        if ((stripos($finalJenisInstansi, 'lainnya') !== false || stripos($finalJenisInstansi, 'tuliskan') !== false) && !empty($jenis_instansi_lainnya) && trim((string)$jenis_instansi_lainnya) !== '') {
+                        if ((stripos($finalJenisInstansi, 'lainnya') !== false || stripos($finalJenisInstansi, 'tuliskan') !== false || trim($finalJenisInstansi) === '5') && !empty($jenis_instansi_lainnya) && trim((string)$jenis_instansi_lainnya) !== '') {
                             $finalJenisInstansi = 'Lainnya: ' . trim((string)$jenis_instansi_lainnya);
-                        } elseif (empty($finalJenisInstansi) && $f8_val && stripos((string)$f8_val, 'wiraswasta') !== false) {
+                        } elseif (empty($finalJenisInstansi) && $f8_val && (stripos((string)$f8_val, 'wiraswasta') !== false || stripos((string)$f8_val, 'wirausaha') !== false || in_array(trim((string)$f8_val), ['3', '[3]', '(3)'], true))) {
                             $finalJenisInstansi = 'Wiraswasta/wirausaha/pekerja lepas';
                         }
 
@@ -422,9 +548,16 @@ class ResponImportController extends Controller
                 return back()->with('error', 'Tidak ada data yang berhasil diimport (Pastikan Data Mahasiswa Terdaftar di Tabel Mahasiswa Lulusan Tracer Study). Silahkan menghubungi admin!');
             }
 
-            if ($skippedFakultasCount > 0) {
-                $unitNama = $isKaprodi ? 'program studi' : 'fakultas';
-                return back()->with('warning', "Berhasil mengimport respon untuk $importedCount mahasiswa {$unitNama} Anda. Sebanyak $skippedFakultasCount data mahasiswa dari {$unitNama} lain dilewati.");
+            if ($skippedFakultasCount > 0 || $notFoundCount > 0) {
+                $notes = [];
+                if ($skippedFakultasCount > 0) {
+                    $unitNama = $isKaprodi ? 'program studi' : 'fakultas';
+                    $notes[] = "$skippedFakultasCount data mahasiswa dari {$unitNama} lain dilewati";
+                }
+                if ($notFoundCount > 0) {
+                    $notes[] = "$notFoundCount NIM tidak ditemukan di database mahasiswa";
+                }
+                return back()->with('warning', "Berhasil mengimport respon untuk $importedCount mahasiswa. Catatan: " . implode('; ', $notes) . ".");
             }
 
             return back()->with('success', "Berhasil mengimport respon untuk $importedCount mahasiswa secara instan.");
@@ -447,22 +580,31 @@ class ResponImportController extends Controller
 
         if (auth()->user()->role === 'Kaprodi') {
             $query->whereHas('mahasiswa', function ($q) {
-                $q->where('prodi_id', auth()->user()->prodi_id);
+                $q->where('prodi_id', auth()->user()->prodi_id ?: '__UNASSIGNED__');
             });
         } elseif (auth()->user()->role === 'Fakultas') {
-            $query->whereHas('mahasiswa.prodi', function ($q) {
-                $q->where('fakultas_id', auth()->user()->fakultas_id);
+            $facId = auth()->user()->fakultas_id ?: -1;
+            $query->whereHas('mahasiswa.prodi', function ($q) use ($facId) {
+                $q->where('fakultas_id', $facId);
             });
-        } elseif ($request->filled('fakultas_id') && $request->fakultas_id !== 'all') {
-            $query->whereHas('mahasiswa.prodi', function ($q) use ($request) {
-                $q->where('fakultas_id', $request->fakultas_id);
-            });
-        }
-
-        if ($request->filled('prodi_id') && $request->prodi_id !== 'all') {
-            $query->whereHas('mahasiswa', function ($q) use ($request) {
-                $q->where('prodi_id', $request->prodi_id);
-            });
+            if ($request->filled('prodi_id') && $request->prodi_id !== 'all') {
+                $reqProdi = $request->prodi_id;
+                $query->whereHas('mahasiswa', function ($q) use ($reqProdi, $facId) {
+                    $q->where('prodi_id', $reqProdi)
+                      ->whereHas('prodi', fn($pq) => $pq->where('fakultas_id', $facId));
+                });
+            }
+        } else {
+            if ($request->filled('fakultas_id') && $request->fakultas_id !== 'all') {
+                $query->whereHas('mahasiswa.prodi', function ($q) use ($request) {
+                    $q->where('fakultas_id', $request->fakultas_id);
+                });
+            }
+            if ($request->filled('prodi_id') && $request->prodi_id !== 'all') {
+                $query->whereHas('mahasiswa', function ($q) use ($request) {
+                    $q->where('prodi_id', $request->prodi_id);
+                });
+            }
         }
 
         $spreadsheet = new Spreadsheet();
@@ -474,10 +616,12 @@ class ResponImportController extends Controller
         $pertanyaanKeys = [];
         $rawHeaders = [];
         $pertanyaanById = [];
+        $kategoriByPertanyaanId = [];
 
         foreach ($kuesioner->kategoriPertanyaans as $kategori) {
             foreach ($kategori->pertanyaans as $pertanyaan) {
                 $pertanyaanById[$pertanyaan->id_pertanyaan] = $pertanyaan;
+                $kategoriByPertanyaanId[$pertanyaan->id_pertanyaan] = $kategori;
                 $kode = !empty($pertanyaan->kode_pertanyaan)
                     ? strtoupper(trim($pertanyaan->kode_pertanyaan))
                     : 'P' . $pertanyaan->id_pertanyaan;
@@ -515,7 +659,7 @@ class ResponImportController extends Controller
         }
 
         $rowNum = 2;
-        $query->chunk(250, function ($respons) use ($sheet, &$rowNum, $uniqueHeaders, $pertanyaanKeys, $pertanyaanById) {
+        $query->chunk(250, function ($respons) use ($sheet, &$rowNum, $uniqueHeaders, $pertanyaanKeys, $pertanyaanById, $kategoriByPertanyaanId) {
             foreach ($respons as $respon) {
                 $sheet->setCellValueExplicit('A' . $rowNum, (string)$respon->mahasiswa_id, DataType::TYPE_STRING);
                 $sheet->setCellValue('B' . $rowNum, optional($respon->mahasiswa)->nama);
@@ -523,14 +667,33 @@ class ResponImportController extends Controller
                 $sheet->setCellValue('D' . $rowNum, $respon->tgl_isi ? Carbon::parse($respon->tgl_isi)->format('Y-m-d H:i') : '');
 
                 $detailMap = [];
+                $jawabanForCond = [];
                 foreach ($respon->jawabanDetails as $detail) {
                     $detailMap[$detail->pertanyaan_id] = $detail;
+                    $pObj = $pertanyaanById[$detail->pertanyaan_id] ?? null;
+                    if ($pObj && $pObj->tipe_jawaban === 'checkbox' && is_string($detail->jawaban_text)) {
+                        $jawabanForCond[$detail->pertanyaan_id] = array_map('trim', explode(',', $detail->jawaban_text));
+                    } else {
+                        $jawabanForCond[$detail->pertanyaan_id] = $detail->jawaban_text;
+                    }
                 }
+
+                $isActivePid = function (int $pId) use ($pertanyaanById, $kategoriByPertanyaanId, $jawabanForCond): bool {
+                    $kat = $kategoriByPertanyaanId[$pId] ?? null;
+                    if ($kat && !TracerResponService::checkCondition($kat->syarat_pertanyaan_id, $kat->syarat_jawaban, $jawabanForCond)) {
+                        return false;
+                    }
+                    $pert = $pertanyaanById[$pId] ?? null;
+                    if ($pert && !TracerResponService::checkCondition($pert->syarat_pertanyaan_id, $pert->syarat_jawaban, $jawabanForCond)) {
+                        return false;
+                    }
+                    return true;
+                };
 
                 $f4Answers = null;
                 if (isset($pertanyaanKeys['F4'])) {
                     foreach ($pertanyaanKeys['F4'] as $pId) {
-                        if (isset($detailMap[$pId])) {
+                        if (isset($detailMap[$pId]) && $isActivePid($pId)) {
                             $f4Answers = TracerResponService::extractCheckboxAnswers($detailMap[$pId]);
                             if ($f4Answers !== null) break;
                         }
@@ -540,7 +703,7 @@ class ResponImportController extends Controller
                 $f16Answers = null;
                 if (isset($pertanyaanKeys['F16'])) {
                     foreach ($pertanyaanKeys['F16'] as $pId) {
-                        if (isset($detailMap[$pId])) {
+                        if (isset($detailMap[$pId]) && $isActivePid($pId)) {
                             $f16Answers = TracerResponService::extractCheckboxAnswers($detailMap[$pId]);
                             if ($f16Answers !== null) break;
                         }
@@ -559,7 +722,7 @@ class ResponImportController extends Controller
                         $val = '';
                         if (isset($pertanyaanKeys[$kode])) {
                             foreach ($pertanyaanKeys[$kode] as $pId) {
-                                if (isset($detailMap[$pId])) {
+                                if (isset($detailMap[$pId]) && $isActivePid($pId)) {
                                     $val = TracerResponService::jawabanToNomor($pertanyaanById[$pId] ?? null, $detailMap[$pId]);
                                     if ($val !== '') {
                                         break;

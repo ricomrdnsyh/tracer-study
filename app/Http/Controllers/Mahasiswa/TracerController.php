@@ -39,12 +39,14 @@ class TracerController extends Controller
         ->where(function ($q) use ($matchingIds) {
             if (!empty($matchingIds)) {
                 $q->whereIn('akademik_id', $matchingIds)
-                  ->orWhereNull('akademik_id');
+                  ->orWhereNull('akademik_id')
+                  ->orWhere('akademik_id', '');
             } else {
-                $q->whereNull('akademik_id');
+                $q->whereNull('akademik_id')
+                  ->orWhere('akademik_id', '');
             }
         })
-        ->orderByRaw('akademik_id IS NULL ASC')
+        ->orderByRaw("CASE WHEN akademik_id IS NULL OR akademik_id = '' THEN 1 ELSE 0 END ASC")
         ->orderByTahunTerbaru()
         ->first();
 
@@ -58,75 +60,10 @@ class TracerController extends Controller
             return view('mahasiswa.tracer.empty', ['message' => 'Belum ada Tracer Study yang aktif' . $taInfo . ' saat ini.']);
         }
 
-        $respon = ResponTracer::with('jawabanDetails.pertanyaan')->where('kuesioner_id', $kuesioner->id_kuesioner)
-            ->where('mahasiswa_id', $mahasiswa->nim)
-            ->first();
+        [$jawabanUser, $jawabanLabel, $respon] = TracerResponService::formData($kuesioner, $mahasiswa->nim);
 
-        if ($respon && !request()->has('edit')) {
+        if ($respon && $respon->status === 'Selesai' && !request()->has('edit')) {
             return view('mahasiswa.tracer.sudah_isi', compact('kuesioner'));
-        }
-
-        $jawabanUser = [];
-        $jawabanLabel = [];
-        if ($respon) {
-            foreach ($respon->jawabanDetails as $detail) {
-                $pertanyaan = $detail->pertanyaan;
-                if ($detail->jawaban_json) {
-                    $decoded = is_string($detail->jawaban_json) ? json_decode($detail->jawaban_json, true) : $detail->jawaban_json;
-                    if (is_array($decoded) && isset($decoded['label'])) {
-                        $jawabanUser[$detail->pertanyaan_id] = $detail->jawaban_text;
-                        $jawabanLabel[$detail->pertanyaan_id] = $decoded['label'];
-                        continue;
-                    } else {
-                        $jawabanUser[$detail->pertanyaan_id] = $decoded;
-                    }
-                } else {
-                    $val = $detail->jawaban_text;
-                    if ($pertanyaan && $pertanyaan->tipe_jawaban === 'checkbox' && is_string($val)) {
-                        $jawabanUser[$detail->pertanyaan_id] = array_map('trim', explode(',', $val));
-                    } else {
-                        $jawabanUser[$detail->pertanyaan_id] = $val;
-                    }
-                }
-            }
-
-            $pertanyaans = \App\Models\Pertanyaan::whereIn('kode_pertanyaan', ['F5A0', 'F5A1', 'F5A2', 'f5a0', 'f5a1', 'f5a2', 'f18b', 'f18c', 'F18B', 'F18C'])->get();
-            foreach ($pertanyaans as $p) {
-                $id = $p->id_pertanyaan;
-                $kode = strtolower($p->kode_pertanyaan);
-
-                if (!empty($jawabanUser[$id]) && empty($jawabanLabel[$id])) {
-                    if ($kode === 'f5a0') {
-                        if (strlen($jawabanUser[$id]) == 2) {
-                            $val = $jawabanUser[$id];
-                            $negara = Cache::remember("master_negara_{$val}", 86400, function () use ($val) {
-                                return DB::table('master_negara')->where('kode_wilayah_negara', $val)->value('negara');
-                            });
-                            if ($negara) $jawabanLabel[$id] = $negara;
-                        }
-                    } elseif ($kode === 'f5a1') {
-                        if (preg_match('/^\d+$/', $jawabanUser[$id])) {
-                            $val = $jawabanUser[$id];
-                            $prov = Cache::remember("master_provinsi_{$val}", 86400, function () use ($val) {
-                                return DB::table('master_provinsi')->where('kode_wilayah_provinsi', $val)->value('provinsi');
-                            });
-                            if ($prov) $jawabanLabel[$id] = $prov;
-                        }
-                    } elseif ($kode === 'f5a2') {
-                        if (preg_match('/^\d+$/', $jawabanUser[$id])) {
-                            $val = $jawabanUser[$id];
-                            $kab = Cache::remember("master_kab_{$val}", 86400, function () use ($val) {
-                                return DB::table('master_kota_kabupaten')->where('kode_wilayah_kota_kabupaten', $val)->value('kota_kabupaten');
-                            });
-                            if ($kab) $jawabanLabel[$id] = $kab;
-                        }
-                    }
-
-                    if (empty($jawabanLabel[$id])) {
-                        $jawabanLabel[$id] = is_array($jawabanUser[$id]) ? implode(', ', $jawabanUser[$id]) : $jawabanUser[$id];
-                    }
-                }
-            }
         }
 
         return view('mahasiswa.tracer.form', compact('kuesioner', 'respon', 'jawabanUser', 'jawabanLabel'));
@@ -141,6 +78,10 @@ class TracerController extends Controller
         ]);
 
         $kuesioner = Kuesioner::findOrFail($request->kuesioner_id);
+        if ($kuesioner->status !== 'Published' || !$kuesioner->matchesMahasiswa($mahasiswa)) {
+            return redirect()->route('mahasiswa.tracer.index')
+                ->with('error', 'Kuesioner ini tidak aktif atau tidak sesuai dengan tahun kelulusan Anda.');
+        }
 
         $jawaban = $request->input('jawaban', []);
         $jawabanLabel = $request->input('jawaban_label', []);

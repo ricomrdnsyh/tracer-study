@@ -168,14 +168,12 @@
             function toggleProdi() {
                 var selectedFakultas = $('#laporan_fakultas').val();
 
-                if (!selectedFakultas || selectedFakultas === 'all') {
-                    $prodiSelect.empty().append(originalProdiOptions.clone());
-                    $prodiSelect.prop('disabled', true);
-                    $prodiSelect.val('all').trigger('change.select2');
-                } else {
-                    $prodiSelect.prop('disabled', false);
+                $prodiSelect.prop('disabled', false);
+                $prodiSelect.empty();
 
-                    $prodiSelect.empty();
+                if (!selectedFakultas || selectedFakultas === 'all') {
+                    $prodiSelect.append(originalProdiOptions.clone());
+                } else {
                     originalProdiOptions.each(function() {
                         var val = $(this).val();
                         var fakultas = $(this).data('fakultas');
@@ -184,9 +182,9 @@
                             $prodiSelect.append($(this).clone());
                         }
                     });
-
-                    $prodiSelect.val('all').trigger('change.select2');
                 }
+
+                $prodiSelect.val('all').trigger('change.select2');
             }
 
             toggleProdi();

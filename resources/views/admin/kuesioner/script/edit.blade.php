@@ -2,10 +2,10 @@
     $(document).on('click', '.btn-edit', function() {
         var id = $(this).data('id');
         $.ajax({
-            url: '/admin/kuesioner/' + id + '/edit',
+            url: '{{ url('admin/kuesioner') }}/' + id + '/edit',
             type: 'GET',
             success: function(response) {
-                $('#form_edit_action').attr('action', '/admin/kuesioner/' + id);
+                $('#form_edit_action').attr('action', '{{ url('admin/kuesioner') }}/' + id);
                 $('#edit_judul').val(response.judul);
                 $('#edit_akademik_id').val(response.target_tahun_lulus || response.akademik_id || '').trigger('change');
 

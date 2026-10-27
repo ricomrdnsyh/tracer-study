@@ -36,9 +36,11 @@ class TracerResponService
                 $pertanyaan = $detail->pertanyaan;
                 if ($detail->jawaban_json) {
                     $decoded = is_string($detail->jawaban_json) ? json_decode($detail->jawaban_json, true) : $detail->jawaban_json;
-                    if (is_array($decoded) && isset($decoded['label'])) {
+                    if (is_array($decoded) && array_key_exists('label', $decoded)) {
                         $jawabanUser[$detail->pertanyaan_id] = $detail->jawaban_text;
-                        $jawabanLabel[$detail->pertanyaan_id] = $decoded['label'];
+                        if (!empty($decoded['label'])) {
+                            $jawabanLabel[$detail->pertanyaan_id] = $decoded['label'];
+                        }
                         continue;
                     } else {
                         $jawabanUser[$detail->pertanyaan_id] = $decoded;
@@ -53,33 +55,41 @@ class TracerResponService
                 }
             }
 
-            $pertanyaans = Pertanyaan::whereIn('kode_pertanyaan', ['F5A0', 'F5A1', 'F5A2', 'f5a0', 'f5a1', 'f5a2', 'f18b', 'f18c', 'F18B', 'F18C'])->get();
+            $pertanyaans = Pertanyaan::whereHas('kategori', function ($q) use ($kuesioner) {
+                $q->where('kuesioner_id', $kuesioner->id_kuesioner);
+            })->whereIn('kode_pertanyaan', ['F5A0', 'F5A1', 'F5A2', 'f5a0', 'f5a1', 'f5a2', 'f18b', 'f18c', 'F18B', 'F18C'])->get();
             foreach ($pertanyaans as $p) {
                 $id = $p->id_pertanyaan;
                 $kode = strtolower($p->kode_pertanyaan);
 
                 if (!empty($jawabanUser[$id]) && empty($jawabanLabel[$id])) {
                     if ($kode === 'f5a0') {
-                        if (strlen($jawabanUser[$id]) == 2) {
-                            $val = $jawabanUser[$id];
+                        if (strlen((string)$jawabanUser[$id]) == 2) {
+                            $val = (string)$jawabanUser[$id];
                             $negara = Cache::remember("master_negara_{$val}", 86400, function () use ($val) {
                                 return DB::table('master_negara')->where('kode_wilayah_negara', $val)->value('negara');
                             });
                             if ($negara) $jawabanLabel[$id] = $negara;
                         }
                     } elseif ($kode === 'f5a1') {
-                        if (preg_match('/^\d+$/', $jawabanUser[$id])) {
-                            $val = $jawabanUser[$id];
+                        if (preg_match('/^\d+$/', (string)$jawabanUser[$id])) {
+                            $val = (string)$jawabanUser[$id];
                             $prov = Cache::remember("master_provinsi_{$val}", 86400, function () use ($val) {
-                                return DB::table('master_provinsi')->where('kode_wilayah_provinsi', $val)->value('provinsi');
+                                return DB::table('master_provinsi')
+                                    ->where('kode_wilayah_provinsi', $val)
+                                    ->orWhere('kode_wilayah_provinsi', str_pad($val, 6, '0', STR_PAD_LEFT))
+                                    ->value('provinsi');
                             });
                             if ($prov) $jawabanLabel[$id] = $prov;
                         }
                     } elseif ($kode === 'f5a2') {
-                        if (preg_match('/^\d+$/', $jawabanUser[$id])) {
-                            $val = $jawabanUser[$id];
+                        if (preg_match('/^\d+$/', (string)$jawabanUser[$id])) {
+                            $val = (string)$jawabanUser[$id];
                             $kab = Cache::remember("master_kab_{$val}", 86400, function () use ($val) {
-                                return DB::table('master_kota_kabupaten')->where('kode_wilayah_kota_kabupaten', $val)->value('kota_kabupaten');
+                                return DB::table('master_kota_kabupaten')
+                                    ->where('kode_wilayah_kota_kabupaten', $val)
+                                    ->orWhere('kode_wilayah_kota_kabupaten', str_pad($val, 6, '0', STR_PAD_LEFT))
+                                    ->value('kota_kabupaten');
                             });
                             if ($kab) $jawabanLabel[$id] = $kab;
                         }
@@ -121,32 +131,47 @@ class TracerResponService
                 continue;
             }
 
+            $isLuarNegeri = false;
+            foreach ($kategori->pertanyaans as $pNegara) {
+                if (strtoupper(trim($pNegara->kode_pertanyaan ?? '')) === 'F5A0') {
+                    $valNegara = trim((string)($jawaban[$pNegara->id_pertanyaan] ?? ''));
+                    $lblNegara = trim((string)($jawabanLabel[$pNegara->id_pertanyaan] ?? ''));
+                    if ($valNegara !== '' && strcasecmp($valNegara, 'ID') !== 0 && strcasecmp($valNegara, 'Indonesia') !== 0 && strcasecmp($lblNegara, 'Indonesia') !== 0) {
+                        $isLuarNegeri = true;
+                    }
+                    break;
+                }
+            }
+
             foreach ($kategori->pertanyaans as $pertanyaan) {
                 if (!self::checkCondition($pertanyaan->syarat_pertanyaan_id, $pertanyaan->syarat_jawaban, $jawaban)) {
                     continue;
                 }
 
-                if ($pertanyaan->wajib) {
-                    $id = $pertanyaan->id_pertanyaan;
-                    $val = $jawaban[$id] ?? null;
+                $kodePertanyaan = strtoupper(trim($pertanyaan->kode_pertanyaan ?? ''));
+                if ($isLuarNegeri && in_array($kodePertanyaan, ['F5A1', 'F5A2'], true)) {
+                    continue;
+                }
 
-                    $isEmpty = false;
-                    if ($val === null || $val === '') {
-                        $isEmpty = true;
-                    } elseif (is_array($val) && count(array_filter($val, fn($v) => $v !== null && $v !== '')) === 0) {
-                        $isEmpty = true;
-                    } elseif (is_string($val) && trim($val) === '') {
-                        $isEmpty = true;
-                    }
+                $id = $pertanyaan->id_pertanyaan;
+                $val = $jawaban[$id] ?? null;
 
-                    if ($isEmpty) {
-                        $kode = strtoupper($pertanyaan->kode_pertanyaan ?? 'P');
-                        $errors[$id] = "Pertanyaan [{$kode}] \"{$pertanyaan->teks_pertanyaan}\" wajib diisi.";
-                    } elseif (strtoupper(trim($pertanyaan->kode_pertanyaan ?? '')) === 'F502') {
-                        $cleanNum = str_replace(',', '.', trim((string)$val));
-                        if (!is_numeric($cleanNum) || (float)$cleanNum < 0 || (float)$cleanNum > 60) {
-                            $errors[$id] = "Pertanyaan [F502] masa tunggu harus berupa angka antara 0 sampai 60 bulan (jangan masukkan tahun atau nominal gaji).";
-                        }
+                $isEmpty = false;
+                if ($val === null || $val === '') {
+                    $isEmpty = true;
+                } elseif (is_array($val) && count(array_filter($val, fn($v) => $v !== null && $v !== '')) === 0) {
+                    $isEmpty = true;
+                } elseif (is_string($val) && trim($val) === '') {
+                    $isEmpty = true;
+                }
+
+                if ($pertanyaan->wajib && $isEmpty) {
+                    $kode = $kodePertanyaan ?: 'P';
+                    $errors[$id] = "Pertanyaan [{$kode}] \"{$pertanyaan->teks_pertanyaan}\" wajib diisi.";
+                } elseif (!$isEmpty && $kodePertanyaan === 'F502') {
+                    $cleanNum = str_replace(',', '.', trim((string)$val));
+                    if (!is_numeric($cleanNum) || (float)$cleanNum < 0 || (float)$cleanNum > 60) {
+                        $errors[$id] = "Pertanyaan [F502] masa tunggu harus berupa angka antara 0 sampai 60 bulan (jangan masukkan tahun atau nominal gaji).";
                     }
                 }
             }
@@ -158,7 +183,7 @@ class TracerResponService
     /**
      * Helper evaluasi apakah jawaban memenuhi syarat skip logic.
      */
-    private static function checkCondition($syaratId, $syaratJawaban, array $jawaban): bool
+    public static function checkCondition($syaratId, $syaratJawaban, array $jawaban): bool
     {
         if (empty($syaratId)) return true;
         if (!isset($jawaban[$syaratId])) return false;
@@ -197,7 +222,7 @@ class TracerResponService
     private static function cleanConditionText($str): string
     {
         if (!$str) return '';
-        $clean = preg_replace('/^\s*(\[\w+\])?\s*(\(0\/1\))?\s*(\(\d+\))?\s*/', '', trim((string)$str));
+        $clean = preg_replace('/^\s*(\[\w+\])?\s*(\(0\/1\))?\s*([\[\(]\d+[\]\)])?\s*/', '', trim((string)$str));
         return strtolower(preg_replace('/\s+/', ' ', $clean));
     }
 
@@ -208,6 +233,12 @@ class TracerResponService
     {
         $jawaban = $jawaban ?? [];
         $jawabanLabel = $jawabanLabel ?? [];
+
+        foreach ($jawabanLabel as $qId => $lbl) {
+            if ((!isset($jawaban[$qId]) || $jawaban[$qId] === '' || $jawaban[$qId] === null) && !empty($lbl)) {
+                $jawaban[$qId] = is_string($lbl) ? trim($lbl) : $lbl;
+            }
+        }
 
         return DB::transaction(function () use ($kuesionerId, $nim, $jawaban, $jawabanLabel) {
             $respon = ResponTracer::updateOrCreate(
@@ -223,10 +254,47 @@ class TracerResponService
 
             JawabanDetail::where('respon_id', $respon->id_respon)->delete();
 
+            $allPertanyaanKuesioner = Pertanyaan::with('kategori')
+                ->whereHas('kategori', function ($q) use ($kuesionerId) {
+                    $q->where('kuesioner_id', $kuesionerId);
+                })
+                ->get()
+                ->keyBy('id_pertanyaan');
+
+            $luarNegeriKategoriIds = [];
+            foreach ($allPertanyaanKuesioner as $pItem) {
+                if (strtoupper(trim($pItem->kode_pertanyaan ?? '')) === 'F5A0') {
+                    $valNeg = trim((string)($jawaban[$pItem->id_pertanyaan] ?? ''));
+                    $lblNeg = trim((string)($jawabanLabel[$pItem->id_pertanyaan] ?? ''));
+                    if ($valNeg !== '' && strcasecmp($valNeg, 'ID') !== 0 && strcasecmp($valNeg, 'Indonesia') !== 0 && strcasecmp($lblNeg, 'Indonesia') !== 0) {
+                        $luarNegeriKategoriIds[$pItem->kategori_id] = true;
+                    }
+                }
+            }
+
             $jawabanData = [];
             foreach ($jawaban as $pertanyaan_id => $isi) {
-                $isRemoteSelect = isset($jawabanLabel[$pertanyaan_id]);
-                $jsonValue = is_array($isi) ? json_encode($isi) : ($isRemoteSelect ? json_encode(['label' => $jawabanLabel[$pertanyaan_id]]) : null);
+                if ($isi === null || (is_string($isi) && trim($isi) === '') || (is_array($isi) && count(array_filter($isi, fn($v) => $v !== null && trim((string)$v) !== '')) === 0)) {
+                    continue;
+                }
+
+                $pObj = $allPertanyaanKuesioner->get($pertanyaan_id);
+                if (!$pObj) {
+                    continue;
+                }
+                if ($pObj->kategori && !self::checkCondition($pObj->kategori->syarat_pertanyaan_id, $pObj->kategori->syarat_jawaban, $jawaban)) {
+                    continue;
+                }
+                if (!self::checkCondition($pObj->syarat_pertanyaan_id, $pObj->syarat_jawaban, $jawaban)) {
+                    continue;
+                }
+                $pKodeUpper = strtoupper(trim($pObj->kode_pertanyaan ?? ''));
+                if (isset($luarNegeriKategoriIds[$pObj->kategori_id]) && in_array($pKodeUpper, ['F5A1', 'F5A2'], true)) {
+                    continue;
+                }
+
+                $isRemoteSelect = isset($jawabanLabel[$pertanyaan_id]) && trim((string)$jawabanLabel[$pertanyaan_id]) !== '';
+                $jsonValue = is_array($isi) ? json_encode($isi) : ($isRemoteSelect ? json_encode(['label' => trim((string)$jawabanLabel[$pertanyaan_id])]) : null);
 
                 $jawabanData[] = [
                     'respon_id' => $respon->id_respon,
@@ -241,10 +309,14 @@ class TracerResponService
                 JawabanDetail::insert($jawabanData);
             }
 
-            $pertanyaans = Pertanyaan::whereIn('kode_pertanyaan', [
-                'F5B', 'F1101', 'F1102', 'F5A1', 'F5A2', 'F8', 'F5C',
-                'f5b', 'f1101', 'f1102', 'f5a1', 'f5a2', 'f8', 'f5c'
-            ])->get();
+            $pertanyaans = Pertanyaan::with('kategori')
+                ->whereHas('kategori', function ($q) use ($kuesionerId) {
+                    $q->where('kuesioner_id', $kuesionerId);
+                })
+                ->whereIn('kode_pertanyaan', [
+                    'F5B', 'F1101', 'F1102', 'F5A1', 'F5A2', 'F8', 'F5C',
+                    'f5b', 'f1101', 'f1102', 'f5a1', 'f5a2', 'f8', 'f5c'
+                ])->get();
 
             $nama = null;
             $jenis_instansi_raw = null;
@@ -257,13 +329,27 @@ class TracerResponService
             $kabupaten_label = null;
 
             foreach ($pertanyaans as $p) {
+                if ($p->kategori && !empty($p->kategori->syarat_pertanyaan_id)) {
+                    if (!self::checkCondition($p->kategori->syarat_pertanyaan_id, $p->kategori->syarat_jawaban, $jawaban)) {
+                        continue;
+                    }
+                }
+                if (!self::checkCondition($p->syarat_pertanyaan_id, $p->syarat_jawaban, $jawaban)) {
+                    continue;
+                }
+
                 $id = $p->id_pertanyaan;
                 $kode = strtolower($p->kode_pertanyaan);
+
+                if (isset($luarNegeriKategoriIds[$p->kategori_id]) && in_array($kode, ['f5a1', 'f5a2'], true)) {
+                    continue;
+                }
 
                 if ($kode === 'f5b' && isset($jawaban[$id]) && !empty($jawaban[$id])) {
                     $nama = !empty($jawabanLabel[$id]) ? $jawabanLabel[$id] : $jawaban[$id];
                 } elseif ($kode === 'f1101' && isset($jawaban[$id]) && !empty($jawaban[$id])) {
-                    $jenis_instansi_raw = $jawaban[$id];
+                    $rawF1101 = is_array($jawaban[$id]) ? implode(', ', $jawaban[$id]) : (string) $jawaban[$id];
+                    $jenis_instansi_raw = self::nomorToLabel(is_array($p->opsi_jawaban) ? array_values($p->opsi_jawaban) : null, $rawF1101, 'F1101');
                 } elseif ($kode === 'f1102' && isset($jawaban[$id]) && !empty($jawaban[$id])) {
                     $jenis_instansi_lainnya = is_array($jawaban[$id]) ? implode(', ', $jawaban[$id]) : $jawaban[$id];
                 } elseif ($kode === 'f8' && isset($jawaban[$id]) && !empty($jawaban[$id])) {
@@ -271,20 +357,26 @@ class TracerResponService
                 } elseif ($kode === 'f5c' && isset($jawaban[$id]) && !empty($jawaban[$id])) {
                     $f5c_val = is_array($jawaban[$id]) ? implode(', ', $jawaban[$id]) : $jawaban[$id];
                 } elseif ($kode === 'f5a1' && isset($jawaban[$id]) && !empty($jawaban[$id])) {
-                    $kode_provinsi = $jawaban[$id];
+                    $kode_provinsi = (string) (is_array($jawaban[$id]) ? implode(', ', $jawaban[$id]) : $jawaban[$id]);
                     $provinsi_label = !empty($jawabanLabel[$id]) ? $jawabanLabel[$id] : null;
                     if (empty($provinsi_label)) {
                         $prov = Cache::remember("master_provinsi_{$kode_provinsi}", 86400, function () use ($kode_provinsi) {
-                            return DB::table('master_provinsi')->where('kode_wilayah_provinsi', $kode_provinsi)->value('provinsi');
+                            return DB::table('master_provinsi')
+                                ->where('kode_wilayah_provinsi', $kode_provinsi)
+                                ->orWhere('kode_wilayah_provinsi', str_pad($kode_provinsi, 6, '0', STR_PAD_LEFT))
+                                ->value('provinsi');
                         });
                         if ($prov) $provinsi_label = $prov;
                     }
                 } elseif ($kode === 'f5a2' && isset($jawaban[$id]) && !empty($jawaban[$id])) {
-                    $kode_kabupaten = $jawaban[$id];
+                    $kode_kabupaten = (string) (is_array($jawaban[$id]) ? implode(', ', $jawaban[$id]) : $jawaban[$id]);
                     $kabupaten_label = !empty($jawabanLabel[$id]) ? $jawabanLabel[$id] : null;
                     if (empty($kabupaten_label)) {
                         $kab = Cache::remember("master_kab_{$kode_kabupaten}", 86400, function () use ($kode_kabupaten) {
-                            return DB::table('master_kota_kabupaten')->where('kode_wilayah_kota_kabupaten', $kode_kabupaten)->value('kota_kabupaten');
+                            return DB::table('master_kota_kabupaten')
+                                ->where('kode_wilayah_kota_kabupaten', $kode_kabupaten)
+                                ->orWhere('kode_wilayah_kota_kabupaten', str_pad($kode_kabupaten, 6, '0', STR_PAD_LEFT))
+                                ->value('kota_kabupaten');
                         });
                         if ($kab) $kabupaten_label = $kab;
                     }
@@ -294,10 +386,10 @@ class TracerResponService
             $jenis_instansi = $jenis_instansi_raw;
             if ($jenis_instansi_raw) {
                 $rawStr = is_array($jenis_instansi_raw) ? implode(', ', $jenis_instansi_raw) : (string) $jenis_instansi_raw;
-                if ((stripos($rawStr, 'lainnya') !== false || stripos($rawStr, 'tuliskan') !== false) && !empty($jenis_instansi_lainnya) && trim((string)$jenis_instansi_lainnya) !== '') {
+                if ((stripos($rawStr, 'lainnya') !== false || stripos($rawStr, 'tuliskan') !== false || trim($rawStr) === '5') && !empty($jenis_instansi_lainnya) && trim((string)$jenis_instansi_lainnya) !== '') {
                     $jenis_instansi = 'Lainnya: ' . trim((string)$jenis_instansi_lainnya);
                 }
-            } elseif ($f8_val && stripos((string)$f8_val, 'wiraswasta') !== false) {
+            } elseif ($f8_val && (stripos((string)$f8_val, 'wiraswasta') !== false || stripos((string)$f8_val, 'wirausaha') !== false || in_array(trim((string)$f8_val), ['3', '[3]', '(3)'], true))) {
                 $jenis_instansi = 'Wiraswasta/wirausaha/pekerja lepas';
             }
 
@@ -339,7 +431,8 @@ class TracerResponService
         // Khusus lokasi wilayah (F5A1, F5A2): Prioritaskan kode wilayah angka!
         if ($kode === 'F5A1') {
             if ($val !== null && $val !== '' && preg_match('/^\d+$/', (string) $val)) {
-                return (string) $val;
+                $valStr = (string) $val;
+                return strlen($valStr) === 5 ? str_pad($valStr, 6, '0', STR_PAD_LEFT) : $valStr;
             }
             $search = $val;
             if ($rawJson) {
@@ -350,14 +443,18 @@ class TracerResponService
             }
             if (!empty($search)) {
                 $provKode = DB::table('master_provinsi')->where('provinsi', $search)->orWhere('provinsi', 'like', "%{$search}%")->value('kode_wilayah_provinsi');
-                if ($provKode) return (string) $provKode;
+                if ($provKode) {
+                    $provKodeStr = (string) $provKode;
+                    return strlen($provKodeStr) === 5 ? str_pad($provKodeStr, 6, '0', STR_PAD_LEFT) : $provKodeStr;
+                }
             }
             return (string) ($val ?? '');
         }
 
         if ($kode === 'F5A2') {
             if ($val !== null && $val !== '' && preg_match('/^\d+$/', (string) $val)) {
-                return (string) $val;
+                $valStr = (string) $val;
+                return strlen($valStr) === 5 ? str_pad($valStr, 6, '0', STR_PAD_LEFT) : $valStr;
             }
             $search = $val;
             if ($rawJson) {
@@ -368,7 +465,10 @@ class TracerResponService
             }
             if (!empty($search)) {
                 $kabKode = DB::table('master_kota_kabupaten')->where('kota_kabupaten', $search)->orWhere('kota_kabupaten', 'like', "%{$search}%")->value('kode_wilayah_kota_kabupaten');
-                if ($kabKode) return (string) $kabKode;
+                if ($kabKode) {
+                    $kabKodeStr = (string) $kabKode;
+                    return strlen($kabKodeStr) === 5 ? str_pad($kabKodeStr, 6, '0', STR_PAD_LEFT) : $kabKodeStr;
+                }
             }
             return (string) ($val ?? '');
         }
@@ -428,7 +528,9 @@ class TracerResponService
         'F407' => 'Menghubungi agen tenaga kerja komersial/swasta',
         'F408' => 'Memperoleh informasi karir dari fakultas/universitas',
         'F409' => 'Menghubungi kantor kemahasiswaan/hubungan alumni',
+        'F410' => 'Membangun jejaring (network) sejak masih kuliah',
         'F411' => 'Melalui jejaring/relasi',
+        'F412' => 'Membangun bisnis sendiri',
         'F413' => 'Melalui penempatan kerja atau magang',
         'F414' => 'Bekerja di tempat yang sama dengan tempat kerja semasa kuliah',
         'F415' => 'Lainnya',
@@ -448,6 +550,7 @@ class TracerResponService
         'F1608' => 'lebih menarik',
         'F1609' => 'jadwal yang fleksibel',
         'F1610' => 'lebih dekat dari rumah',
+        'F1611' => 'lebih menjamin kebutuhan keluarga saya',
         'F1612' => 'pada awal meniti karir ini',
         'F1613' => 'Lainnya',
     ];
@@ -511,19 +614,28 @@ class TracerResponService
         ],
         'F1101' => [
             'instansi/lembagapemerintah' => '1',
+            'instansipemerintah' => '1',
             'instansipemerintah(termasukbumn)' => '1',
             'badanusahamiliknegara(bumn)/badanusahamilikdaerah(bumd)' => '6',
+            'bumn/bumd' => '6',
             'institusi/organisasimultilateral' => '7',
             'institusi/organisasinirlaba' => '2',
             'organisasinon-profit/lembagaswadayamasyarakat' => '2',
             'perusahaanswasta(perusahaannasional,multinasional,rintisan/startup,umkm,danlain-lain)' => '3',
             'perusahaanswasta' => '3',
+            'wiraswasta/perusahaansendiri' => '4',
+            'wirausaha/perusahaansendiri' => '4',
+            'perusahaansendiri' => '4',
+            'wiraswasta' => '4',
             'lainnya' => '5',
             'lainnya,tuliskan...' => '5',
+            'lainnya,tuliskan:' => '5',
         ],
         'F5C' => [
             'founder' => '1',
             'co-founder' => '2',
+            'staf/pegawai/karyawan' => '3',
+            'staff/pegawai/karyawan' => '3',
             'freelance/kerjalepas' => '4',
             'freelance/pekerjalepas' => '4',
         ],
@@ -603,7 +715,7 @@ class TracerResponService
 
     private static function stripNomor(string $s): string
     {
-        return preg_replace('/^\(\d+\)\s*/', '', trim($s));
+        return preg_replace('/^[\[\(]\d+[\]\)]\s*/', '', trim($s));
     }
 
     private static function panduanMap(?string $kode): ?array
@@ -648,8 +760,8 @@ class TracerResponService
             return $labelStr;
         }
 
-        // Jika label diawali kode angka panduan, mis. "(1) Bekerja...", "(6) BUMN...", "(0) Belum"
-        if (preg_match('/^\((\d+)\)/', $labelStr, $m)) {
+        // Jika label diawali kode angka panduan, mis. "(1) Bekerja...", "[1] Bekerja...", "(6) BUMN...", "(0) Belum"
+        if (preg_match('/^[\[\(](\d+)[\]\)]/', $labelStr, $m)) {
             return $m[1];
         }
 
@@ -661,7 +773,7 @@ class TracerResponService
         $labelStripped = self::stripNomor($labelStr);
 
         foreach ($opsi as $o) {
-            if (preg_match('/^\((\d+)\)\s*(.+)$/', trim((string) $o), $m)
+            if (preg_match('/^[\[\(](\d+)[\]\)]\s*(.+)$/', trim((string) $o), $m)
                 && self::norm($m[2]) === self::norm($labelStripped)) {
                 return $m[1];
             }
@@ -673,7 +785,6 @@ class TracerResponService
             if (isset($map[$nl])) {
                 return (string) $map[$nl];
             }
-            return $labelStr;
         }
 
         foreach ($opsi as $i => $o) {
@@ -706,7 +817,7 @@ class TracerResponService
             $resolved = null;
             if (ctype_digit($part)) {
                 foreach ($opsi as $o) {
-                    if (preg_match('/^\((\d+)\)\s*(.+)$/', trim((string) $o), $m) && $m[1] === $part) {
+                    if (preg_match('/^[\[\(](\d+)[\]\)]\s*(.+)$/', trim((string) $o), $m) && $m[1] === $part) {
                         $resolved = (string) $o;
                         break;
                     }
@@ -778,10 +889,15 @@ class TracerResponService
                         $dataArray = $query->limit(50)->get()->map(fn($x) => (array)$x)->toArray();
                         break;
                     case 'kabupaten':
-                        $kodeProvinsi = $request->query('kode_provinsi', '');
-                        if ($kodeProvinsi) {
+                        $kodeProvinsi = trim((string) $request->query('kode_provinsi', ''));
+                        if ($kodeProvinsi !== '') {
+                            $provCandidates = array_values(array_unique(array_filter([
+                                $kodeProvinsi,
+                                strlen($kodeProvinsi) < 6 ? str_pad($kodeProvinsi, 6, '0', STR_PAD_LEFT) : null,
+                                ltrim($kodeProvinsi, '0'),
+                            ])));
                             $query = DB::table('master_kota_kabupaten')
-                                ->where('kode_wilayah_provinsi', $kodeProvinsi);
+                                ->whereIn('kode_wilayah_provinsi', $provCandidates);
                             if (!empty($keyword)) {
                                 $query->where('kota_kabupaten', 'like', "%{$keyword}%");
                             }

@@ -34,16 +34,23 @@ class SsoController extends Controller
                 $mahasiswa = Mahasiswa::where('nim', $nim)->first();
 
                 if (!$mahasiswa) {
-                    return redirect()->route('login')->with(
+                    return redirect()->route('tracer.login')->with(
                         'error',
-                        "Data alumni dengan NIM {$nim} belum terdaftar di sistem Tracer Study. Silakan hubungi Admin untuk sinkronisasi data alumni."
+                        "Data alumni dengan NIM {$nim} belum terdaftar di sistem Tracer Study. Silakan ajukan Bantuan Lupa/Verifikasi NIM di bawah atau hubungi Admin."
                     );
                 }
 
+                $prodiCandidate = !empty($responseData['id_prodi'])
+                    ? trim((string) $responseData['id_prodi'])
+                    : (!empty($responseData['id_sms']) ? trim((string) $responseData['id_sms']) : null);
+                $validProdiId = ($prodiCandidate && \App\Models\Prodi::where('id_prodi', $prodiCandidate)->exists())
+                    ? $prodiCandidate
+                    : $mahasiswa->prodi_id;
+
                 $updateData = [
                     'nama'            => $responseData['nama'] ?? $mahasiswa->nama,
-                    'prodi_id'        => $responseData['id_prodi'] ?? $mahasiswa->prodi_id,
-                    'email'           => $responseData['email'] ?? $mahasiswa->email,
+                    'prodi_id'        => $validProdiId,
+                    'email'           => !empty($responseData['email']) ? $responseData['email'] : $mahasiswa->email,
                     'jenis_kelamin'   => isset($responseData['jenis_kelamin']) ? strtoupper(trim($responseData['jenis_kelamin'])) : $mahasiswa->jenis_kelamin,
                     'id_jenis_keluar' => $responseData['id_jenis_keluar'] ?? $mahasiswa->id_jenis_keluar,
                 ];

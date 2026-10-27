@@ -14,7 +14,7 @@ class DashboardController extends Controller
 {
     public function index(Request $request)
     {
-        $fakultasId = auth()->user()->fakultas_id;
+        $fakultasId = auth()->user()->fakultas_id ?: -1;
 
         $kuesionerList = Kuesioner::orderByTahunTerbaru()->get();
 
@@ -30,6 +30,7 @@ class DashboardController extends Controller
 
 
         $recentQuery = ResponTracer::with(['mahasiswa.prodi', 'kuesioner'])
+            ->where('status', 'Selesai')
             ->whereHas('mahasiswa.prodi', function($q) use ($fakultasId) {
                 $q->where('fakultas_id', $fakultasId);
             })

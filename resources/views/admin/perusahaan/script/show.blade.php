@@ -39,17 +39,21 @@
                 },
                 {
                     extend: 'csv',
-                    action: newexportaction,
                     titleAttr: 'Csv',
                     title: 'Data Mahasiswa Alumni',
-                    className: 'btn btn-sm btn-primary mt-2 rounded-2'
+                    className: 'btn btn-sm btn-primary mt-2 rounded-2',
+                    exportOptions: {
+                        columns: [2, 3, 4, 5]
+                    }
                 },
                 {
                     extend: 'excel',
-                    action: newexportaction,
                     titleAttr: 'Excel',
                     title: 'Data Mahasiswa Alumni',
-                    className: 'btn btn-sm btn-primary mt-2 rounded-2'
+                    className: 'btn btn-sm btn-primary mt-2 rounded-2',
+                    exportOptions: {
+                        columns: [2, 3, 4, 5]
+                    }
                 }
             ]
         });

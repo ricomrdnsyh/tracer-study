@@ -19,12 +19,15 @@ class AdminFakultasController extends Controller
     {
         $query = Fakultas::select(['id_fakultas', 'nama_fakultas', 'singkatan', 'nama_dekan'])->orderByDesc('id_fakultas');
 
-        if (auth()->user()->role === 'Fakultas') {
-            $query->where('id_fakultas', auth()->user()->fakultas_id);
+        $user = auth()->user();
+        if ($user->role === 'Fakultas') {
+            $query->where('id_fakultas', $user->fakultas_id ?: 0);
+        } elseif ($user->role === 'Kaprodi') {
+            $query->where('id_fakultas', $user->prodi?->fakultas_id ?: 0);
         }
 
         return DataTables::of($query)
-            ->addColumn('action', function ($row) {
+            ->addColumn('action', function ($row) use ($user) {
                 $showBtn = '<a href="javascript:void(0)"
                                 class="btn btn-sm btn-light btn-active-light-info text-center btn-show"
                                 data-id="' . $row->id_fakultas . '"
@@ -32,14 +35,17 @@ class AdminFakultasController extends Controller
                                 <i class="fa fa-file-alt"></i>
                             </a>';
 
-                $editBtn = '<a href="javascript:void(0)"
-                                class="btn btn-sm btn-light btn-active-light-warning text-center btn-edit"
-                                data-id="' . $row->id_fakultas . '"
-                                data-bs-toggle="tooltip" title="Edit" data-bs-title="Edit">
-                                <i class="fa fa-edit"></i>
-                            </a>';
+                $editBtn = '';
+                if ($user->role !== 'Kaprodi') {
+                    $editBtn = ' <a href="javascript:void(0)"
+                                    class="btn btn-sm btn-light btn-active-light-warning text-center btn-edit"
+                                    data-id="' . $row->id_fakultas . '"
+                                    data-bs-toggle="tooltip" title="Edit" data-bs-title="Edit">
+                                    <i class="fa fa-edit"></i>
+                                </a>';
+                }
 
-                return '<div class="text-center">' . $showBtn . ' ' . $editBtn . '</div>';
+                return '<div class="text-center">' . $showBtn . $editBtn . '</div>';
             })
             ->rawColumns(['action'])
             ->make(true);
@@ -48,6 +54,15 @@ class AdminFakultasController extends Controller
     public function show(string $id)
     {
         $fakultas = Fakultas::findOrFail($id);
+
+        $user = auth()->user();
+        if ($user->role === 'Kaprodi') {
+            return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
+        }
+        if ($user->role === 'Fakultas' && (string) $fakultas->id_fakultas !== (string) $user->fakultas_id) {
+            return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
+        }
+
         return response()->json($fakultas);
     }
 
@@ -58,6 +73,15 @@ class AdminFakultasController extends Controller
         ]);
 
         $fakultas = Fakultas::findOrFail($id);
+
+        $user = auth()->user();
+        if ($user->role === 'Kaprodi') {
+            return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
+        }
+        if ($user->role === 'Fakultas' && (string) $fakultas->id_fakultas !== (string) $user->fakultas_id) {
+            return response()->json(['success' => false, 'message' => 'Anda hanya dapat memperbarui fakultas Anda sendiri.'], 403);
+        }
+
         $fakultas->update([
             'nama_dekan' => $request->nama_dekan,
         ]);

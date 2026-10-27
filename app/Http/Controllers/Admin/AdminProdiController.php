@@ -16,7 +16,9 @@ class AdminProdiController extends Controller
         $fakultas = Fakultas::orderBy('nama_fakultas');
         
         if (auth()->user()->role === 'Fakultas') {
-            $fakultas->where('id_fakultas', auth()->user()->fakultas_id);
+            $fakultas->where('id_fakultas', auth()->user()->fakultas_id ?: 0);
+        } elseif (auth()->user()->role === 'Kaprodi') {
+            $fakultas->where('id_fakultas', auth()->user()->prodi?->fakultas_id ?: 0);
         }
 
         $fakultas = $fakultas->get();
@@ -27,9 +29,11 @@ class AdminProdiController extends Controller
     {
         $query = Prodi::with('fakultas')->select(['id_prodi', 'fakultas_id', 'nama_prodi', 'jenjang', 'nama_kaprodi', 'singkatan'])->orderByDesc('created_at');
 
-        if (auth()->user()->role === 'Fakultas') {
-            $query->where('fakultas_id', auth()->user()->fakultas_id);
-        } else if ($request->has('id_fakultas') && !empty($request->id_fakultas)) {
+        if (auth()->user()->role === 'Kaprodi') {
+            $query->where('id_prodi', auth()->user()->prodi_id ?: '__NONE__');
+        } elseif (auth()->user()->role === 'Fakultas') {
+            $query->where('fakultas_id', auth()->user()->fakultas_id ?: 0);
+        } elseif ($request->has('id_fakultas') && !empty($request->id_fakultas)) {
             $query->where('fakultas_id', $request->id_fakultas);
         }
 
@@ -61,6 +65,15 @@ class AdminProdiController extends Controller
     public function show(string $id)
     {
         $prodi = Prodi::with('fakultas')->findOrFail($id);
+
+        $user = auth()->user();
+        if ($user->role === 'Kaprodi' && (string) $prodi->id_prodi !== (string) $user->prodi_id) {
+            return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
+        }
+        if ($user->role === 'Fakultas' && (string) $prodi->fakultas_id !== (string) $user->fakultas_id) {
+            return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
+        }
+
         return response()->json($prodi);
     }
 
@@ -72,6 +85,15 @@ class AdminProdiController extends Controller
         ]);
 
         $prodi = Prodi::findOrFail($id);
+
+        $user = auth()->user();
+        if ($user->role === 'Kaprodi' && (string) $prodi->id_prodi !== (string) $user->prodi_id) {
+            return response()->json(['success' => false, 'message' => 'Anda hanya dapat memperbarui program studi Anda sendiri.'], 403);
+        }
+        if ($user->role === 'Fakultas' && (string) $prodi->fakultas_id !== (string) $user->fakultas_id) {
+            return response()->json(['success' => false, 'message' => 'Program studi tersebut bukan bagian dari fakultas Anda.'], 403);
+        }
+
         $prodi->update([
             'jenjang' => $request->jenjang,
             'nama_kaprodi' => $request->nama_kaprodi,

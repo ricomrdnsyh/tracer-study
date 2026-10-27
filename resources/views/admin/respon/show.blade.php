@@ -321,10 +321,11 @@
                                     $isSelectedRadio = function($ans, $opt) {
                                         if ($ans === null || $ans === '') return false;
                                         if ($ans === $opt) return true;
-                                        $c1 = preg_replace('/^\s*(\[\w+\])?\s*(\(0\/1\))?\s*(\(\d+\))?\s*/', '', trim((string)$ans));
-                                        $c2 = preg_replace('/^\s*(\[\w+\])?\s*(\(0\/1\))?\s*(\(\d+\))?\s*/', '', trim((string)$opt));
+                                        $c1 = preg_replace('/^\s*(\[\w+\])?\s*(\(0\/1\))?\s*([\[\(]\d+[\]\)])?\s*/', '', trim((string)$ans));
+                                        $c2 = preg_replace('/^\s*(\[\w+\])?\s*(\(0\/1\))?\s*([\[\(]\d+[\]\)])?\s*/', '', trim((string)$opt));
                                         if ($c1 !== '' && strcasecmp($c1, $c2) === 0) return true;
-                                        if (preg_match('/^\((\d+)\)/', $opt, $m) && (string)$ans === $m[1]) return true;
+                                        if (preg_match('/^[\[\(](\d+)[\]\)]/', $opt, $m) && (string)$ans === (string)$m[1]) return true;
+                                        if (preg_match('/^[\[\(](\d+)[\]\)]/', (string)$ans, $ma) && preg_match('/^[\[\(](\d+)[\]\)]/', (string)$opt, $mo) && $ma[1] === $mo[1]) return true;
                                         return false;
                                     };
 
@@ -333,10 +334,10 @@
                                         $arr = is_array($ansList) ? $ansList : [ $ansList ];
                                         foreach ($arr as $item) {
                                             if ($item === $opt) return true;
-                                            $c1 = preg_replace('/^\s*(\[\w+\])?\s*(\(0\/1\))?\s*(\(\d+\))?\s*/', '', trim((string)$item));
-                                            $c2 = preg_replace('/^\s*(\[\w+\])?\s*(\(0\/1\))?\s*(\(\d+\))?\s*/', '', trim((string)$opt));
+                                            $c1 = preg_replace('/^\s*(\[\w+\])?\s*(\(0\/1\))?\s*([\[\(]\d+[\]\)])?\s*/', '', trim((string)$item));
+                                            $c2 = preg_replace('/^\s*(\[\w+\])?\s*(\(0\/1\))?\s*([\[\(]\d+[\]\)])?\s*/', '', trim((string)$opt));
                                             if ($c1 !== '' && strcasecmp($c1, $c2) === 0) return true;
-                                            if (preg_match('/^\[(F\d+)\]/i', $opt, $m) && strcasecmp((string)$item, $m[1]) === 0) return true;
+                                            if (preg_match('/^\[(F\d+)\]/i', $opt, $m) && strcasecmp(trim((string)$item, "[] \t\n\r\0\x0B"), $m[1]) === 0) return true;
                                         }
                                         return false;
                                     };
@@ -355,6 +356,8 @@
                                                     $colClass = $isKompetensi ? 'col-12 col-md-6' : 'col-12';
                                                 @endphp
                                                 <div class="{{ $colClass }} mb-6 pertanyaan-container"
+                                                    data-id-pertanyaan="{{ $pertanyaan->id_pertanyaan }}"
+                                                    data-kode="{{ strtoupper((string)($pertanyaan->kode_pertanyaan ?? '')) }}"
                                                     data-syarat-pertanyaan="{{ $pertanyaan->syarat_pertanyaan_id }}"
                                                     data-syarat-jawaban="{{ json_encode($pertanyaan->syarat_jawaban) }}">
                                                     @php
@@ -444,7 +447,7 @@
                                                     @elseif($pertanyaan->tipe_jawaban == 'date')
                                                         <input type="date" class="form-control border-gray-300"
                                                             name="jawaban[{{ $pertanyaan->id_pertanyaan }}]"
-                                                            value="{{ $answer ? date('Y-m-d', strtotime($answer)) : '' }}"
+                                                            value="{{ (!empty($answer) && strtotime($answer) && strtotime($answer) > 0) ? date('Y-m-d', strtotime($answer)) : $answer }}"
                                                             disabled>
                                                     @endif
                                                 </div>
@@ -502,7 +505,7 @@
 
                 let cleanText = function(str) {
                     if (!str) return '';
-                    return String(str).replace(/^\s*(\[\w+\])?\s*(\(0\/1\))?\s*(\(\d+\))?\s*/, '').replace(/\s+/g, ' ').trim().toLowerCase();
+                    return String(str).replace(/^\s*(\[\w+\])?\s*(\(0\/1\))?\s*([\[\(]\d+[\]\)])?\s*/, '').replace(/\s+/g, ' ').trim().toLowerCase();
                 };
 
                 let userVals = Array.isArray(userVal) ? userVal : [userVal];
@@ -542,6 +545,18 @@
                         let show = checkCondition(syaratId, syaratJawabanJson);
                         if (!show) {
                             $(this).hide();
+                        }
+                    }
+                });
+
+                $('.kategori-container:visible').each(function() {
+                    let $kat = $(this);
+                    let $f5a0 = $kat.find('.pertanyaan-container[data-kode="F5A0"]');
+                    if ($f5a0.length) {
+                        let qId = $f5a0.attr('data-id-pertanyaan');
+                        let val = (getQuestionValue(qId) || '').toString().trim().toLowerCase();
+                        if (val !== '' && val !== 'id' && val !== 'indonesia') {
+                            $kat.find('.pertanyaan-container[data-kode="F5A1"], .pertanyaan-container[data-kode="F5A2"]').hide();
                         }
                     }
                 });

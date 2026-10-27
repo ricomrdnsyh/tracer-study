@@ -35,10 +35,10 @@ class AdminStatistikController extends Controller
 
         if ($isKaprodi) {
             $fakultasList = collect();
-            $prodiList = Prodi::where('id_prodi', $userProdiId)->get();
+            $prodiList = Prodi::where('id_prodi', $userProdiId ?: '__NONE__')->get();
         } elseif ($isFakultas) {
-            $fakultasList = Fakultas::where('id_fakultas', $userFakultasId)->get();
-            $prodiList = Prodi::where('fakultas_id', $userFakultasId)->orderBy('nama_prodi')->get();
+            $fakultasList = Fakultas::where('id_fakultas', $userFakultasId ?: 0)->get();
+            $prodiList = Prodi::where('fakultas_id', $userFakultasId ?: 0)->orderBy('nama_prodi')->get();
         } else {
             $fakultasList = Fakultas::orderBy('nama_fakultas')->get();
             $prodiList = Prodi::orderBy('nama_prodi')->get();

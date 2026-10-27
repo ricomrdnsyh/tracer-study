@@ -32,6 +32,16 @@ class StatistikService
         $fakultasId = ($fakultasId && $fakultasId !== 'all') ? (int) $fakultasId : null;
         $prodiId = ($prodiId && $prodiId !== 'all') ? (string) $prodiId : null;
 
+        if ($isFakultas) {
+            $fakultasId = $user->fakultas_id ? (int) $user->fakultas_id : -1;
+            if ($prodiId && !Prodi::where('id_prodi', $prodiId)->where('fakultas_id', $fakultasId)->exists()) {
+                $prodiId = null;
+            }
+        } elseif ($isKaprodi) {
+            $prodiId = $user->prodi_id ? (string) $user->prodi_id : '__UNASSIGNED__';
+        }
+
+        $matchingIds = null;
         $mahasiswaQuery = Mahasiswa::query();
         if ($akademikId) {
             $mahasiswaQuery->filterAkademik($akademikId, 'akademik_id');
@@ -56,6 +66,8 @@ class StatistikService
         }
         if ($akademikId) {
             $responQuery->whereHas('mahasiswa', fn($q) => $q->filterAkademik($akademikId, 'akademik_id'));
+        } elseif (!empty($matchingIds)) {
+            $responQuery->whereHas('mahasiswa', fn($q) => $q->whereIn('akademik_id', $matchingIds));
         }
         if ($prodiId) {
             $responQuery->whereHas('mahasiswa', fn($q) => $q->where('prodi_id', $prodiId));
@@ -63,7 +75,7 @@ class StatistikService
             $responQuery->whereHas('mahasiswa.prodi', fn($q) => $q->where('fakultas_id', $fakultasId));
         }
 
-        $totalResponden = $responQuery->count();
+        $totalResponden = (clone $responQuery)->distinct('mahasiswa_id')->count('mahasiswa_id');
         $responIds = (clone $responQuery)->pluck('id_respon')->toArray();
         $responseRate = $totalAlumni > 0 ? round(($totalResponden / $totalAlumni) * 100, 1) : 0;
 
@@ -71,6 +83,10 @@ class StatistikService
 
         $draftCount = ResponTracer::where('status', 'Draft')
             ->when($kuesionerId, fn($q) => $q->where('kuesioner_id', $kuesionerId))
+            ->when($akademikId, fn($q) => $q->whereHas('mahasiswa', fn($mq) => $mq->filterAkademik($akademikId, 'akademik_id')))
+            ->when(!$akademikId && !empty($matchingIds), fn($q) => $q->whereHas('mahasiswa', fn($mq) => $mq->whereIn('akademik_id', $matchingIds)))
+            ->when($prodiId, fn($q) => $q->whereHas('mahasiswa', fn($mq) => $mq->where('prodi_id', $prodiId)))
+            ->when(!$prodiId && $fakultasId, fn($q) => $q->whereHas('mahasiswa.prodi', fn($mq) => $mq->where('fakultas_id', $fakultasId)))
             ->count();
 
         $statusPelaporanData = [
@@ -123,10 +139,10 @@ class StatistikService
         $f502Wiraswasta = $coreAnswers->get('F502', collect())->filter(fn($d) => isset($wiraswastaSet[$d->respon_id]))->unique('respon_id');
         $waktuTungguWiraswastaData = $this->calcWaktuTungguIntervals($f502Wiraswasta->pluck('jawaban_text'), $nowFormatted);
 
-        $f14Bekerja = $coreAnswers->get('F14', collect())->filter(fn($d) => isset($bekerjaSet[$d->respon_id]));
+        $f14Bekerja = $coreAnswers->get('F14', collect())->filter(fn($d) => isset($bekerjaSet[$d->respon_id]))->unique('respon_id');
         $keselarasanHorizontalData = $this->buildKeselarasanHorizontalData($f14Bekerja->pluck('jawaban_text'), $nowFormatted);
 
-        $f15Bekerja = $coreAnswers->get('F15', collect())->filter(fn($d) => isset($bekerjaSet[$d->respon_id]));
+        $f15Bekerja = $coreAnswers->get('F15', collect())->filter(fn($d) => isset($bekerjaSet[$d->respon_id]))->unique('respon_id');
         $keselarasanVertikalData = $this->buildKeselarasanVertikalData($f15Bekerja->pluck('jawaban_text'), $nowFormatted);
 
         $f4CariKerja = $coreAnswers->get('F4', collect())->filter(fn($d) => isset($cariKerjaSet[$d->respon_id]));
@@ -134,7 +150,7 @@ class StatistikService
 
         $kompetensiData = $this->buildKompetensiDataOptimized($responIds, $nowFormatted);
 
-        $skalaData = $this->buildSkalaKerjaData($coreAnswers->get('F5D', collect())->pluck('jawaban_text'));
+        $skalaData = $this->buildSkalaKerjaData($coreAnswers->get('F5D', collect())->unique('respon_id')->pluck('jawaban_text'));
 
         $sebaranProvinsiData = $this->buildSebaranProvinsiData($responIds);
 
@@ -225,6 +241,11 @@ class StatistikService
                 $matched = false;
                 if (is_numeric($raw) && isset($f8Counts[(int)$raw])) {
                     $val = (int)$raw;
+                    $f8Counts[$val]++;
+                    $responF8Map[$d->respon_id] = $val;
+                    $matched = true;
+                } elseif (preg_match('/^[\[\(](\d+)[\]\)]/', $raw, $m) && isset($f8Counts[(int)$m[1]])) {
+                    $val = (int)$m[1];
                     $f8Counts[$val]++;
                     $responF8Map[$d->respon_id] = $val;
                     $matched = true;
@@ -365,11 +386,12 @@ class StatistikService
         $f1201Mapping = [
             1 => ['label' => 'Biaya Sendiri/Keluarga', 'keywords' => ['sendiri', 'keluarga'], 'color' => '#5b67ec'],
             2 => ['label' => 'Beasiswa ADIK', 'keywords' => ['adik'], 'color' => '#22c55e'],
-            3 => ['label' => 'Beasiswa BIDIKMISI', 'keywords' => ['bidikmisi', 'kip', 'kip-k'], 'color' => '#f59e0b'],
+            3 => ['label' => 'Beasiswa KIP-Kuliah (KIP-K)', 'keywords' => ['bidikmisi', 'kip', 'kip-k'], 'color' => '#f59e0b'],
             4 => ['label' => 'Beasiswa PPA', 'keywords' => ['ppa'], 'color' => '#8b5cf6'],
             5 => ['label' => 'Beasiswa AFIRMASI', 'keywords' => ['afirmasi'], 'color' => '#ef4444'],
             6 => ['label' => 'Beasiswa Perusahaan/Swasta', 'keywords' => ['perusahaan', 'swasta'], 'color' => '#14b8a6'],
-            7 => ['label' => 'Lainnya, tuliskan', 'keywords' => ['lainnya', 'pemda', 'daerah'], 'color' => '#f97316'],
+            8 => ['label' => 'Beasiswa Pemerintah Daerah', 'keywords' => ['pemerintah daerah', 'pemda', 'daerah'], 'color' => '#06b6d4'],
+            7 => ['label' => 'Lainnya, tuliskan', 'keywords' => ['lainnya'], 'color' => '#f97316'],
         ];
 
         $f1201Counts = [];
@@ -386,6 +408,11 @@ class StatistikService
                     $matched = false;
                     if (is_numeric($rawAns) && isset($f1201Mapping[(int)$rawAns])) {
                         $matchedVal = (int)$rawAns;
+                        $f1201Counts[$matchedVal]++;
+                        $responF1201Values[$d->respon_id] = $matchedVal;
+                        $matched = true;
+                    } elseif (preg_match('/^[\[\(](\d+)[\]\)]/', $rawAns, $m) && isset($f1201Mapping[(int)$m[1]])) {
+                        $matchedVal = (int)$m[1];
                         $f1201Counts[$matchedVal]++;
                         $responF1201Values[$d->respon_id] = $matchedVal;
                         $matched = true;
@@ -445,12 +472,12 @@ class StatistikService
     {
         $f1101Mapping = [
             1 => ['label' => 'Instansi pemerintah', 'keywords' => ['pemerintah', 'lembaga pemerintah'], 'color' => '#5b67ec'],
-            2 => ['label' => 'BUMN/BUMD', 'keywords' => ['bumn', 'bumd'], 'color' => '#22c55e'],
-            3 => ['label' => 'Institusi/Organisasi Multilateral', 'keywords' => ['multilateral'], 'color' => '#f59e0b'],
-            4 => ['label' => 'Organisasi non-profit/Lembaga Swadaya Masyarakat', 'keywords' => ['nirlaba', 'non-profit', 'swadaya'], 'color' => '#8b5cf6'],
-            5 => ['label' => 'Perusahaan swasta', 'keywords' => ['swasta'], 'color' => '#ef4444'],
-            6 => ['label' => 'Wiraswasta/perusahaan sendiri', 'keywords' => ['wiraswasta', 'wirausaha', 'sendiri'], 'color' => '#14b8a6'],
-            7 => ['label' => 'Lainnya, tuliskan', 'keywords' => ['lainnya'], 'color' => '#f97316'],
+            6 => ['label' => 'BUMN/BUMD', 'keywords' => ['bumn', 'bumd'], 'color' => '#22c55e'],
+            7 => ['label' => 'Institusi/Organisasi Multilateral', 'keywords' => ['multilateral'], 'color' => '#f59e0b'],
+            2 => ['label' => 'Organisasi non-profit/Lembaga Swadaya Masyarakat', 'keywords' => ['nirlaba', 'non-profit', 'swadaya'], 'color' => '#8b5cf6'],
+            3 => ['label' => 'Perusahaan swasta', 'keywords' => ['swasta'], 'color' => '#ef4444'],
+            4 => ['label' => 'Wiraswasta/perusahaan sendiri', 'keywords' => ['wiraswasta', 'wirausaha', 'perusahaan sendiri'], 'color' => '#14b8a6'],
+            5 => ['label' => 'Lainnya, tuliskan', 'keywords' => ['lainnya'], 'color' => '#f97316'],
         ];
 
         $f1101Counts = [];
@@ -470,6 +497,11 @@ class StatistikService
                         $f1101Counts[$matchedVal]++;
                         $responF1101Values[$d->respon_id] = $matchedVal;
                         $matched = true;
+                    } elseif (preg_match('/^[\[\(](\d+)[\]\)]/', $rawAns, $m) && isset($f1101Mapping[(int)$m[1]])) {
+                        $matchedVal = (int)$m[1];
+                        $f1101Counts[$matchedVal]++;
+                        $responF1101Values[$d->respon_id] = $matchedVal;
+                        $matched = true;
                     } else {
                         foreach ($f1101Mapping as $val => $info) {
                             foreach ($info['keywords'] as $kw) {
@@ -483,8 +515,8 @@ class StatistikService
                         }
                     }
                     if (!$matched) {
-                        $f1101Counts[7]++;
-                        $responF1101Values[$d->respon_id] = 7;
+                        $f1101Counts[5]++;
+                        $responF1101Values[$d->respon_id] = 5;
                     }
                 }
             }
@@ -526,6 +558,7 @@ class StatistikService
     {
         $c0_6 = 0; $c0_12 = 0; $c6_12 = 0; $cAbove12 = 0;
         $sum = 0; $count = 0; $countAvg = 0;
+        $validMonths = [];
         foreach ($answers as $ans) {
             $raw = trim((string)$ans);
             if ($raw === '') continue;
@@ -551,9 +584,18 @@ class StatistikService
             if ($m <= 60) {
                 $sum += $m;
                 $countAvg++;
+                $validMonths[] = $m;
             }
         }
         $avg = $countAvg > 0 ? round($sum / $countAvg, 2) : 0;
+        $median = 0;
+        if ($countAvg > 0) {
+            sort($validMonths);
+            $mid = (int) floor($countAvg / 2);
+            $median = ($countAvg % 2 === 0)
+                ? round(($validMonths[$mid - 1] + $validMonths[$mid]) / 2, 2)
+                : round($validMonths[$mid], 2);
+        }
         $totalRes = $count;
         $p0_6 = $totalRes > 0 ? round(($c0_6 / $totalRes) * 100, 2) : 0;
         $p0_12 = $totalRes > 0 ? round(($c0_12 / $totalRes) * 100, 2) : 0;
@@ -564,6 +606,8 @@ class StatistikService
             'total_responden' => $totalRes,
             'rata_rata' => number_format($avg, 2, ',', '.') . ' bulan',
             'rata_rata_numeric' => $avg,
+            'median' => number_format($median, 2, ',', '.') . ' bulan',
+            'median_numeric' => $median,
             'labels' => ['0-6 bulan', '0-12 bulan', '6-12 bulan', 'Di atas 12 bulan'],
             'series' => [$c0_6, $c0_12, $c6_12, $cAbove12],
             'colors' => ['#5b67ec', '#22c55e', '#f59e0b', '#8b5cf6'],
@@ -584,7 +628,15 @@ class StatistikService
             $t = strtolower(trim((string)$ans));
             if ($t === '') continue;
             $total++;
-            if (str_contains($t, 'tidak relevan') || str_contains($t, 'kurang relevan')) {
+            $isTidakSelaras = (
+                $t === '4' || $t === '5' ||
+                in_array($t, ['[4]', '[5]', '(4)', '(5)'], true) ||
+                str_starts_with($t, '[4]') || str_starts_with($t, '[5]') ||
+                str_starts_with($t, '(4)') || str_starts_with($t, '(5)') ||
+                str_contains($t, 'tidak relevan') || str_contains($t, 'kurang relevan') ||
+                str_contains($t, 'tidak sama sekali') || str_contains($t, 'kurang erat')
+            );
+            if ($isTidakSelaras) {
                 $tidakSelaras++;
             } else {
                 $selaras++;
@@ -613,9 +665,9 @@ class StatistikService
             $t = strtolower(trim((string)$ans));
             if ($t === '') continue;
             $total++;
-            if (str_contains($t, 'lebih tinggi')) {
+            if ($t === '1' || in_array($t, ['[1]', '(1)'], true) || str_starts_with($t, '[1]') || str_starts_with($t, '(1)') || str_contains($t, 'lebih tinggi')) {
                 $tinggi++;
-            } elseif (str_contains($t, 'sama') || str_contains($t, 'tingkat yang sama')) {
+            } elseif ($t === '2' || in_array($t, ['[2]', '(2)'], true) || str_starts_with($t, '[2]') || str_starts_with($t, '(2)') || str_contains($t, 'sama') || str_contains($t, 'tingkat yang sama')) {
                 $sama++;
             } else {
                 $rendah++;
@@ -651,8 +703,8 @@ class StatistikService
             'F407' => ['label' => 'Menghubungi agen tenaga kerja komersial/swasta', 'keywords' => ['agen tenaga kerja'], 'color' => '#f97316'],
             'F408' => ['label' => 'Memeroleh informasi dari pusat/kantor pengembangan karir fakultas/universitas', 'keywords' => ['pengembangan karir', 'informasi karir'], 'color' => '#3b82f6'],
             'F409' => ['label' => 'Menghubungi kantor kemahasiswaan/hubungan alumni', 'keywords' => ['kemahasiswaan', 'hubungan alumni'], 'color' => '#10b981'],
-            'F410' => ['label' => 'Membangun jejaring(network) sejak masih kuliah', 'keywords' => ['jejaring(network)', 'jejaring', 'network'], 'color' => '#eab308'],
-            'F411' => ['label' => 'Melalui relasi (misalnya dosen, orang tua, saudara, teman, dll.)', 'keywords' => ['relasi', 'dosen', 'orang tua', 'teman'], 'color' => '#a855f7'],
+            'F410' => ['label' => 'Membangun jejaring(network) sejak masih kuliah', 'keywords' => ['jejaring(network)', 'sejak masih kuliah', 'membangun jejaring', 'network'], 'color' => '#eab308'],
+            'F411' => ['label' => 'Melalui relasi (misalnya dosen, orang tua, saudara, teman, dll.)', 'keywords' => ['jejaring/relasi', 'relasi', 'dosen', 'orang tua', 'teman'], 'color' => '#a855f7'],
             'F412' => ['label' => 'Membangun bisnis sendiri', 'keywords' => ['membangun bisnis', 'bisnis sendiri'], 'color' => '#ec4899'],
             'F413' => ['label' => 'Melalui penempatan kerja atau magang', 'keywords' => ['penempatan kerja', 'magang'], 'color' => '#14b8a6'],
             'F414' => ['label' => 'Bekerja di tempat yang sama dengan tempat kerja semasa kuliah', 'keywords' => ['tempat yang sama', 'semasa kuliah'], 'color' => '#f97316'],
@@ -674,15 +726,26 @@ class StatistikService
             $matchedForThisRespon = [];
             if (is_iterable($selectedOptions)) {
                 foreach ($selectedOptions as $opt) {
-                    $optLower = strtolower(trim((string)$opt));
+                    $optStr = trim((string)$opt);
+                    $optLower = strtolower($optStr);
                     if ($optLower === '') continue;
+
+                    if (preg_match('/\[(F4\d{2})\]/i', $optStr, $m)) {
+                        $code = strtoupper($m[1]);
+                        if (isset($f4Mapping[$code]) && !isset($matchedForThisRespon[$code])) {
+                            $matchedForThisRespon[$code] = true;
+                            $f4Counts[$code]++;
+                        }
+                        continue;
+                    }
+
                     foreach ($f4Mapping as $code => $info) {
                         if (isset($matchedForThisRespon[$code])) continue;
                         foreach ($info['keywords'] as $kw) {
                             if (str_contains($optLower, $kw)) {
                                 $matchedForThisRespon[$code] = true;
                                 $f4Counts[$code]++;
-                                break;
+                                break 2;
                             }
                         }
                     }
@@ -757,7 +820,7 @@ class StatistikService
                     ->join('pertanyaan', 'jawaban_detail.pertanyaan_id', '=', 'pertanyaan.id_pertanyaan')
                     ->whereIn('jawaban_detail.respon_id', $chunk)
                     ->whereIn('pertanyaan.kode_pertanyaan', $allCodes)
-                    ->select('pertanyaan.kode_pertanyaan', 'jawaban_detail.jawaban_text')
+                    ->select('jawaban_detail.respon_id', 'pertanyaan.kode_pertanyaan', 'jawaban_detail.jawaban_text')
                     ->get();
                 $groupedAnswers = $groupedAnswers->merge($rows);
             }
@@ -778,12 +841,15 @@ class StatistikService
                 $counts = [1 => 0, 2 => 0, 3 => 0, 4 => 0, 5 => 0];
                 $sumScore = 0;
                 $responCount = 0;
+                $seenRespon = [];
 
                 foreach ($details as $d) {
+                    if (isset($seenRespon[$d->respon_id])) continue;
                     $t = strtolower(trim((string)$d->jawaban_text));
                     $val = null;
                     if ($t !== '') {
                         if (is_numeric($t) && (int)$t >= 1 && (int)$t <= 5) $val = (int)$t;
+                        elseif (preg_match('/^[\[\(]([1-5])[\]\)]/', $t, $m)) $val = (int)$m[1];
                         elseif (str_contains($t, 'sangat rendah')) $val = 1;
                         elseif (str_contains($t, 'sangat tinggi')) $val = 5;
                         elseif (str_contains($t, 'rendah')) $val = 2;
@@ -791,6 +857,7 @@ class StatistikService
                         elseif (str_contains($t, 'netral') || str_contains($t, 'sedang') || str_contains($t, 'cukup')) $val = 3;
                     }
                     if ($val !== null) {
+                        $seenRespon[$d->respon_id] = true;
                         $counts[$val]++;
                         $sumScore += $val;
                         $responCount++;
@@ -845,12 +912,13 @@ class StatistikService
         ];
 
         foreach ($f5dAnswers as $ans) {
-            $ansLower = strtolower($ans ?? '');
-            if (str_contains($ansLower, 'lokal') || str_contains($ansLower, 'wilayah')) {
+            $raw = trim((string)($ans ?? ''));
+            $ansLower = strtolower($raw);
+            if ($raw === '1' || str_contains($ansLower, 'lokal') || str_contains($ansLower, 'wilayah')) {
                 $skalaCount['Lokal/Wilayah']++;
-            } elseif (str_contains($ansLower, 'multi') || str_contains($ansLower, 'internasional')) {
+            } elseif ($raw === '3' || str_contains($ansLower, 'multi') || str_contains($ansLower, 'internasional')) {
                 $skalaCount['Multinasional/Internasional']++;
-            } elseif (str_contains($ansLower, 'nasional')) {
+            } elseif ($raw === '2' || str_contains($ansLower, 'nasional')) {
                 $skalaCount['Nasional']++;
             }
         }
@@ -878,11 +946,27 @@ class StatistikService
             $provinsiList = $provinsiList->merge($rows);
         }
 
-        $aggregated = $provinsiList->groupBy('provinsi')->map->sum('total')->sortDesc()->take(8);
+        $provinsiDict = null;
+        $countsByLabel = [];
+        foreach ($provinsiList as $item) {
+            $label = trim((string) $item->provinsi);
+            if ($label === '') continue;
+            if (ctype_digit($label)) {
+                if ($provinsiDict === null) {
+                    $provinsiDict = DB::table('master_provinsi')->pluck('provinsi', 'kode_wilayah_provinsi')->toArray();
+                }
+                $padded = str_pad($label, 6, '0', STR_PAD_LEFT);
+                $label = $provinsiDict[$label] ?? ($provinsiDict[$padded] ?? $label);
+            }
+            $countsByLabel[$label] = ($countsByLabel[$label] ?? 0) + (int) $item->total;
+        }
+
+        arsort($countsByLabel);
+        $top = array_slice($countsByLabel, 0, 8, true);
 
         return [
-            'labels' => $aggregated->keys()->toArray(),
-            'series' => $aggregated->values()->toArray(),
+            'labels' => array_keys($top),
+            'series' => array_values($top),
         ];
     }
 
@@ -917,7 +1001,7 @@ class StatistikService
                     ->join('pertanyaan', 'jawaban_detail.pertanyaan_id', '=', 'pertanyaan.id_pertanyaan')
                     ->whereIn('jawaban_detail.respon_id', $chunk)
                     ->whereIn('pertanyaan.kode_pertanyaan', $allCodes)
-                    ->select('pertanyaan.kode_pertanyaan', 'jawaban_detail.jawaban_text')
+                    ->select('jawaban_detail.respon_id', 'pertanyaan.kode_pertanyaan', 'jawaban_detail.jawaban_text')
                     ->get();
                 $groupedAnswers = $groupedAnswers->merge($rows);
             }
@@ -933,20 +1017,24 @@ class StatistikService
 
             $sumScore = 0;
             $responCount = 0;
+            $seenRespon = [];
 
             foreach ($details as $d) {
+                if (isset($seenRespon[$d->respon_id])) continue;
                 $t = strtolower(trim((string)$d->jawaban_text));
                 $val = null;
                 if ($t !== '') {
-                    if (is_numeric($t) && (int)$t >= 1 && (int)$t <= 5) $val = (int)$t;
-                    elseif (str_contains($t, 'sangat besar')) $val = 5;
-                    elseif (str_contains($t, 'besar')) $val = 4;
+                    if (str_contains($t, 'sangat besar')) $val = 5;
                     elseif (str_contains($t, 'cukup')) $val = 3;
                     elseif (str_contains($t, 'kurang')) $val = 2;
                     elseif (str_contains($t, 'tidak ada') || str_contains($t, 'tidak sama sekali')) $val = 1;
+                    elseif (str_contains($t, 'besar')) $val = 4;
+                    elseif (is_numeric($t) && (int)$t >= 1 && (int)$t <= 5) $val = 6 - (int)$t;
+                    elseif (preg_match('/^[\[\(]([1-5])[\]\)]/', $t, $m)) $val = 6 - (int)$m[1];
                 }
 
                 if ($val !== null) {
+                    $seenRespon[$d->respon_id] = true;
                     $sumScore += $val;
                     $responCount++;
                 }
@@ -987,8 +1075,17 @@ class StatistikService
 
         $prodiIds = $prodis->pluck('id_prodi')->toArray();
 
+        $matchingAkademikIds = null;
+        if (!$akademikId && $kuesionerId) {
+            $kuesioner = Kuesioner::find($kuesionerId);
+            if ($kuesioner && $kuesioner->akademik_id) {
+                $matchingAkademikIds = $kuesioner->getMatchingAkademikIds();
+            }
+        }
+
         $targetCounts = Mahasiswa::whereIn('prodi_id', $prodiIds)
             ->when($akademikId, fn($q) => $q->filterAkademik($akademikId, 'akademik_id'))
+            ->when(!$akademikId && $matchingAkademikIds !== null, fn($q) => $q->whereIn('akademik_id', $matchingAkademikIds))
             ->groupBy('prodi_id')
             ->select('prodi_id', DB::raw('count(*) as total'))
             ->pluck('total', 'prodi_id')
@@ -998,9 +1095,20 @@ class StatistikService
             ->where('respon_tracer.status', 'Selesai')
             ->whereIn('mahasiswa.prodi_id', $prodiIds)
             ->when($kuesionerId, fn($q) => $q->where('respon_tracer.kuesioner_id', $kuesionerId))
-            ->when($akademikId, fn($q) => $q->filterAkademik($akademikId, 'mahasiswa.akademik_id'))
+            ->when($akademikId, function ($q) use ($akademikId) {
+                if (strlen($akademikId) === 4 && is_numeric($akademikId)) {
+                    $taPrefix = (int) $akademikId - 1;
+                    $q->where(function ($sq) use ($akademikId, $taPrefix) {
+                        $sq->where('mahasiswa.akademik_id', $akademikId)
+                           ->orWhere('mahasiswa.akademik_id', 'like', $taPrefix . '%');
+                    });
+                } else {
+                    $q->where('mahasiswa.akademik_id', $akademikId);
+                }
+            })
+            ->when(!$akademikId && $matchingAkademikIds !== null, fn($q) => $q->whereIn('mahasiswa.akademik_id', $matchingAkademikIds))
             ->groupBy('mahasiswa.prodi_id')
-            ->select('mahasiswa.prodi_id', DB::raw('count(*) as total'))
+            ->select('mahasiswa.prodi_id', DB::raw('count(distinct respon_tracer.mahasiswa_id) as total'))
             ->pluck('total', 'prodi_id')
             ->toArray();
 
@@ -1023,20 +1131,49 @@ class StatistikService
                     $q->where('mahasiswa.akademik_id', $akademikId);
                 }
             })
-            ->select('mahasiswa.prodi_id', 'jawaban_detail.jawaban_text')
+            ->when(!$akademikId && $matchingAkademikIds !== null, fn($q) => $q->whereIn('mahasiswa.akademik_id', $matchingAkademikIds))
+            ->select('mahasiswa.prodi_id', 'respon_tracer.mahasiswa_id', 'jawaban_detail.respon_id', 'jawaban_detail.jawaban_text')
+            ->orderByDesc('respon_tracer.id_respon')
             ->get();
 
         $f8ByProdi = [];
+        $responF8ProdiMap = [];
+        $seenF8Mhs = [];
         foreach ($f8Rows as $r) {
+            if (isset($responF8ProdiMap[$r->respon_id]) || isset($seenF8Mhs[$r->mahasiswa_id])) continue;
             $pid = $r->prodi_id;
             if (!isset($f8ByProdi[$pid])) {
                 $f8ByProdi[$pid] = ['bekerja' => 0, 'wirausaha' => 0, 'studi' => 0, 'mencari' => 0];
             }
-            $al = strtolower($r->jawaban_text ?? '');
-            if (str_contains($al, 'bekerja (')) $f8ByProdi[$pid]['bekerja']++;
-            elseif (str_contains($al, 'wiraswasta') || str_contains($al, 'wirausaha')) $f8ByProdi[$pid]['wirausaha']++;
-            elseif (str_contains($al, 'melanjutkan')) $f8ByProdi[$pid]['studi']++;
-            elseif (str_contains($al, 'mencari pekerjaan')) $f8ByProdi[$pid]['mencari']++;
+            $raw = trim((string)($r->jawaban_text ?? ''));
+            $al = strtolower($raw);
+            if ($al === '') continue;
+
+            $val = null;
+            if (is_numeric($raw) && in_array((int)$raw, [1, 2, 3, 4, 5], true)) {
+                $val = (int)$raw;
+            } elseif (preg_match('/^[\[\(](\d+)[\]\)]/', $raw, $m) && in_array((int)$m[1], [1, 2, 3, 4, 5], true)) {
+                $val = (int)$m[1];
+            } elseif (str_contains($al, 'tidak bekerja') || str_contains($al, 'tidak kerja') || str_contains($al, 'mencari pekerjaan') || str_contains($al, 'mencari kerja')) {
+                $val = 5;
+            } elseif (str_contains($al, 'belum memungkinkan')) {
+                $val = 2;
+            } elseif (str_contains($al, 'melanjutkan') || str_contains($al, 'studi')) {
+                $val = 4;
+            } elseif (str_contains($al, 'wiraswasta') || str_contains($al, 'wirausaha')) {
+                $val = 3;
+            } elseif (str_contains($al, 'bekerja')) {
+                $val = 1;
+            }
+
+            if ($val !== null) {
+                $responF8ProdiMap[$r->respon_id] = $val;
+                $seenF8Mhs[$r->mahasiswa_id] = true;
+                if ($val === 1) $f8ByProdi[$pid]['bekerja']++;
+                elseif ($val === 3) $f8ByProdi[$pid]['wirausaha']++;
+                elseif ($val === 4) $f8ByProdi[$pid]['studi']++;
+                elseif ($val === 5) $f8ByProdi[$pid]['mencari']++;
+            }
         }
 
         $f14Rows = DB::table('jawaban_detail')
@@ -1058,21 +1195,38 @@ class StatistikService
                     $q->where('mahasiswa.akademik_id', $akademikId);
                 }
             })
-            ->select('mahasiswa.prodi_id', 'jawaban_detail.jawaban_text')
+            ->when(!$akademikId && $matchingAkademikIds !== null, fn($q) => $q->whereIn('mahasiswa.akademik_id', $matchingAkademikIds))
+            ->select('mahasiswa.prodi_id', 'respon_tracer.mahasiswa_id', 'jawaban_detail.respon_id', 'jawaban_detail.jawaban_text')
+            ->orderByDesc('respon_tracer.id_respon')
             ->get();
 
         $f14ByProdi = [];
+        $seenF14Respon = [];
+        $seenF14Mhs = [];
         foreach ($f14Rows as $r) {
+            if (isset($seenF14Respon[$r->respon_id]) || isset($seenF14Mhs[$r->mahasiswa_id])) continue;
+            if (($responF8ProdiMap[$r->respon_id] ?? null) !== 1) continue;
+
             $pid = $r->prodi_id;
             if (!isset($f14ByProdi[$pid])) {
                 $f14ByProdi[$pid] = ['rel' => 0, 'total' => 0];
             }
-            $al = strtolower(trim($r->jawaban_text ?? ''));
-            if ($al === 'sangat relevan' || $al === 'relevan') {
+            $al = strtolower(trim((string)($r->jawaban_text ?? '')));
+            if ($al === '') continue;
+
+            $seenF14Respon[$r->respon_id] = true;
+            $seenF14Mhs[$r->mahasiswa_id] = true;
+            $f14ByProdi[$pid]['total']++;
+            $isRel = !(
+                $al === '4' || $al === '5' ||
+                in_array($al, ['[4]', '[5]', '(4)', '(5)'], true) ||
+                str_starts_with($al, '[4]') || str_starts_with($al, '[5]') ||
+                str_starts_with($al, '(4)') || str_starts_with($al, '(5)') ||
+                str_contains($al, 'tidak relevan') || str_contains($al, 'kurang relevan') ||
+                str_contains($al, 'tidak sama sekali') || str_contains($al, 'kurang erat')
+            );
+            if ($isRel) {
                 $f14ByProdi[$pid]['rel']++;
-            }
-            if (!empty($al)) {
-                $f14ByProdi[$pid]['total']++;
             }
         }
 
@@ -1173,16 +1327,17 @@ class StatistikService
             ],
             'sumber_dana' => [
                 'total_responden' => 0,
-                'labels' => ['Biaya Sendiri/Keluarga', 'Beasiswa ADIK', 'Beasiswa BIDIKMISI', 'Beasiswa PPA', 'Beasiswa AFIRMASI', 'Beasiswa Perusahaan/Swasta', 'Lainnya, tuliskan'],
-                'series' => [0, 0, 0, 0, 0, 0, 0],
-                'colors' => ['#5b67ec', '#22c55e', '#f59e0b', '#8b5cf6', '#ef4444', '#14b8a6', '#f97316'],
+                'labels' => ['Biaya Sendiri/Keluarga', 'Beasiswa ADIK', 'Beasiswa KIP-Kuliah (KIP-K)', 'Beasiswa PPA', 'Beasiswa AFIRMASI', 'Beasiswa Perusahaan/Swasta', 'Beasiswa Pemerintah Daerah', 'Lainnya, tuliskan'],
+                'series' => [0, 0, 0, 0, 0, 0, 0, 0],
+                'colors' => ['#5b67ec', '#22c55e', '#f59e0b', '#8b5cf6', '#ef4444', '#14b8a6', '#06b6d4', '#f97316'],
                 'table' => [
                     ['value' => 1, 'label' => 'Biaya Sendiri/Keluarga', 'jumlah' => 0, 'persentase' => '0,00%', 'pct_numeric' => 0],
                     ['value' => 2, 'label' => 'Beasiswa ADIK', 'jumlah' => 0, 'persentase' => '0,00%', 'pct_numeric' => 0],
-                    ['value' => 3, 'label' => 'Beasiswa BIDIKMISI', 'jumlah' => 0, 'persentase' => '0,00%', 'pct_numeric' => 0],
+                    ['value' => 3, 'label' => 'Beasiswa KIP-Kuliah (KIP-K)', 'jumlah' => 0, 'persentase' => '0,00%', 'pct_numeric' => 0],
                     ['value' => 4, 'label' => 'Beasiswa PPA', 'jumlah' => 0, 'persentase' => '0,00%', 'pct_numeric' => 0],
                     ['value' => 5, 'label' => 'Beasiswa AFIRMASI', 'jumlah' => 0, 'persentase' => '0,00%', 'pct_numeric' => 0],
                     ['value' => 6, 'label' => 'Beasiswa Perusahaan/Swasta', 'jumlah' => 0, 'persentase' => '0,00%', 'pct_numeric' => 0],
+                    ['value' => 8, 'label' => 'Beasiswa Pemerintah Daerah', 'jumlah' => 0, 'persentase' => '0,00%', 'pct_numeric' => 0],
                     ['value' => 7, 'label' => 'Lainnya, tuliskan', 'jumlah' => 0, 'persentase' => '0,00%', 'pct_numeric' => 0],
                 ],
                 'updated_at' => $nowFormatted,
@@ -1194,12 +1349,12 @@ class StatistikService
                 'colors' => ['#5b67ec', '#22c55e', '#f59e0b', '#8b5cf6', '#ef4444', '#14b8a6', '#f97316'],
                 'table' => [
                     ['value' => 1, 'label' => 'Instansi pemerintah', 'jumlah' => 0, 'persentase' => '0,00%', 'pct_numeric' => 0],
-                    ['value' => 2, 'label' => 'BUMN/BUMD', 'jumlah' => 0, 'persentase' => '0,00%', 'pct_numeric' => 0],
-                    ['value' => 3, 'label' => 'Institusi/Organisasi Multilateral', 'jumlah' => 0, 'persentase' => '0,00%', 'pct_numeric' => 0],
-                    ['value' => 4, 'label' => 'Organisasi non-profit/Lembaga Swadaya Masyarakat', 'jumlah' => 0, 'persentase' => '0,00%', 'pct_numeric' => 0],
-                    ['value' => 5, 'label' => 'Perusahaan swasta', 'jumlah' => 0, 'persentase' => '0,00%', 'pct_numeric' => 0],
-                    ['value' => 6, 'label' => 'Wiraswasta/perusahaan sendiri', 'jumlah' => 0, 'persentase' => '0,00%', 'pct_numeric' => 0],
-                    ['value' => 7, 'label' => 'Lainnya, tuliskan', 'jumlah' => 0, 'persentase' => '0,00%', 'pct_numeric' => 0],
+                    ['value' => 6, 'label' => 'BUMN/BUMD', 'jumlah' => 0, 'persentase' => '0,00%', 'pct_numeric' => 0],
+                    ['value' => 7, 'label' => 'Institusi/Organisasi Multilateral', 'jumlah' => 0, 'persentase' => '0,00%', 'pct_numeric' => 0],
+                    ['value' => 2, 'label' => 'Organisasi non-profit/Lembaga Swadaya Masyarakat', 'jumlah' => 0, 'persentase' => '0,00%', 'pct_numeric' => 0],
+                    ['value' => 3, 'label' => 'Perusahaan swasta', 'jumlah' => 0, 'persentase' => '0,00%', 'pct_numeric' => 0],
+                    ['value' => 4, 'label' => 'Wiraswasta/perusahaan sendiri', 'jumlah' => 0, 'persentase' => '0,00%', 'pct_numeric' => 0],
+                    ['value' => 5, 'label' => 'Lainnya, tuliskan', 'jumlah' => 0, 'persentase' => '0,00%', 'pct_numeric' => 0],
                 ],
                 'updated_at' => $nowFormatted,
             ],
@@ -1207,6 +1362,8 @@ class StatistikService
                 'total_responden' => 0,
                 'rata_rata' => '0,00 bulan',
                 'rata_rata_numeric' => 0,
+                'median' => '0,00 bulan',
+                'median_numeric' => 0,
                 'labels' => ['0-6 bulan', '0-12 bulan', '6-12 bulan', 'Di atas 12 bulan'],
                 'series' => [0, 0, 0, 0],
                 'colors' => ['#5b67ec', '#22c55e', '#f59e0b', '#8b5cf6'],
@@ -1222,6 +1379,8 @@ class StatistikService
                 'total_responden' => 0,
                 'rata_rata' => '0,00 bulan',
                 'rata_rata_numeric' => 0,
+                'median' => '0,00 bulan',
+                'median_numeric' => 0,
                 'labels' => ['0-6 bulan', '0-12 bulan', '6-12 bulan', 'Di atas 12 bulan'],
                 'series' => [0, 0, 0, 0],
                 'colors' => ['#5b67ec', '#22c55e', '#f59e0b', '#8b5cf6'],
@@ -1256,14 +1415,7 @@ class StatistikService
                 ],
                 'updated_at' => $nowFormatted,
             ],
-            'metode_mencari_kerja' => [
-                'total_responden' => 0,
-                'labels' => [],
-                'series' => [],
-                'colors' => [],
-                'table' => [],
-                'updated_at' => $nowFormatted,
-            ],
+            'metode_mencari_kerja' => $this->buildMetodeMencariKerjaData(collect(), $nowFormatted),
             'kompetensi' => $this->buildKompetensiDataOptimized([], $nowFormatted),
             'skala_kerja' => [
                 'labels' => ['Lokal/Wilayah', 'Nasional', 'Multinasional/Internasional'],
@@ -1273,11 +1425,7 @@ class StatistikService
                 'labels' => [],
                 'series' => [],
             ],
-            'aspek_pembelajaran' => [
-                'aspek' => [],
-                'rata_rata_semua' => 0,
-                'updated_at' => $nowFormatted,
-            ],
+            'aspek_pembelajaran' => $this->buildMetodePembelajaranDataOptimized([], $nowFormatted),
             'rekap_prodi' => $this->getRekapProdiOptimized($fakultasId, $prodiId, $akademikId, $kuesionerId),
         ];
     }

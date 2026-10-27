@@ -144,7 +144,7 @@
         }).then((result) => {
             if (result.isConfirmed) {
                 $.ajax({
-                    url: '/admin/kuesioner/' + id,
+                    url: '{{ url('admin/kuesioner') }}/' + id,
                     type: 'DELETE',
                     data: {
                         _token: '{{ csrf_token() }}'

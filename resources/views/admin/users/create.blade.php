@@ -79,7 +79,7 @@
                                 </label>
                                 <input type="text" name="username" id="username"
                                     class="form-control form-control-sm fs-sm-8 fs-lg-6 @error('username') is-invalid @enderror"
-                                    value="{{ old('username') }}" required readonly maxlength="20">
+                                    value="{{ old('username') }}" required readonly maxlength="10">
 
                                 @error('username')
                                     <div class="small text-danger mt-1">{{ $message }}</div>

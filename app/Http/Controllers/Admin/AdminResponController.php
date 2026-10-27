@@ -44,21 +44,23 @@ class AdminResponController extends Controller
         $query = ResponTracer::with(['mahasiswa.prodi.fakultas', 'kuesioner'])->select(['id_respon', 'mahasiswa_id', 'kuesioner_id', 'status', 'tgl_isi'])->orderByDesc('tgl_isi');
 
         if (auth()->user()->role === 'Kaprodi') {
-            $nimList = Mahasiswa::where('prodi_id', auth()->user()->prodi_id)->pluck('nim')->toArray();
-            $query->whereIn('mahasiswa_id', $nimList);
+            $query->whereHas('mahasiswa', function ($q) {
+                $q->where('prodi_id', auth()->user()->prodi_id ?: '__UNASSIGNED__');
+            });
         } elseif (auth()->user()->role === 'Fakultas') {
-            $facultyProdiIds = Prodi::where('fakultas_id', auth()->user()->fakultas_id)->pluck('id_prodi')->toArray();
-            $nimList = Mahasiswa::whereIn('prodi_id', $facultyProdiIds)->pluck('nim')->toArray();
-            $query->whereIn('mahasiswa_id', $nimList);
+            $query->whereHas('mahasiswa.prodi', function ($q) {
+                $q->where('fakultas_id', auth()->user()->fakultas_id ?: -1);
+            });
         } elseif ($request->filled('fakultas_id') && $request->fakultas_id !== 'all') {
-            $facultyProdiIds = Prodi::where('fakultas_id', $request->fakultas_id)->pluck('id_prodi')->toArray();
-            $nimList = Mahasiswa::whereIn('prodi_id', $facultyProdiIds)->pluck('nim')->toArray();
-            $query->whereIn('mahasiswa_id', $nimList);
+            $query->whereHas('mahasiswa.prodi', function ($q) use ($request) {
+                $q->where('fakultas_id', $request->fakultas_id);
+            });
         }
 
         if ($request->filled('prodi_id') && $request->prodi_id !== 'all') {
-            $nimList = Mahasiswa::where('prodi_id', $request->prodi_id)->pluck('nim')->toArray();
-            $query->whereIn('mahasiswa_id', $nimList);
+            $query->whereHas('mahasiswa', function ($q) use ($request) {
+                $q->where('prodi_id', $request->prodi_id);
+            });
         }
 
         if ($request->filled('kuesioner_id') && $request->kuesioner_id !== 'all') {
@@ -108,11 +110,11 @@ class AdminResponController extends Controller
 
         if (auth()->user()->role === 'Kaprodi') {
             $query->whereHas('mahasiswa', function ($q) {
-                $q->where('prodi_id', auth()->user()->prodi_id);
+                $q->where('prodi_id', auth()->user()->prodi_id ?: '__UNASSIGNED__');
             });
         } elseif (auth()->user()->role === 'Fakultas') {
             $query->whereHas('mahasiswa.prodi', function ($q) {
-                $q->where('fakultas_id', auth()->user()->fakultas_id);
+                $q->where('fakultas_id', auth()->user()->fakultas_id ?: -1);
             });
         }
 
@@ -124,8 +126,8 @@ class AdminResponController extends Controller
 
             if ($detail->jawaban_json) {
                 $decoded = is_string($detail->jawaban_json) ? json_decode($detail->jawaban_json, true) : $detail->jawaban_json;
-                if (is_array($decoded) && isset($decoded['label'])) {
-                    $jawabanUser[$detail->pertanyaan_id] = $decoded['label'];
+                if (is_array($decoded) && array_key_exists('label', $decoded)) {
+                    $jawabanUser[$detail->pertanyaan_id] = !empty($decoded['label']) ? $decoded['label'] : $detail->jawaban_text;
                 } else {
                     $jawabanUser[$detail->pertanyaan_id] = $decoded;
                 }
@@ -140,43 +142,51 @@ class AdminResponController extends Controller
         }
 
         $pekerjaan = $respon->pekerjaanAlumni;
-        $pertanyaans = Pertanyaan::whereIn('kode_pertanyaan', ['F5A0', 'F5A1', 'F5A2', 'f5a0', 'f5a1', 'f5a2', 'f18b', 'F18B'])->get();
+        $pertanyaans = Pertanyaan::with('kategori')
+            ->whereHas('kategori', function ($q) use ($respon) {
+                $q->where('kuesioner_id', $respon->kuesioner_id);
+            })
+            ->whereIn('kode_pertanyaan', ['F5A0', 'F5A1', 'F5A2', 'f5a0', 'f5a1', 'f5a2'])
+            ->get();
 
         foreach ($pertanyaans as $p) {
             $id = $p->id_pertanyaan;
             $kode = strtolower($p->kode_pertanyaan);
+            $isActiveKat = !$p->kategori || TracerResponService::checkCondition($p->kategori->syarat_pertanyaan_id, $p->kategori->syarat_jawaban, $jawabanUser);
 
             if ($kode === 'f5a0') {
-                if (!empty($jawabanUser[$id]) && strlen($jawabanUser[$id]) == 2) {
+                if (!empty($jawabanUser[$id]) && strlen((string)$jawabanUser[$id]) == 2) {
                     $val = $jawabanUser[$id];
                     $negara = Cache::remember("master_negara_{$val}", 86400, function () use ($val) {
                         return DB::table('master_negara')->where('kode_wilayah_negara', $val)->value('negara');
                     });
                     if ($negara) $jawabanUser[$id] = $negara;
                 }
-            } elseif ($kode === 'f18b') {
-                if (empty($jawabanUser[$id]) && $pekerjaan) {
-                    $jawabanUser[$id] = $pekerjaan->nama;
-                }
             } elseif ($kode === 'f5a1') {
-                if (empty($jawabanUser[$id]) && $pekerjaan) {
+                if (empty($jawabanUser[$id]) && $pekerjaan && $isActiveKat) {
                     $jawabanUser[$id] = $pekerjaan->provinsi ?? $pekerjaan->kode_provinsi;
                 }
-                if (!empty($jawabanUser[$id]) && preg_match('/^\d+$/', $jawabanUser[$id])) {
-                    $val = $jawabanUser[$id];
+                if (!empty($jawabanUser[$id]) && preg_match('/^\d+$/', (string)$jawabanUser[$id])) {
+                    $val = (string)$jawabanUser[$id];
                     $prov = Cache::remember("master_provinsi_{$val}", 86400, function () use ($val) {
-                        return DB::table('master_provinsi')->where('kode_wilayah_provinsi', $val)->value('provinsi');
+                        return DB::table('master_provinsi')
+                            ->where('kode_wilayah_provinsi', $val)
+                            ->orWhere('kode_wilayah_provinsi', str_pad($val, 6, '0', STR_PAD_LEFT))
+                            ->value('provinsi');
                     });
                     if ($prov) $jawabanUser[$id] = $prov;
                 }
             } elseif ($kode === 'f5a2') {
-                if (empty($jawabanUser[$id]) && $pekerjaan) {
+                if (empty($jawabanUser[$id]) && $pekerjaan && $isActiveKat) {
                     $jawabanUser[$id] = $pekerjaan->kabupaten ?? $pekerjaan->kode_kabupaten;
                 }
-                if (!empty($jawabanUser[$id]) && preg_match('/^\d+$/', $jawabanUser[$id])) {
-                    $val = $jawabanUser[$id];
+                if (!empty($jawabanUser[$id]) && preg_match('/^\d+$/', (string)$jawabanUser[$id])) {
+                    $val = (string)$jawabanUser[$id];
                     $kab = Cache::remember("master_kab_{$val}", 86400, function () use ($val) {
-                        return DB::table('master_kota_kabupaten')->where('kode_wilayah_kota_kabupaten', $val)->value('kota_kabupaten');
+                        return DB::table('master_kota_kabupaten')
+                            ->where('kode_wilayah_kota_kabupaten', $val)
+                            ->orWhere('kode_wilayah_kota_kabupaten', str_pad($val, 6, '0', STR_PAD_LEFT))
+                            ->value('kota_kabupaten');
                     });
                     if ($kab) $jawabanUser[$id] = $kab;
                 }
@@ -185,7 +195,13 @@ class AdminResponController extends Controller
 
         $jsonKemdikbud = [];
         foreach ($respon->kuesioner->kategoriPertanyaans as $kategori) {
+            if (!TracerResponService::checkCondition($kategori->syarat_pertanyaan_id, $kategori->syarat_jawaban, $jawabanUser)) {
+                continue;
+            }
             foreach ($kategori->pertanyaans as $pertanyaan) {
+                if (!TracerResponService::checkCondition($pertanyaan->syarat_pertanyaan_id, $pertanyaan->syarat_jawaban, $jawabanUser)) {
+                    continue;
+                }
                 if (!empty($pertanyaan->kode_pertanyaan)) {
                     $val = $jawabanUser[$pertanyaan->id_pertanyaan] ?? null;
                     if ($val !== null && $val !== "") {
@@ -306,9 +322,9 @@ class AdminResponController extends Controller
         $query = Mahasiswa::with('prodi')->select(['nim', 'nama', 'prodi_id']);
 
         if ($this->isKaprodiScope()) {
-            $query->where('prodi_id', auth()->user()->prodi_id);
+            $query->where('prodi_id', auth()->user()->prodi_id ?: '__UNASSIGNED__');
         } elseif ($this->isFakultasScope()) {
-            $prodiIds = Prodi::where('fakultas_id', auth()->user()->fakultas_id)->pluck('id_prodi')->toArray();
+            $prodiIds = Prodi::where('fakultas_id', auth()->user()->fakultas_id ?: -1)->pluck('id_prodi')->toArray();
             $query->whereIn('prodi_id', $prodiIds);
         }
 

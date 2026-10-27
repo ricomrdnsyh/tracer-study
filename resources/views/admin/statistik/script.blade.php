@@ -184,18 +184,19 @@
             var el = document.getElementById('chart_sumber_dana');
             if (!el) return;
 
-            var series = (data && data.series) ? data.series : [0, 0, 0, 0, 0, 0, 0];
+            var series = (data && data.series) ? data.series : [0, 0, 0, 0, 0, 0, 0, 0];
             var labels = (data && data.labels) ? data.labels : [
                 'Biaya Sendiri/Keluarga',
                 'Beasiswa ADIK',
-                'Beasiswa BIDIKMISI',
+                'Beasiswa KIP-Kuliah (KIP-K)',
                 'Beasiswa PPA',
                 'Beasiswa AFIRMASI',
                 'Beasiswa Perusahaan/Swasta',
+                'Beasiswa Pemerintah Daerah',
                 'Lainnya, tuliskan'
             ];
             var colors = (data && data.colors) ? data.colors : ['#5b67ec', '#22c55e', '#f59e0b', '#8b5cf6',
-                '#ef4444', '#14b8a6', '#f97316'
+                '#ef4444', '#14b8a6', '#06b6d4', '#f97316'
             ];
 
             var options = {
@@ -1571,7 +1572,7 @@
                     if (chartSumberDana && res.sumber_dana) {
                         chartSumberDana.updateOptions({
                             series: [{
-                                data: res.sumber_dana.series || [0, 0, 0, 0, 0, 0, 0]
+                                data: res.sumber_dana.series || [0, 0, 0, 0, 0, 0, 0, 0]
                             }],
                             xaxis: {
                                 categories: res.sumber_dana.labels || []
@@ -1687,13 +1688,13 @@
                             series: [{
                                     name: 'Dikuasai Saat Lulus (F17A)',
                                     data: res.kompetensi.summary.series_a || [0, 0, 0, 0, 0,
-                                        0, 0
+                                        0, 0, 0, 0, 0, 0
                                     ]
                                 },
                                 {
                                     name: 'Diperlukan Dalam Pekerjaan (F17B)',
                                     data: res.kompetensi.summary.series_b || [0, 0, 0, 0, 0,
-                                        0, 0
+                                        0, 0, 0, 0, 0, 0
                                     ]
                                 }
                             ],
@@ -1820,10 +1821,12 @@
                 e.preventDefault();
                 $('#filter_kuesioner').val('all').trigger('change.select2');
 
-                if (!$('#filter_fakultas').prop('disabled')) {
+                if ($('#filter_fakultas').is('select') && !$('#filter_fakultas').prop('disabled')) {
                     $('#filter_fakultas').val('all').trigger('change.select2');
                 }
-                $('#filter_prodi').val('all').trigger('change.select2');
+                if ($('#filter_prodi').is('select') && !$('#filter_prodi').prop('disabled')) {
+                    $('#filter_prodi').val('all').trigger('change.select2');
+                }
 
                 fetchStatisticsData();
             });

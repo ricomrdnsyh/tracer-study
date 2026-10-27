@@ -417,7 +417,7 @@
                             @if (!$isFakultas && !$isKaprodi)
                                 <div class="col-md-12">
                                     <label class="d-flex align-items-center fw-bolder mb-1">Fakultas (Opsional)</label>
-                                    <select name="fakultas_id" class="form-select form-select-sm" data-control="select2"
+                                    <select name="fakultas_id" id="export_fakultas" class="form-select form-select-sm" data-control="select2"
                                         data-dropdown-parent="#exportModal" data-placeholder="Semua Fakultas"
                                         data-allow-clear="true">
                                         <option value="">Semua Fakultas</option>
@@ -430,12 +430,12 @@
                             @if (!$isKaprodi)
                             <div class="col-md-12">
                                 <label class="d-flex align-items-center fw-bolder mb-1">Program Studi (Opsional)</label>
-                                <select name="prodi_id" class="form-select form-select-sm" data-control="select2"
+                                <select name="prodi_id" id="export_prodi" class="form-select form-select-sm" data-control="select2"
                                     data-dropdown-parent="#exportModal" data-placeholder="Semua Program Studi"
                                     data-allow-clear="true">
                                     <option value="">Semua Program Studi</option>
                                     @foreach ($prodi as $p)
-                                        <option value="{{ $p->id_prodi }}">{{ $p->nama_prodi }}</option>
+                                        <option value="{{ $p->id_prodi }}" data-fakultas="{{ $p->fakultas_id }}">{{ $p->nama_prodi }}</option>
                                     @endforeach
                                 </select>
                             </div>

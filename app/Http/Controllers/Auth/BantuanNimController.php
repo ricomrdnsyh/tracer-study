@@ -10,6 +10,7 @@ use App\Models\Prodi;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Validation\Rule;
 
 class BantuanNimController extends Controller
 {
@@ -21,7 +22,13 @@ class BantuanNimController extends Controller
         $validated = $request->validate([
             'nama' => 'required|string|max:150',
             'fakultas_id' => 'required|integer|exists:fakultas,id_fakultas',
-            'prodi_id' => 'required|string|exists:prodi,id_prodi',
+            'prodi_id' => [
+                'required',
+                'string',
+                Rule::exists('prodi', 'id_prodi')->where(function ($query) use ($request) {
+                    $query->where('fakultas_id', $request->input('fakultas_id'));
+                }),
+            ],
             'no_wa' => 'required|string|min:8|max:30',
             'tahun_lulus' => 'nullable|string|max:10',
             'keterangan' => 'nullable|string|max:500',
@@ -30,7 +37,7 @@ class BantuanNimController extends Controller
             'fakultas_id.required' => 'Fakultas wajib dipilih.',
             'fakultas_id.exists' => 'Fakultas yang dipilih tidak valid.',
             'prodi_id.required' => 'Program studi wajib dipilih.',
-            'prodi_id.exists' => 'Program studi yang dipilih tidak valid.',
+            'prodi_id.exists' => 'Program studi yang dipilih tidak sesuai dengan Fakultas.',
             'no_wa.required' => 'Nomor WhatsApp aktif wajib diisi.',
             'no_wa.min' => 'Nomor WhatsApp minimal 8 karakter.',
         ]);

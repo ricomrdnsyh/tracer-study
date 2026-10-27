@@ -87,15 +87,26 @@ class AuthController extends Controller
 
     public function logout(Request $request)
     {
+        $logoutSession = $request->session()->get('logout_session');
+        $isMahasiswa = Auth::guard('mahasiswa')->check();
+
         if (Auth::guard('web')->check()) {
             Auth::guard('web')->logout();
         }
-        if (Auth::guard('mahasiswa')->check()) {
+        if ($isMahasiswa) {
             Auth::guard('mahasiswa')->logout();
         }
 
         $request->session()->invalidate();
         $request->session()->regenerateToken();
+
+        if ($logoutSession) {
+            return redirect($logoutSession);
+        }
+
+        if ($isMahasiswa) {
+            return redirect()->route('tracer.login')->with('success', 'Anda telah berhasil keluar dari akun Tracer Study.');
+        }
 
         return redirect('https://sso.unuja.ac.id');
     }

@@ -497,7 +497,7 @@
                                 <div class="input-group">
                                     <span class="input-group-text"><i
                                             class="fab fa-whatsapp text-success me-1"></i></span>
-                                    <input type="number" name="no_wa" id="bantuan_no_wa" class="form-control"
+                                    <input type="tel" inputmode="tel" name="no_wa" id="bantuan_no_wa" class="form-control"
                                         placeholder="Contoh: 081234567890" required />
                                 </div>
                                 <span class="text-muted" style="font-size: 0.75rem;">Pastikan nomor terhubung dengan

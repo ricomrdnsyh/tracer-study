@@ -70,6 +70,45 @@
     <script src="{{ asset('assets/plugins/global/plugins.bundle.js') }}"></script>
     <script src="{{ asset('assets/plugins/custom/datatables/print.js') }}"></script>
     <script src="{{ asset('assets/js/scripts.bundle.js') }}"></script>
+    <script>
+        if (typeof toastr !== 'undefined') {
+            toastr.options = {
+                "closeButton": true,
+                "debug": false,
+                "newestOnTop": true,
+                "progressBar": true,
+                "positionClass": "toastr-top-right",
+                "preventDuplicates": false,
+                "showDuration": "300",
+                "hideDuration": "1000",
+                "timeOut": "5000",
+                "extendedTimeOut": "1000",
+                "showEasing": "swing",
+                "hideEasing": "linear",
+                "showMethod": "fadeIn",
+                "hideMethod": "fadeOut"
+            };
+
+            @if (session('success'))
+                toastr.success(@json(session('success')));
+            @endif
+            @if (session('error'))
+                toastr.error(@json(session('error')));
+            @endif
+            @if (session('failed'))
+                toastr.error(@json(session('failed')));
+            @endif
+            @if (session('warning'))
+                toastr.warning(@json(session('warning')));
+            @endif
+            @if (session('info'))
+                toastr.info(@json(session('info')));
+            @endif
+            @if ($errors->any())
+                toastr.error(@json($errors->first()));
+            @endif
+        }
+    </script>
     @yield('js')
 </body>
 

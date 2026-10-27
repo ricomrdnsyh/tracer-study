@@ -22,6 +22,13 @@ class AdminPertanyaanController extends Controller
             $data['opsi_jawaban'] = null;
         }
 
+        if (empty($data['syarat_pertanyaan_id'])) {
+            $data['syarat_pertanyaan_id'] = null;
+            $data['syarat_jawaban'] = null;
+        } elseif (!$request->has('syarat_jawaban') || empty($data['syarat_jawaban'])) {
+            $data['syarat_jawaban'] = null;
+        }
+
         Pertanyaan::create($data);
 
         return redirect()->back()->with('success', 'Pertanyaan berhasil ditambahkan.');
@@ -41,6 +48,13 @@ class AdminPertanyaanController extends Controller
             $data['opsi_jawaban'] = null;
         }
 
+        if (empty($data['syarat_pertanyaan_id'])) {
+            $data['syarat_pertanyaan_id'] = null;
+            $data['syarat_jawaban'] = null;
+        } elseif (!$request->has('syarat_jawaban') || empty($data['syarat_jawaban'])) {
+            $data['syarat_jawaban'] = null;
+        }
+
         $pertanyaan->update($data);
 
         return redirect()->back()->with('success', 'Pertanyaan berhasil diupdate.');
@@ -51,6 +65,15 @@ class AdminPertanyaanController extends Controller
         if (auth()->user()->role !== 'Admin') abort(403);
 
         $pertanyaan = Pertanyaan::findOrFail($id);
+
+        \App\Models\KategoriPertanyaan::where('syarat_pertanyaan_id', $id)->update([
+            'syarat_pertanyaan_id' => null,
+            'syarat_jawaban' => null,
+        ]);
+        Pertanyaan::where('syarat_pertanyaan_id', $id)->update([
+            'syarat_pertanyaan_id' => null,
+            'syarat_jawaban' => null,
+        ]);
 
         JawabanDetail::where('pertanyaan_id', $id)->delete();
 

@@ -70,6 +70,8 @@ class AdminKuesionerController extends Controller
 
     public function edit($id)
     {
+        if (auth()->user()->role !== 'Admin') abort(403);
+
         $kuesioner = Kuesioner::findOrFail($id);
         $data = $kuesioner->toArray();
         $data['target_tahun_lulus'] = $kuesioner->target_tahun_lulus;
@@ -89,7 +91,29 @@ class AdminKuesionerController extends Controller
         if (auth()->user()->role !== 'Admin') abort(403);
 
         $kuesioner = Kuesioner::findOrFail($id);
-        $kuesioner->delete();
+
+        DB::transaction(function () use ($kuesioner) {
+            $responIds = $kuesioner->responTracers()->pluck('id_respon')->toArray();
+            if (!empty($responIds)) {
+                \App\Models\PekerjaanAlumni::whereIn('respon_id', $responIds)->delete();
+                \App\Models\JawabanDetail::whereIn('respon_id', $responIds)->delete();
+                $kuesioner->responTracers()->delete();
+            }
+
+            $kategoriIds = $kuesioner->kategoriPertanyaans()->pluck('id_kategori')->toArray();
+            if (!empty($kategoriIds)) {
+                $pertanyaanIds = Pertanyaan::whereIn('kategori_id', $kategoriIds)->pluck('id_pertanyaan')->toArray();
+                if (!empty($pertanyaanIds)) {
+                    \App\Models\JawabanDetail::whereIn('pertanyaan_id', $pertanyaanIds)->delete();
+                    KategoriPertanyaan::whereIn('id_kategori', $kategoriIds)->update(['syarat_pertanyaan_id' => null, 'syarat_jawaban' => null]);
+                    Pertanyaan::whereIn('id_pertanyaan', $pertanyaanIds)->update(['syarat_pertanyaan_id' => null, 'syarat_jawaban' => null]);
+                    Pertanyaan::whereIn('kategori_id', $kategoriIds)->delete();
+                }
+                $kuesioner->kategoriPertanyaans()->delete();
+            }
+
+            $kuesioner->delete();
+        });
 
         return response()->json([
             'status'  => 'success',
@@ -167,6 +191,8 @@ class AdminKuesionerController extends Controller
 
     public function importJson(Request $request, Kuesioner $kuesioner)
     {
+        if (auth()->user()->role !== 'Admin') abort(403);
+
         $request->validate([
             'json_file' => 'required|file',
         ]);
@@ -175,7 +201,7 @@ class AdminKuesionerController extends Controller
         $data = json_decode($fileContent, true);
 
         if (!is_array($data)) {
-            return back()->with('failed', 'Format file JSON tidak valid.');
+            return back()->with('error', 'Format file JSON tidak valid.');
         }
 
         try {
@@ -290,7 +316,7 @@ class AdminKuesionerController extends Controller
 
             return back()->with('success', 'Berhasil mengimpor dan memperbarui Kategori serta Pertanyaan dari JSON.');
         } catch (\Exception $e) {
-            return back()->with('failed', 'Gagal mengimpor data: ' . $e->getMessage());
+            return back()->with('error', 'Gagal mengimpor data: ' . $e->getMessage());
         }
     }
 }

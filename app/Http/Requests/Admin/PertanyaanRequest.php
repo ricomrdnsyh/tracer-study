@@ -25,7 +25,7 @@ class PertanyaanRequest extends FormRequest
         $rules = [
             'kode_pertanyaan' => 'nullable|string|max:50',
             'teks_pertanyaan' => 'required|string',
-            'tipe_jawaban' => 'required|string',
+            'tipe_jawaban' => 'required|string|in:text,textarea,radio,checkbox,select,date,number',
             'wajib' => 'required|boolean',
             'opsi_jawaban' => 'nullable|string',
             'syarat_pertanyaan_id' => 'nullable|exists:pertanyaan,id_pertanyaan',

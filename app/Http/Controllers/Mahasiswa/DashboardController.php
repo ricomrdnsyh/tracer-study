@@ -33,12 +33,14 @@ class DashboardController extends Controller
             ->where(function ($q) use ($matchingIds) {
                 if (!empty($matchingIds)) {
                     $q->whereIn('akademik_id', $matchingIds)
-                      ->orWhereNull('akademik_id');
+                      ->orWhereNull('akademik_id')
+                      ->orWhere('akademik_id', '');
                 } else {
-                    $q->whereNull('akademik_id');
+                    $q->whereNull('akademik_id')
+                      ->orWhere('akademik_id', '');
                 }
             })
-            ->orderByRaw('akademik_id IS NULL ASC')
+            ->orderByRaw("CASE WHEN akademik_id IS NULL OR akademik_id = '' THEN 1 ELSE 0 END ASC")
             ->orderByTahunTerbaru()
             ->first();
 

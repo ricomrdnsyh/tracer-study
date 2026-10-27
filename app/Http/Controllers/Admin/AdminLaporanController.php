@@ -23,10 +23,10 @@ class AdminLaporanController extends Controller
 
         if ($isKaprodi) {
             $fakultas = collect();
-            $prodi = Prodi::where('id_prodi', $userProdiId)->get();
+            $prodi = Prodi::where('id_prodi', $userProdiId ?: '__NONE__')->get();
         } elseif ($isFakultas) {
-            $fakultas = Fakultas::where('id_fakultas', $userFakultasId)->get();
-            $prodi = Prodi::where('fakultas_id', $userFakultasId)->orderBy('nama_prodi')->get();
+            $fakultas = Fakultas::where('id_fakultas', $userFakultasId ?: 0)->get();
+            $prodi = Prodi::where('fakultas_id', $userFakultasId ?: 0)->orderBy('nama_prodi')->get();
         } else {
             $fakultas = Fakultas::orderBy('nama_fakultas')->get();
             $prodi = Prodi::orderBy('nama_prodi')->get();

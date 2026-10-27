@@ -13,7 +13,7 @@ class DashboardController extends Controller
     public function index(Request $request)
     {
         $user = auth()->user();
-        $prodiId = $user->prodi_id;
+        $prodiId = $user->prodi_id ?: '__UNASSIGNED__';
         $prodi = $user->prodi;
 
         $kuesionerList = Kuesioner::orderByTahunTerbaru()->get();
@@ -29,6 +29,7 @@ class DashboardController extends Controller
         $statsData = app(StatistikService::class)->buildStatisticsData($statsRequest);
 
         $recentQuery = ResponTracer::with(['mahasiswa.prodi', 'kuesioner'])
+            ->where('status', 'Selesai')
             ->whereHas('mahasiswa', function ($q) use ($prodiId) {
                 $q->where('prodi_id', $prodiId);
             })

@@ -11,7 +11,16 @@ class AdminKategoriPertanyaanController extends Controller
 {
     public function store(KategoriPertanyaanRequest $request)
     {
-        KategoriPertanyaan::create($request->validated());
+        $data = $request->validated();
+
+        if (empty($data['syarat_pertanyaan_id'])) {
+            $data['syarat_pertanyaan_id'] = null;
+            $data['syarat_jawaban'] = null;
+        } elseif (!$request->has('syarat_jawaban') || empty($data['syarat_jawaban'])) {
+            $data['syarat_jawaban'] = null;
+        }
+
+        KategoriPertanyaan::create($data);
 
         return redirect()->back()->with('success', 'Kategori berhasil ditambahkan.');
     }
@@ -19,7 +28,16 @@ class AdminKategoriPertanyaanController extends Controller
     public function update(KategoriPertanyaanRequest $request, $id)
     {
         $kategori = KategoriPertanyaan::findOrFail($id);
-        $kategori->update($request->validated());
+        $data = $request->validated();
+
+        if (empty($data['syarat_pertanyaan_id'])) {
+            $data['syarat_pertanyaan_id'] = null;
+            $data['syarat_jawaban'] = null;
+        } elseif (!$request->has('syarat_jawaban') || empty($data['syarat_jawaban'])) {
+            $data['syarat_jawaban'] = null;
+        }
+
+        $kategori->update($data);
 
         return redirect()->back()->with('success', 'Kategori berhasil diupdate.');
     }
@@ -35,9 +53,9 @@ class AdminKategoriPertanyaanController extends Controller
             return redirect()->back()->with('success', 'Kategori berhasil dihapus.');
         } catch (\Illuminate\Database\QueryException $e) {
             if ($e->getCode() == 23000) {
-                return redirect()->back()->with('failed', 'Kategori tidak dapat dihapus karena masih memiliki pertanyaan.');
+                return redirect()->back()->with('error', 'Kategori tidak dapat dihapus karena masih memiliki pertanyaan.');
             }
-            return redirect()->back()->with('failed', 'Terjadi kesalahan saat menghapus kategori.');
+            return redirect()->back()->with('error', 'Terjadi kesalahan saat menghapus kategori.');
         }
     }
 }

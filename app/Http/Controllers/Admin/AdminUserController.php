@@ -118,6 +118,14 @@ class AdminUserController extends Controller
     public function destroy(string $id)
     {
         $user = User::findOrFail($id);
+
+        if ((int) $user->id === (int) auth()->id()) {
+            return response()->json([
+                'status'  => 'error',
+                'message' => 'Anda tidak dapat menghapus akun Anda sendiri yang sedang digunakan.',
+            ], 422);
+        }
+
         $user->delete();
 
         return response()->json([

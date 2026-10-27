@@ -141,7 +141,7 @@
         }).then((result) => {
             if (result.isConfirmed) {
                 $.ajax({
-                    url: '/admin/users/' + id,
+                    url: '{{ url('admin/users') }}/' + id,
                     type: 'DELETE',
                     data: {
                         _token: '{{ csrf_token() }}'
@@ -166,8 +166,9 @@
                         });
                         $('#example').DataTable().ajax.reload(null, false);
                     },
-                    error: function() {
-                        Swal.fire("Error!", "Terjadi kesalahan saat menghapus data.", "error");
+                    error: function(xhr) {
+                        let msg = (xhr.responseJSON && xhr.responseJSON.message) ? xhr.responseJSON.message : "Terjadi kesalahan saat menghapus data.";
+                        Swal.fire("Error!", msg, "error");
                     }
                 });
             }

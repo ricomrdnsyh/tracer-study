@@ -1,7 +1,7 @@
 <script>
     $(document).on('click', '.btn-show', function() {
         let id = $(this).data('id');
-        let url = '/admin/tahun-akademik/' + id;
+        let url = '{{ url('admin/tahun-akademik') }}/' + id;
 
         $.ajax({
             url: url,

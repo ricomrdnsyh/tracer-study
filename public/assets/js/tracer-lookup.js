@@ -53,6 +53,10 @@ $(document).ready(function() {
             if (isInit) {
                 searchInput.val(initialSearchText);
                 hiddenInput.val(initialHiddenText);
+            } else if (config.dependsOn) {
+                searchInput.val('');
+                hiddenInput.val('').trigger('change');
+                resultsContainer.addClass('d-none').empty();
             }
             searchInput.attr('placeholder', config.placeholder);
             statusText.text(config.helperText);
@@ -136,14 +140,17 @@ $(document).ready(function() {
             searchInput.val(text).trigger('change');
             
             resultsContainer.addClass('d-none');
-            statusText.html('<span class="text-success fs-7 fw-semibold"><i class="fas fa-check-circle text-success me-1"></i> Terpilih: ' + text + '</span>');
+            const $badge = $('<span class="text-success fs-7 fw-semibold"><i class="fas fa-check-circle text-success me-1"></i> Terpilih: </span>');
+            $badge.append(document.createTextNode(text));
+            statusText.empty().append($badge);
         });
     });
 
     function performSearch(type, keyword, container, config, resultsContainer, statusText) {
         statusText.text('Mencari...');
         
-        let url = `${LOOKUP_BASE}?type=${type}&keyword=${encodeURIComponent(keyword)}`;
+        const sep = LOOKUP_BASE.indexOf('?') !== -1 ? '&' : '?';
+        let url = `${LOOKUP_BASE}${sep}type=${type}&keyword=${encodeURIComponent(keyword)}`;
         
         if (config.dependsOn) {
             const parentHidden = $(`div[data-remote-select="${config.dependsOn}"]`).find('input[type="hidden"]');
@@ -157,13 +164,11 @@ $(document).ready(function() {
                 resultsContainer.empty();
                 if (response && response.length > 0) {
                     response.forEach(item => {
-                        resultsContainer.append(`
-                            <div class="remote-select-item p-2 cursor-pointer border-bottom hover-bg-light" 
-                                 data-id="${item.id}" 
-                                 data-text="${item.text}">
-                                ${item.text}
-                            </div>
-                        `);
+                        const $el = $('<div>', {
+                            class: 'remote-select-item p-2 cursor-pointer border-bottom hover-bg-light',
+                            text: item.text
+                        }).attr('data-id', item.id).attr('data-text', item.text);
+                        resultsContainer.append($el);
                     });
                     resultsContainer.removeClass('d-none');
                     statusText.text(`Ditemukan ${response.length} hasil`);
@@ -264,11 +269,12 @@ $(document).ready(function() {
 
         // Sembunyikan Provinsi & Kabupaten bila Negara selain Indonesia
         if (code === 'f5a0') {
-            const scope = select.closest('form').length ? select.closest('form') : container;
+            const scope = container.length ? container : select.closest('form');
             const provSelect = scope.find('select[data-wilayah-select="f5a1"]');
             const kabSelect = scope.find('select[data-wilayah-select="f5a2"]');
 
             const applyNegaraVisibility = () => {
+                if (container.length && container.hasClass('skip-hidden')) return;
                 const val = (select.val() || '').toString().trim().toUpperCase();
                 const label = (($('#hidden_label_' + idPertanyaan).val()) || '').toString().trim().toLowerCase();
                 const isIndonesia = val === 'ID' || label === 'indonesia';
@@ -295,6 +301,8 @@ $(document).ready(function() {
                         }
                         if (s.is(provSelect)) {
                             s.prop('disabled', !val);
+                        } else if (s.is(kabSelect)) {
+                            s.prop('disabled', !provSelect.val());
                         }
                     }
                 });

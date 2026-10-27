@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\AdminBantuanNimController;
 use App\Http\Controllers\Admin\AdminFakultasController;
 use App\Http\Controllers\Admin\AdminKategoriPertanyaanController;
 use App\Http\Controllers\Admin\AdminKuesionerController;
@@ -30,11 +31,11 @@ use Rap2hpoutre\LaravelLogViewer\LogViewerController;
 Route::get('/', function () {
     $kuesionerAktifList = App\Models\Kuesioner::with('tahunAkademik')
         ->where('status', 'Published')
-        ->orderByRaw('akademik_id IS NULL ASC')
-        ->orderBy('akademik_id', 'asc')
+        ->orderByRaw("CASE WHEN akademik_id IS NULL OR akademik_id = '' THEN 1 ELSE 0 END ASC")
+        ->orderByTahunTerbaru()
         ->get();
 
-    $kuesionerAktif = $kuesionerAktifList->last() ?? $kuesionerAktifList->first();
+    $kuesionerAktif = $kuesionerAktifList->first();
 
     return view('landing', compact('kuesionerAktif', 'kuesionerAktifList'));
 })->name('home');
@@ -64,19 +65,42 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:Admin,Fakultas
         Route::get('/dashboard', [AdminDashboard::class, 'index'])->name('dashboard');
         Route::get('/users/data', [AdminUserController::class, 'getUsers'])->name('users.data');
         Route::resource('users', AdminUserController::class);
+
+        Route::get('/tahun-akademik/data', [AdminTahunAkademikController::class, 'getTahunAkademik'])->name('tahun-akademik.data');
+        Route::match(['get', 'post'], '/tahun-akademik/sync', [AdminTahunAkademikController::class, 'sync'])->name('tahun-akademik.sync');
+        Route::resource('tahun-akademik', AdminTahunAkademikController::class)->only(['index', 'show']);
+
+        Route::get('/fakultas/data', [AdminFakultasController::class, 'getFakultas'])->name('fakultas.data');
+        Route::match(['get', 'post'], '/fakultas/sync', [AdminFakultasController::class, 'sync'])->name('fakultas.sync');
+        Route::resource('fakultas', AdminFakultasController::class)->only(['index', 'show', 'update']);
+
+        Route::get('/prodi/data', [AdminProdiController::class, 'getProdi'])->name('prodi.data');
+        Route::match(['get', 'post'], '/prodi/sync', [AdminProdiController::class, 'sync'])->name('prodi.sync');
+        Route::resource('prodi', AdminProdiController::class)->only(['index', 'show', 'update']);
+
+        Route::get('/kuesioner/data', [AdminKuesionerController::class, 'getKuesioner'])->name('kuesioner.data');
+        Route::get('/kuesioner/{kuesioner}/export-json', [AdminKuesionerController::class, 'exportJson'])->name('kuesioner.export-json');
+        Route::post('/kuesioner/{kuesioner}/import-json', [AdminKuesionerController::class, 'importJson'])->name('kuesioner.import-json');
+        Route::resource('kuesioner', AdminKuesionerController::class);
+
+        Route::get('/wilayah', [AdminWilayahController::class, 'index'])->name('wilayah.index');
+        Route::get('/wilayah/negara', [AdminWilayahController::class, 'getNegara'])->name('wilayah.negara');
+        Route::get('/wilayah/provinsi', [AdminWilayahController::class, 'getProvinsi'])->name('wilayah.provinsi');
+        Route::get('/wilayah/kabupaten', [AdminWilayahController::class, 'getKabupaten'])->name('wilayah.kabupaten');
+        Route::post('/wilayah/import', [AdminWilayahController::class, 'import'])->name('wilayah.import');
+
+        Route::get('/template-laporan', [AdminTemplateLaporanController::class, 'index'])->name('template-laporan.index');
+        Route::get('/template-laporan/download', [AdminTemplateLaporanController::class, 'downloadCurrent'])->name('template-laporan.download');
+        Route::post('/template-laporan/upload', [AdminTemplateLaporanController::class, 'upload'])->name('template-laporan.upload');
+
+        Route::get('/bantuan-nim', [AdminBantuanNimController::class, 'index'])->name('bantuan-nim.index');
+        Route::get('/bantuan-nim/data', [AdminBantuanNimController::class, 'getData'])->name('bantuan-nim.data');
+        Route::patch('/bantuan-nim/{id}/status', [AdminBantuanNimController::class, 'updateStatus'])->name('bantuan-nim.update-status');
+        Route::delete('/bantuan-nim/{id}', [AdminBantuanNimController::class, 'destroy'])->name('bantuan-nim.destroy');
+
+        Route::resource('kategori', AdminKategoriPertanyaanController::class)->except(['index', 'show']);
+        Route::resource('pertanyaan', AdminPertanyaanController::class)->except(['index', 'show']);
     });
-
-    Route::get('/tahun-akademik/data', [AdminTahunAkademikController::class, 'getTahunAkademik'])->name('tahun-akademik.data');
-    Route::match(['get', 'post'], '/tahun-akademik/sync', [AdminTahunAkademikController::class, 'sync'])->name('tahun-akademik.sync');
-    Route::resource('tahun-akademik', AdminTahunAkademikController::class)->only(['index', 'show']);
-
-    Route::get('/fakultas/data', [AdminFakultasController::class, 'getFakultas'])->name('fakultas.data');
-    Route::match(['get', 'post'], '/fakultas/sync', [AdminFakultasController::class, 'sync'])->name('fakultas.sync');
-    Route::resource('fakultas', AdminFakultasController::class)->only(['index', 'show', 'update']);
-
-    Route::get('/prodi/data', [AdminProdiController::class, 'getProdi'])->name('prodi.data');
-    Route::match(['get', 'post'], '/prodi/sync', [AdminProdiController::class, 'sync'])->name('prodi.sync');
-    Route::resource('prodi', AdminProdiController::class)->only(['index', 'show', 'update']);
 
     Route::get('/mahasiswa/data', [AdminMahasiswaController::class, 'getMahasiswa'])->name('mahasiswa.data');
     Route::match(['get', 'post'], '/mahasiswa/sync', [AdminMahasiswaController::class, 'sync'])->name('mahasiswa.sync');
@@ -84,17 +108,6 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:Admin,Fakultas
 
     Route::get('/perusahaan/data', [AdminPerusahaanController::class, 'getPerusahaan'])->name('perusahaan.data');
     Route::resource('perusahaan', AdminPerusahaanController::class)->only(['index', 'show']);
-
-    Route::get('/kuesioner/data', [AdminKuesionerController::class, 'getKuesioner'])->name('kuesioner.data');
-    Route::get('/kuesioner/{kuesioner}/export-json', [AdminKuesionerController::class, 'exportJson'])->name('kuesioner.export-json');
-    Route::post('/kuesioner/{kuesioner}/import-json', [AdminKuesionerController::class, 'importJson'])->name('kuesioner.import-json');
-    Route::resource('kuesioner', AdminKuesionerController::class);
-
-    Route::get('/wilayah', [AdminWilayahController::class, 'index'])->name('wilayah.index');
-    Route::get('/wilayah/negara', [AdminWilayahController::class, 'getNegara'])->name('wilayah.negara');
-    Route::get('/wilayah/provinsi', [AdminWilayahController::class, 'getProvinsi'])->name('wilayah.provinsi');
-    Route::get('/wilayah/kabupaten', [AdminWilayahController::class, 'getKabupaten'])->name('wilayah.kabupaten');
-    Route::post('/wilayah/import', [AdminWilayahController::class, 'import'])->name('wilayah.import');
 
     Route::get('/respon/template', [ResponImportController::class, 'template'])->name('respon.template');
     Route::post('/respon/import', [ResponImportController::class, 'import'])->name('respon.import');
@@ -111,13 +124,6 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:Admin,Fakultas
 
     Route::get('/laporan', [AdminLaporanController::class, 'index'])->name('laporan.index');
     Route::get('/laporan/export', [AdminStatistikController::class, 'exportLaporanWord'])->name('laporan.export');
-
-    Route::get('/template-laporan', [AdminTemplateLaporanController::class, 'index'])->name('template-laporan.index');
-    Route::get('/template-laporan/download', [AdminTemplateLaporanController::class, 'downloadCurrent'])->name('template-laporan.download');
-    Route::post('/template-laporan/upload', [AdminTemplateLaporanController::class, 'upload'])->name('template-laporan.upload');
-
-    Route::resource('kategori', AdminKategoriPertanyaanController::class)->except(['index', 'show']);
-    Route::resource('pertanyaan', AdminPertanyaanController::class)->except(['index', 'show']);
 });
 
 Route::prefix('fakultas')->name('fakultas.')->middleware(['auth', 'role:Fakultas'])->group(function () {

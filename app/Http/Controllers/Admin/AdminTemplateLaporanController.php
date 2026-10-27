@@ -10,6 +10,8 @@ class AdminTemplateLaporanController extends Controller
 {
     public function index()
     {
+        if (auth()->user()->role !== 'Admin') abort(403);
+
         $hasCustomTemplate = Storage::exists('templates/laporan_prodi.docx');
 
         return view('admin.template-laporan.index', compact('hasCustomTemplate'));
@@ -17,6 +19,8 @@ class AdminTemplateLaporanController extends Controller
 
     public function downloadCurrent()
     {
+        if (auth()->user()->role !== 'Admin') abort(403);
+
         clearstatcache();
 
         if (Storage::exists('templates/laporan_prodi.docx')) {
@@ -33,6 +37,8 @@ class AdminTemplateLaporanController extends Controller
 
     public function upload(Request $request)
     {
+        if (auth()->user()->role !== 'Admin') abort(403);
+
         $request->validate([
             'template_file' => 'required|mimes:docx|max:10240',
         ]);

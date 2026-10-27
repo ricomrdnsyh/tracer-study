@@ -1,16 +1,16 @@
 <script>
     $(document).on('click', '.btn-edit', function() {
         let id = $(this).data('id');
-        let url = '/admin/users/' + id + '/edit';
+        let url = '{{ url('admin/users') }}/' + id + '/edit';
 
         $.ajax({
             url: url,
             type: 'GET',
             success: function(response) {
                 $('#form_edit').modal('show');
-                $('#bt_submit_edit').attr('action', '/admin/users/' + id);
-                $('#edit_username').val(response.username);
-                $('#edit_name').val(response.name);
+                $('#bt_submit_edit').attr('action', '{{ url('admin/users') }}/' + id);
+                $('#edit_username').val(response.username).prop('readonly', false);
+                $('#edit_name').val(response.name).prop('readonly', false);
                 $('#edit_email').val(response.email);
                 $('#edit_role').val(response.role).trigger('change');
                 if (response.role === 'Fakultas') {
@@ -30,7 +30,14 @@
                     $('#edit_prodi_id').val('').trigger('change');
                 }
                 if ($('#edit_karyawan').length) {
-                    $('#edit_karyawan').val(response.username).trigger('change.select2');
+                    var hasKaryawanOption = $('#edit_karyawan option').filter(function() {
+                        return String($(this).val()) === String(response.username);
+                    }).length > 0;
+                    $('#edit_karyawan').val(hasKaryawanOption ? response.username : null).trigger('change.select2');
+                    if (hasKaryawanOption) {
+                        $('#edit_username').prop('readonly', true);
+                        $('#edit_name').prop('readonly', true);
+                    }
                 }
             },
             error: function() {
@@ -57,6 +64,8 @@
     $('#form_edit').on('hidden.bs.modal', function() {
         $(this).find('form')[0].reset();
         $(this).find('form').removeClass('was-validated');
+        $('#edit_username').prop('readonly', false);
+        $('#edit_name').prop('readonly', false);
         $('#edit_fakultas_container').hide();
         $('#edit_fakultas_id').prop('required', false).val('').trigger('change');
         $('#edit_prodi_container').hide();

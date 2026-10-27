@@ -14,12 +14,12 @@
                     <div class="row g-3">
                         <div class="col-12">
                             <div class="d-flex flex-column mb-2">
-                                <label class="d-flex align-items-center fs-sm-8 fs-lg-6 fw-bolder mb-1 required">
+                                <label class="d-flex align-items-center fs-sm-8 fs-lg-6 fw-bolder mb-1">
                                     <span>Pilih Pegawai (Dosen / Karyawan)</span>
                                 </label>
                                 <select id="edit_karyawan" class="form-select form-select-sm fs-sm-8 fs-lg-6"
                                     data-control="select2" data-placeholder="Pilih Dosen / Karyawan"
-                                    data-allow-clear="true" data-dropdown-parent="#form_edit" required>
+                                    data-allow-clear="true" data-dropdown-parent="#form_edit">
                                     <option value="">-- Pilih Dosen / Karyawan --</option>
                                     @if (!empty($dosens) && is_array($dosens))
                                         <optgroup label="Dosen">
@@ -80,7 +80,7 @@
                                 </label>
                                 <input type="text" name="username" id="edit_username"
                                     class="form-control form-control-sm fs-sm-8 fs-lg-6 @error('username') is-invalid @enderror"
-                                    required readonly maxlength="20">
+                                    required readonly maxlength="10">
 
                                 <div class="invalid-feedback">Username wajib diisi (maks 10 karakter).</div>
                             </div>

@@ -14,6 +14,7 @@
                                 foreach ($kuesioner->kategoriPertanyaans as $kat) {
                                     foreach ($kat->pertanyaans as $p) {
                                         if (in_array($p->tipe_jawaban, ['radio', 'select', 'checkbox'])) {
+                                            $p->nama_kategori_label = $kat->nama_kategori;
                                             $allPertanyaan->push($p);
                                         }
                                     }
@@ -188,7 +189,7 @@
                                                                 </tr>
                                                             @empty
                                                                 <tr>
-                                                                    <td colspan="5"
+                                                                    <td colspan="{{ auth()->user()->role === 'Admin' ? 6 : 5 }}"
                                                                         class="text-center text-muted py-8">
                                                                         <i
                                                                             class="fas fa-box-open fs-2x mb-3 text-muted"></i><br>
@@ -259,7 +260,7 @@
                                                     @foreach ($allPertanyaan as $p)
                                                         <option value="{{ $p->id_pertanyaan }}"
                                                             data-opsi="{{ json_encode($p->opsi_jawaban ?? []) }}">
-                                                            {{ $p->teks_pertanyaan }}</option>
+                                                            {{ $p->kode_pertanyaan ? '[' . strtoupper($p->kode_pertanyaan) . '] ' : '' }}{{ $p->teks_pertanyaan }} ({{ $p->nama_kategori_label ?? '-' }})</option>
                                                     @endforeach
                                                 </select>
                                                 <select class="form-select form-select-sm fs-sm-8 fs-lg-6"
@@ -335,7 +336,7 @@
                                             @foreach ($allPertanyaan as $p)
                                                 <option value="{{ $p->id_pertanyaan }}"
                                                     data-opsi="{{ json_encode($p->opsi_jawaban ?? []) }}">
-                                                    {{ $p->teks_pertanyaan }}</option>
+                                                    {{ $p->kode_pertanyaan ? '[' . strtoupper($p->kode_pertanyaan) . '] ' : '' }}{{ $p->teks_pertanyaan }} ({{ $p->nama_kategori_label ?? '-' }})</option>
                                             @endforeach
                                         </select>
                                         <select class="form-select form-select-sm fs-sm-8 fs-lg-6" data-control="select2"
@@ -451,7 +452,7 @@
                                         @foreach ($allPertanyaan as $p)
                                             <option value="{{ $p->id_pertanyaan }}"
                                                 data-opsi="{{ json_encode($p->opsi_jawaban ?? []) }}">
-                                                {{ $p->teks_pertanyaan }}</option>
+                                                {{ $p->kode_pertanyaan ? '[' . strtoupper($p->kode_pertanyaan) . '] ' : '' }}{{ $p->teks_pertanyaan }} ({{ $p->nama_kategori_label ?? '-' }})</option>
                                         @endforeach
                                     </select>
                                     <select class="form-select form-select-sm fs-sm-8 fs-lg-6" data-control="select2"
@@ -519,7 +520,10 @@
 
                     if (Array.isArray(currentValues)) {
                         currentValues.forEach(function(val) {
-                            if (targetSelect.find("option[value='" + val + "']").length === 0) {
+                            var exists = targetSelect.find('option').filter(function() {
+                                return $(this).val() === String(val);
+                            }).length > 0;
+                            if (!exists) {
                                 var customOption = new Option(val, val, true, true);
                                 targetSelect.append(customOption);
                             }
@@ -536,7 +540,7 @@
                     var syaratPert = $(this).data('syarat-pertanyaan');
                     var syaratJawaban = $(this).data('syarat-jawaban');
 
-                    $('#form_edit_kategori').attr('action', '/admin/kategori/' + id);
+                    $('#form_edit_kategori').attr('action', '{{ url('admin/kategori') }}/' + id);
                     $('#edit_nama_kategori').val(nama);
                     $('#edit_urutan').val(urutan);
 
@@ -557,6 +561,7 @@
                     $('#opsi_jawaban').val('');
                     $('#wajib').val('1').trigger('change');
 
+                    $('#pert_syarat_pertanyaan_id option').prop('disabled', false);
                     $('#pert_syarat_jawaban').data('saved-values', []);
                     $('#pert_syarat_pertanyaan_id').val('').trigger('change');
 
@@ -565,7 +570,7 @@
 
                 $('.btn-edit-pertanyaan').click(function() {
                     var id = $(this).data('id');
-                    $('#form_pertanyaan').attr('action', '/admin/pertanyaan/' + id);
+                    $('#form_pertanyaan').attr('action', '{{ url('admin/pertanyaan') }}/' + id);
                     $('#method_pertanyaan').val('PUT');
                     $('#title_pertanyaan').text('Edit Pertanyaan');
                     $('#pertanyaan_kategori_id').val($(this).data('kategori'));
@@ -582,6 +587,13 @@
 
                     var syaratPert = $(this).data('syarat-pertanyaan');
                     var syaratJawaban = $(this).data('syarat-jawaban');
+
+                    $('#pert_syarat_pertanyaan_id option').each(function() {
+                        $(this).prop('disabled', String($(this).val()) === String(id));
+                    });
+                    if (String(syaratPert) === String(id)) {
+                        syaratPert = '';
+                    }
 
                     $('#pert_syarat_jawaban').data('saved-values', syaratJawaban);
                     $('#pert_syarat_pertanyaan_id').val(syaratPert).trigger('change');

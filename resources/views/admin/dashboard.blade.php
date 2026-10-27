@@ -458,7 +458,7 @@
                     <div class="row g-5 g-xl-8 mb-8">
                         <div class="col-xl-3 col-md-6 animate-fade-in-up delay-200">
                             <div class="card stat-card shadow-sm h-100 border border-dashed border-primary bg-light-primary"
-                                onclick="window.location.href='{{ route('admin.respon.index') }}'">
+                                onclick="window.location.href='{{ route('admin.mahasiswa.index') }}'">
                                 <div class="card-body d-flex align-items-center">
                                     <div class="stat-icon bg-body shadow-sm me-4 icon-glow-primary">
                                         <i class="fa-solid fa-graduation-cap fs-2x text-primary"></i>
@@ -507,7 +507,7 @@
                                     </div>
                                     <div>
                                         <div class="text-gray-600 fw-semibold fs-7 mb-1">Rata-rata Waktu Tunggu</div>
-                                        <div class="text-gray-900 fw-bolder fs-2x">{{ $statsData['kpi']['waktu_tunggu_bekerja'] ?? 0 }} <span class="fs-6 fw-semibold text-gray-600">Bulan</span></div>
+                                        <div class="text-gray-900 fw-bolder fs-2x">{{ $statsData['kpi']['avg_waktu_tunggu'] ?? 0 }} <span class="fs-6 fw-semibold text-gray-600">Bulan</span></div>
                                     </div>
                                 </div>
                             </div>

@@ -34,16 +34,13 @@ class AdminMahasiswaController extends Controller
         $tahunAkademik = TahunAkademik::orderByDesc('id_smt')->get();
         $listTahunLulus = TahunAkademik::getListTahunLulus();
         $listKuesioner = Kuesioner::orderByTahunTerbaru()->get();
-        $defaultKuesioner = $listKuesioner->firstWhere('status', 'Published') ?: $listKuesioner->first();
-        $defaultKuesionerId = $defaultKuesioner ? $defaultKuesioner->id_kuesioner : null;
 
         return view('admin.mahasiswa.index', compact(
             'prodi',
             'tahunAkademik',
             'listTahunLulus',
             'fakultas',
-            'listKuesioner',
-            'defaultKuesionerId'
+            'listKuesioner'
         ));
     }
 
@@ -54,9 +51,9 @@ class AdminMahasiswaController extends Controller
             ->orderByDesc('created_at');
 
         if (auth()->user()->role === 'Kaprodi') {
-            $query->where('prodi_id', auth()->user()->prodi_id);
+            $query->where('prodi_id', auth()->user()->prodi_id ?: '__UNASSIGNED__');
         } elseif (auth()->user()->role === 'Fakultas') {
-            $facultyProdiIds = Prodi::where('fakultas_id', auth()->user()->fakultas_id)->pluck('id_prodi')->toArray();
+            $facultyProdiIds = Prodi::where('fakultas_id', auth()->user()->fakultas_id ?: -1)->pluck('id_prodi')->toArray();
             $query->whereIn('prodi_id', $facultyProdiIds);
         } elseif ($request->filled('fakultas_id') && $request->fakultas_id !== 'all' && $request->fakultas_id !== '') {
             $facultyProdiIds = Prodi::where('fakultas_id', $request->fakultas_id)->pluck('id_prodi')->toArray();
@@ -64,8 +61,16 @@ class AdminMahasiswaController extends Controller
         }
 
         $targetAkademik = $request->filled('akademik_id') ? $request->akademik_id : ($request->filled('tahun_keluar') ? $request->tahun_keluar : null);
+        $targetKuesionerId = $request->filled('kuesioner_id') ? $request->kuesioner_id : null;
+
         if ($targetAkademik && $targetAkademik !== 'all') {
             $query->filterAkademik($targetAkademik, 'akademik_id');
+        } elseif (!empty($targetKuesionerId) && $targetKuesionerId !== 'all') {
+            $kuesioner = Kuesioner::find($targetKuesionerId);
+            if ($kuesioner && $kuesioner->akademik_id) {
+                $matchingIds = $kuesioner->getMatchingAkademikIds();
+                $query->whereIn('akademik_id', $matchingIds);
+            }
         }
 
         if ($request->filled('prodi_id') && $request->prodi_id !== 'all') {
@@ -75,8 +80,6 @@ class AdminMahasiswaController extends Controller
         if ($request->filled('status') && $request->status !== 'all') {
             $query->where('status', $request->status);
         }
-
-        $targetKuesionerId = $request->filled('kuesioner_id') ? $request->kuesioner_id : null;
 
         $query->withExists(['responTracers as sudah_mengisi' => function ($q) use ($targetKuesionerId) {
             if (!empty($targetKuesionerId) && $targetKuesionerId !== 'all') {
@@ -133,6 +136,15 @@ class AdminMahasiswaController extends Controller
     public function show(string $id)
     {
         $mahasiswa = Mahasiswa::with(['prodi.fakultas', 'tahunAkademik'])->findOrFail($id);
+
+        $user = auth()->user();
+        if ($user->role === 'Kaprodi' && (string) $mahasiswa->prodi_id !== (string) $user->prodi_id) {
+            return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
+        }
+        if ($user->role === 'Fakultas' && (string) ($mahasiswa->prodi->fakultas_id ?? '') !== (string) $user->fakultas_id) {
+            return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
+        }
+
         return response()->json($mahasiswa);
     }
 
@@ -192,7 +204,7 @@ class AdminMahasiswaController extends Controller
             $newCount = 0;
             $updatedCount = 0;
 
-            $existingNims = Mahasiswa::pluck('nim')->flip()->toArray();
+            $existingStudents = Mahasiswa::select('nim', 'email', 'no_hp', 'prodi_id')->get()->keyBy('nim');
             $validProdiIds = Prodi::pluck('id_prodi')->flip()->toArray();
 
             $now = now();
@@ -202,21 +214,29 @@ class AdminMahasiswaController extends Controller
                 if (empty($item['nim'])) continue;
 
                 $nim = trim((string) $item['nim']);
+                $existingMhs = $existingStudents->get($nim);
+
                 $nama = trim((string) ($item['nama'] ?? ''));
                 $prodiId = !empty($item['id_sms']) ? trim((string) $item['id_sms']) : null;
-                $email = !empty($item['email']) ? trim((string) $item['email']) : ($nim . '@student.unuja.ac.id');
-                $noHp = !empty($item['no_hp']) ? trim((string) $item['no_hp']) : null;
+                $apiEmail = !empty($item['email']) ? trim((string) $item['email']) : null;
+                $email = $apiEmail ?: (($existingMhs && !empty($existingMhs->email)) ? $existingMhs->email : ($nim . '@student.unuja.ac.id'));
+                $apiNoHp = !empty($item['no_hp']) ? trim((string) $item['no_hp']) : null;
+                $noHp = $apiNoHp ?: (($existingMhs && !empty($existingMhs->no_hp)) ? $existingMhs->no_hp : null);
                 $tahunKeluar = !empty($item['tahun_keluar']) ? trim((string) $item['tahun_keluar']) : null;
                 $jenisKelamin = !empty($item['jenis_kelamin']) ? strtoupper(trim((string) $item['jenis_kelamin'])) : null;
                 $idJenisKeluar = isset($item['id_jenis_keluar']) ? (int) $item['id_jenis_keluar'] : 1;
 
                 if ($prodiId && !isset($validProdiIds[$prodiId])) {
-                    $prodiId = null;
+                    $prodiId = ($existingMhs && !empty($existingMhs->prodi_id) && isset($validProdiIds[$existingMhs->prodi_id]))
+                        ? $existingMhs->prodi_id
+                        : null;
+                } elseif (!$prodiId && $existingMhs && !empty($existingMhs->prodi_id) && isset($validProdiIds[$existingMhs->prodi_id])) {
+                    $prodiId = $existingMhs->prodi_id;
                 }
 
-                if (!isset($existingNims[$nim])) {
+                if (!$existingMhs) {
                     $newCount++;
-                    $existingNims[$nim] = true;
+                    $existingStudents->put($nim, (object) ['nim' => $nim, 'email' => $email, 'no_hp' => $noHp, 'prodi_id' => $prodiId]);
                 } else {
                     $updatedCount++;
                 }

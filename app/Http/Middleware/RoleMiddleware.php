@@ -20,6 +20,13 @@ class RoleMiddleware
             return $next($request);
         }
 
-        return redirect('/'); // or abort(403)
+        if ($request->expectsJson() || $request->ajax()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Anda tidak memiliki hak akses untuk tindakan ini.'
+            ], 403);
+        }
+
+        abort(403, 'Anda tidak memiliki hak akses untuk halaman ini.');
     }
 }

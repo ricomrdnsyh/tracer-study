@@ -54,6 +54,8 @@ class AdminWilayahController extends Controller
 
     public function import(Request $request)
     {
+        if (auth()->user()->role !== 'Admin') abort(403);
+
         $request->validate([
             'file' => 'required|mimes:xlsx,xls'
         ]);
@@ -74,20 +76,31 @@ class AdminWilayahController extends Controller
             $updated = 0;
             $skipped = 0;
 
+            $padWilayah = function ($val): string {
+                $v = trim((string) $val);
+                if ($v !== '' && ctype_digit($v) && strlen($v) === 5) {
+                    return str_pad($v, 6, '0', STR_PAD_LEFT);
+                }
+                return $v;
+            };
+
             if (in_array('kode_wilayah_kota_kabupaten', $headers) && in_array('kode_wilayah_provinsi', $headers) && in_array('kota_kabupaten', $headers)) {
                 $idxKode = array_search('kode_wilayah_kota_kabupaten', $headers);
                 $idxProv = array_search('kode_wilayah_provinsi', $headers);
                 $idxNama = array_search('kota_kabupaten', $headers);
 
                 foreach (array_slice($rows, 1) as $row) {
-                    if (empty($row[$idxKode]) || empty($row[$idxProv])) continue;
+                    $kodeKab = $padWilayah($row[$idxKode] ?? '');
+                    $kodeProv = $padWilayah($row[$idxProv] ?? '');
+                    $namaKab = trim((string) ($row[$idxNama] ?? ''));
+                    if ($kodeKab === '' || $kodeProv === '') continue;
 
-                    $existing = DB::table('master_kota_kabupaten')->where('kode_wilayah_kota_kabupaten', $row[$idxKode])->first();
+                    $existing = DB::table('master_kota_kabupaten')->where('kode_wilayah_kota_kabupaten', $kodeKab)->first();
                     if ($existing) {
-                        if ($existing->kode_wilayah_provinsi != $row[$idxProv] || $existing->kota_kabupaten != $row[$idxNama]) {
-                            DB::table('master_kota_kabupaten')->where('kode_wilayah_kota_kabupaten', $row[$idxKode])->update([
-                                'kode_wilayah_provinsi' => $row[$idxProv],
-                                'kota_kabupaten' => $row[$idxNama],
+                        if ($existing->kode_wilayah_provinsi != $kodeProv || $existing->kota_kabupaten != $namaKab) {
+                            DB::table('master_kota_kabupaten')->where('kode_wilayah_kota_kabupaten', $kodeKab)->update([
+                                'kode_wilayah_provinsi' => $kodeProv,
+                                'kota_kabupaten' => $namaKab,
                                 'updated_at' => now(),
                             ]);
                             $updated++;
@@ -96,9 +109,9 @@ class AdminWilayahController extends Controller
                         }
                     } else {
                         DB::table('master_kota_kabupaten')->insert([
-                            'kode_wilayah_kota_kabupaten' => $row[$idxKode],
-                            'kode_wilayah_provinsi' => $row[$idxProv],
-                            'kota_kabupaten' => $row[$idxNama],
+                            'kode_wilayah_kota_kabupaten' => $kodeKab,
+                            'kode_wilayah_provinsi' => $kodeProv,
+                            'kota_kabupaten' => $namaKab,
                             'created_at' => now(),
                             'updated_at' => now(),
                         ]);
@@ -113,14 +126,17 @@ class AdminWilayahController extends Controller
                 $idxNama = array_search('provinsi', $headers);
 
                 foreach (array_slice($rows, 1) as $row) {
-                    if (empty($row[$idxKode]) || empty($row[$idxNegara])) continue;
+                    $kodeProv = $padWilayah($row[$idxKode] ?? '');
+                    $kodeNegara = trim((string) ($row[$idxNegara] ?? ''));
+                    $namaProv = trim((string) ($row[$idxNama] ?? ''));
+                    if ($kodeProv === '' || $kodeNegara === '') continue;
 
-                    $existing = DB::table('master_provinsi')->where('kode_wilayah_provinsi', $row[$idxKode])->first();
+                    $existing = DB::table('master_provinsi')->where('kode_wilayah_provinsi', $kodeProv)->first();
                     if ($existing) {
-                        if ($existing->kode_wilayah_negara != $row[$idxNegara] || $existing->provinsi != $row[$idxNama]) {
-                            DB::table('master_provinsi')->where('kode_wilayah_provinsi', $row[$idxKode])->update([
-                                'kode_wilayah_negara' => $row[$idxNegara],
-                                'provinsi' => $row[$idxNama],
+                        if ($existing->kode_wilayah_negara != $kodeNegara || $existing->provinsi != $namaProv) {
+                            DB::table('master_provinsi')->where('kode_wilayah_provinsi', $kodeProv)->update([
+                                'kode_wilayah_negara' => $kodeNegara,
+                                'provinsi' => $namaProv,
                                 'updated_at' => now(),
                             ]);
                             $updated++;
@@ -129,9 +145,9 @@ class AdminWilayahController extends Controller
                         }
                     } else {
                         DB::table('master_provinsi')->insert([
-                            'kode_wilayah_provinsi' => $row[$idxKode],
-                            'kode_wilayah_negara' => $row[$idxNegara],
-                            'provinsi' => $row[$idxNama],
+                            'kode_wilayah_provinsi' => $kodeProv,
+                            'kode_wilayah_negara' => $kodeNegara,
+                            'provinsi' => $namaProv,
                             'created_at' => now(),
                             'updated_at' => now(),
                         ]);
@@ -145,13 +161,15 @@ class AdminWilayahController extends Controller
                 $idxNama = array_search('negara', $headers);
 
                 foreach (array_slice($rows, 1) as $row) {
-                    if (empty($row[$idxKode])) continue;
+                    $kodeNegara = trim((string) ($row[$idxKode] ?? ''));
+                    $namaNegara = trim((string) ($row[$idxNama] ?? ''));
+                    if ($kodeNegara === '') continue;
 
-                    $existing = DB::table('master_negara')->where('kode_wilayah_negara', $row[$idxKode])->first();
+                    $existing = DB::table('master_negara')->where('kode_wilayah_negara', $kodeNegara)->first();
                     if ($existing) {
-                        if ($existing->negara != $row[$idxNama]) {
-                            DB::table('master_negara')->where('kode_wilayah_negara', $row[$idxKode])->update([
-                                'negara' => $row[$idxNama],
+                        if ($existing->negara != $namaNegara) {
+                            DB::table('master_negara')->where('kode_wilayah_negara', $kodeNegara)->update([
+                                'negara' => $namaNegara,
                                 'updated_at' => now(),
                             ]);
                             $updated++;
@@ -160,8 +178,8 @@ class AdminWilayahController extends Controller
                         }
                     } else {
                         DB::table('master_negara')->insert([
-                            'kode_wilayah_negara' => $row[$idxKode],
-                            'negara' => $row[$idxNama],
+                            'kode_wilayah_negara' => $kodeNegara,
+                            'negara' => $namaNegara,
                             'created_at' => now(),
                             'updated_at' => now(),
                         ]);

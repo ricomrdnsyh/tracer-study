@@ -26,6 +26,7 @@
     $('#form_create').on('hidden.bs.modal', function() {
         $(this).find('form')[0].reset();
         $(this).find('form').removeClass('was-validated');
-        $(this).find('select').val('').trigger('change');
+        $('#create_akademik_id').val('').trigger('change');
+        $(this).find('select[name="status"]').val('Draft').trigger('change');
     });
 </script>

@@ -232,7 +232,7 @@
                                         </tr>
                                     </thead>
                                     <tbody class="fw-bold text-gray-800">
-                                        @forelse($pekerjaanList as $p)
+                                        @foreach($pekerjaanList as $p)
                                             @php
                                                 $mhs = $p->responTracer->mahasiswa ?? null;
                                                 $prodi = $mhs->prodi ?? null;
@@ -267,17 +267,7 @@
                                                         class="text-gray-800 fw-bold">{{ $prodi ? $prodi->nama_prodi : '-' }}</span>
                                                 </td>
                                             </tr>
-                                        @empty
-                                            <tr>
-                                                <td colspan="6" class="text-center text-muted py-8">
-                                                    <div class="d-flex flex-column align-items-center">
-                                                        <i class="fas fa-box-open fs-2x text-muted mb-3"></i>
-                                                        <span class="fw-semibold fs-6">Belum ada alumni yang
-                                                            terhubung</span>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        @endforelse
+                                        @endforeach
                                     </tbody>
                                 </table>
                             </div>

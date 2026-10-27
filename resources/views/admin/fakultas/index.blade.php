@@ -135,7 +135,6 @@
                     </div>
                 </div>
             </div>
-            </div>
             @include('admin.fakultas.show')
             @include('admin.fakultas.edit')
 

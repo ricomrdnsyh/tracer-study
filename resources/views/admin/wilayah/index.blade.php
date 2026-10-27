@@ -115,10 +115,12 @@
                                 </div>
                             </div>
                             <div class="card-toolbar">
-                                <button type="button" class="btn btn-sm btn-success" data-bs-toggle="modal"
-                                    data-bs-target="#kt_modal_import">
-                                    <i class="fa-solid fa-file-excel me-2"></i> Import Excel
-                                </button>
+                                @if (auth()->user()->role === 'Admin')
+                                    <button type="button" class="btn btn-sm btn-success" data-bs-toggle="modal"
+                                        data-bs-target="#kt_modal_import">
+                                        <i class="fa-solid fa-file-excel me-2"></i> Import Excel
+                                    </button>
+                                @endif
                             </div>
                         </div>
                         <div class="separator my-5"></div>
@@ -205,7 +207,9 @@
                 </div>
             </div>
 
-            @include('admin.wilayah.import')
+            @if (auth()->user()->role === 'Admin')
+                @include('admin.wilayah.import')
+            @endif
 
             @include('layouts.footer')
         </div>
