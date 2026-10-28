@@ -87,12 +87,13 @@
                     data: 'lokasi',
                     name: 'lokasi',
                     orderable: false,
-                    searchable: false
+                    searchable: true
                 },
                 {
                     data: 'jumlah_mahasiswa',
                     name: 'jumlah_mahasiswa',
-                    className: 'text-center'
+                    className: 'text-center',
+                    searchable: false
                 }
             ]
         });

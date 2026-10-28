@@ -67,6 +67,26 @@ class AdminPerusahaanController extends Controller
 
             return DataTables::of($data)
                 ->addIndexColumn()
+                ->filterColumn('nama', function ($query, $keyword) {
+                    $clean = trim($keyword);
+                    $query->where(function ($q) use ($clean) {
+                        $q->where('pekerjaan_alumni.nama', 'like', "%{$clean}%");
+                        if (preg_match('/^[a-zA-Z0-9 ]+$/', $clean)) {
+                            $escaped = preg_quote($clean, '/');
+                            $vowelPattern = preg_replace('/([aeiou])/i', '$1+', $escaped);
+                            $q->orWhere('pekerjaan_alumni.nama', 'regexp', $vowelPattern);
+                        }
+                    });
+                })
+                ->filterColumn('lokasi', function ($query, $keyword) {
+                    $query->where(function ($q) use ($keyword) {
+                        $q->where('pekerjaan_alumni.kabupaten', 'like', "%{$keyword}%")
+                          ->orWhere('pekerjaan_alumni.provinsi', 'like', "%{$keyword}%");
+                    });
+                })
+                ->filterColumn('jumlah_mahasiswa', function ($query, $keyword) {
+                    // Aggregate column is not a physical column in pekerjaan_alumni; avoid SQL where clause error
+                })
                 ->addColumn('action', function ($row) {
                     $detailUrl = route('admin.perusahaan.show', 'detail') . '?nama=' . urlencode($row->nama);
                     $showBtn = '<a href="'.$detailUrl.'"
